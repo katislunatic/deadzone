@@ -106,9 +106,7 @@ class Zombie extends Entity {
     this.scoreValue = this.type === 'big' ? 50 : 15;
     this.coinValue = this.type === 'big' ? 15 : 5;
     this.facingAngle = 0;
-    // Pathfinding state
-    this.waypoint = null;
-    this.waypointTimer = 0;
+    this.moveAngle = null; // smoothed movement angle for context steering
   }
   update(px, py, obstacles) {
     this.wobble += 0.12;
@@ -116,98 +114,42 @@ class Zombie extends Entity {
     const distToPlayer = Math.sqrt(dx*dx + dy*dy);
     this.facingAngle = Math.atan2(dy, dx);
 
-    // --- Pathfinding with hysteresis to prevent jitter ---
-    // Only re-evaluate path every 15 frames
-    if (this.age % 15 === 0 || this.waypoint === undefined) {
-      const directBlocked = this._pathBlocked(this.x, this.y, px, py, obstacles);
-      if (directBlocked) {
-        this.blockedFrames = (this.blockedFrames || 0) + 1;
-        this.clearFrames = 0;
-      } else {
-        this.clearFrames = (this.clearFrames || 0) + 1;
-        this.blockedFrames = 0;
-      }
-      // Only acquire waypoint after being blocked for 2 checks in a row
-      if (this.blockedFrames >= 2 && !this.waypoint) {
-        this.waypoint = this._findWaypoint(px, py, obstacles);
-        this.waypointTimer = 180; // hold waypoint for 3 seconds
-      }
-      // Only clear waypoint after path has been clear for 2 checks in a row
-      if (this.clearFrames >= 2 && this.waypoint) {
-        this.waypoint = null;
-        this.waypointTimer = 0;
-        this.blockedFrames = 0;
+    // Context steering — sample 12 directions, pick best that avoids obstacles
+    const toPlayerAngle = Math.atan2(dy, dx);
+    const numDirs = 12;
+    let bestAngle = toPlayerAngle;
+    let bestScore = -Infinity;
+
+    for (let i = 0; i < numDirs; i++) {
+      const angle = (i / numDirs) * Math.PI * 2;
+      const probeX = this.x + Math.cos(angle) * (this.radius + 20);
+      const probeY = this.y + Math.sin(angle) * (this.radius + 20);
+
+      // Skip if this direction hits an obstacle
+      if (obstacles.some(o => circleRect(probeX, probeY, this.radius + 2, o))) continue;
+
+      // Score: prefer directions toward player, with smooth angular falloff
+      const angleDiff = Math.atan2(Math.sin(angle - toPlayerAngle), Math.cos(angle - toPlayerAngle));
+      const score = Math.cos(angleDiff); // 1.0 = toward player, -1.0 = away
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestAngle = angle;
       }
     }
 
-    let targetX = px, targetY = py;
-    if (this.waypoint && this.waypointTimer > 0) {
-      targetX = this.waypoint.x;
-      targetY = this.waypoint.y;
-      this.waypointTimer--;
-      // Reached waypoint — clear it and head to player
-      if (dist(this.x, this.y, this.waypoint.x, this.waypoint.y) < 28) {
-        this.waypoint = null;
-        this.waypointTimer = 0;
-        this.blockedFrames = 0;
-        this.clearFrames = 0;
-      }
-    }
+    // Smoothly interpolate current move angle toward best angle
+    if (!this.moveAngle) this.moveAngle = toPlayerAngle;
+    const angleDelta = Math.atan2(Math.sin(bestAngle - this.moveAngle), Math.cos(bestAngle - this.moveAngle));
+    this.moveAngle += angleDelta * 0.18; // smooth turn rate
 
-    const tdx = targetX - this.x, tdy = targetY - this.y;
-    const tdist = Math.sqrt(tdx*tdx + tdy*tdy);
-    if (tdist > 1) {
-      this.vx = (tdx / tdist) * this.speed + Math.sin(this.wobble)*0.25;
-      this.vy = (tdy / tdist) * this.speed + Math.cos(this.wobble)*0.25;
-    }
-    this.facingAngle = Math.atan2(this.vy, this.vx);
+    this.vx = Math.cos(this.moveAngle) * this.speed;
+    this.vy = Math.sin(this.moveAngle) * this.speed;
+    this.facingAngle = this.moveAngle;
     this.move(obstacles);
     if (this.attackCooldown > 0) this.attackCooldown--;
     return distToPlayer < this.radius + 14;
   }
-  _pathBlocked(x1, y1, x2, y2, obstacles) {
-    // Cast several points along the line to check for obstacles
-    const steps = 8;
-    for (let i = 1; i < steps; i++) {
-      const t = i / steps;
-      const cx = x1 + (x2 - x1) * t;
-      const cy = y1 + (y2 - y1) * t;
-      if (obstacles.some(o => circleRect(cx, cy, this.radius + 4, o))) return true;
-    }
-    return false;
-  }
-
-  _findWaypoint(px, py, obstacles) {
-    const toPlayer = Math.atan2(py - this.y, px - this.x);
-    // Try perpendicular offsets at increasing distances
-    // Pick whichever side gets us closer to the player
-    const sides = [1, -1];
-    const distances = [80, 140, 200];
-    let bestWP = null, bestDist = Infinity;
-
-    for (const side of sides) {
-      for (const d of distances) {
-        const angle = toPlayer + side * Math.PI / 2;
-        const wpx = Math.max(this.radius+5, Math.min(WORLD_W-this.radius-5,
-                    this.x + Math.cos(angle) * d));
-        const wpy = Math.max(this.radius+5, Math.min(WORLD_H-this.radius-5,
-                    this.y + Math.sin(angle) * d));
-        if (!obstacles.some(o => circleRect(wpx, wpy, this.radius + 6, o))) {
-          // Also check that we can actually walk toward this waypoint
-          if (!this._pathBlocked(this.x, this.y, wpx, wpy, obstacles)) {
-            const score = dist(wpx, wpy, px, py);
-            if (score < bestDist) {
-              bestDist = score;
-              bestWP = { x: wpx, y: wpy };
-            }
-            break; // found a clear distance for this side, move to other side
-          }
-        }
-      }
-    }
-    return bestWP;
-  }
-
   draw(ctx) {
     ctx.save();
     ctx.translate(this.x, this.y);
