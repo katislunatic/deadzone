@@ -466,6 +466,7 @@ function loop() {
           c.alive = false;
           score = Math.max(0, score - 100);
           civKills++;
+          playSound('civilian_hit');
           addKillFeed('💔 -100 pts CIVILIAN!', 'civ');
           for (let p=0; p<6; p++) {
             particles.push(new Particle(c.x, c.y, '#ffaa00', { spread:5, life:30 }));
