@@ -363,19 +363,76 @@ body {
 /* ── GAME OVER ─────────────────────────────── */
 #gameover-screen {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.9);
+  background: rgba(0,0,0,0);
   z-index: 95;
   display: none;
   flex-direction: column;
   align-items: center; justify-content: center;
   gap: 1rem;
+  animation: goFadeIn 0.8s ease forwards;
+}
+
+@keyframes goFadeIn {
+  from { background: rgba(0,0,0,0); }
+  to   { background: rgba(0,0,0,0.92); }
 }
 
 .go-title {
   font-family: 'Rye', serif;
-  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-size: clamp(3rem, 10vw, 7rem);
   color: var(--blood);
-  text-shadow: 3px 3px 0 #000, 0 0 40px rgba(192,57,43,0.6);
+  text-shadow: 4px 4px 0 #000, 0 0 60px rgba(192,57,43,0.8);
+  display: flex;
+  gap: 0.2em;
+  overflow: hidden;
+}
+
+.go-you {
+  display: inline-block;
+  animation: slamLeft 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+}
+
+.go-died {
+  display: inline-block;
+  animation: slamRight 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+}
+
+@keyframes slamLeft {
+  from { transform: translateX(-120vw); opacity: 0; }
+  to   { transform: translateX(0);      opacity: 1; }
+}
+
+@keyframes slamRight {
+  from { transform: translateX(120vw);  opacity: 0; }
+  to   { transform: translateX(0);      opacity: 1; }
+}
+
+.go-shockwave {
+  position: absolute;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: transparent;
+  border: 4px solid rgba(192,57,43,0.9);
+  animation: shockwave 0.6s ease-out 0.72s both;
+  pointer-events: none;
+}
+
+@keyframes shockwave {
+  from { transform: scale(0);   opacity: 1; border-width: 6px; }
+  to   { transform: scale(40);  opacity: 0; border-width: 1px; }
+}
+
+.go-stats-wrap {
+  animation: goStatsIn 0.5s ease 1.1s both;
+}
+
+@keyframes goStatsIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.go-buttons-wrap {
+  animation: goStatsIn 0.5s ease 1.35s both;
 }
 
 .go-stats {
