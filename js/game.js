@@ -367,8 +367,10 @@ function loop() {
         if (moving && z.attackCooldown <= 0) {
           z.hp -= 15;
           z.attackCooldown = 20; // reuse cooldown to prevent stomp spam
-          for (let p = 0; p < 5; p++) {
-            particles.push(new Particle(z.x, z.y, '#c0392b', { spread:4, life:20, size:3 }));
+          if (typeof isBloodEnabled !== 'function' || isBloodEnabled()) {
+            for (let p = 0; p < 5; p++) {
+              particles.push(new Particle(z.x, z.y, '#c0392b', { spread:4, life:20, size:3 }));
+            }
           }
           if (z.hp <= 0) {
             z.alive = false;
@@ -436,8 +438,10 @@ function loop() {
         b.alive = false;
         playSound(z.hp <= 0 ? 'zombie_die' : 'zombie_hit');
         // blood splash
-        for (let p=0; p<8; p++) {
-          particles.push(new Particle(z.x, z.y, '#c0392b', { spread:5, life:25, size:4 }));
+        if (typeof isBloodEnabled !== 'function' || isBloodEnabled()) {
+          for (let p=0; p<8; p++) {
+            particles.push(new Particle(z.x, z.y, '#c0392b', { spread:5, life:25, size:4 }));
+          }
         }
         if (z.hp <= 0) {
           z.alive = false;
@@ -449,8 +453,10 @@ function loop() {
           particles.push(new Particle(z.x, z.y-10, '#f0c040', { life:60, size:1, upward:1, text:`+${coins}🪙` }));
           addKillFeed(`☠️ +${z.scoreValue} pts`, 'kill');
           // gore
-          for (let p=0; p<14; p++) {
-            particles.push(new Particle(z.x, z.y, '#8b0000', { spread:8, life:40, size:5, gravity:0.1 }));
+          if (typeof isBloodEnabled !== 'function' || isBloodEnabled()) {
+            for (let p=0; p<14; p++) {
+              particles.push(new Particle(z.x, z.y, '#8b0000', { spread:8, life:40, size:5, gravity:0.1 }));
+            }
           }
         }
         break;
