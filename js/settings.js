@@ -141,3 +141,12 @@ function syncPauseSettings() {
     bloodBtn.classList.toggle('active', gameSettings.blood);
   }
 }
+
+function togglePauseSettings() {
+  const panel = document.getElementById('pause-settings-panel');
+  const btn = document.getElementById('pause-settings-btn');
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  btn.classList.toggle('open', !isOpen);
+  if (!isOpen) syncPauseSettings();
+}
