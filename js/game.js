@@ -198,13 +198,18 @@ function getActiveWeapon() {
 
 // ── SPAWN ─────────────────────────────────────────────────────────────
 function spawnZombie() {
-  const edge = Math.floor(Math.random()*4);
+  // Spawn just inside the world edges with enough margin to clear border obstacles
+  const margin = 60;
   let x, y;
-  const margin = 30;
-  if      (edge===0) { x=Math.random()*WORLD_W; y=-margin; }
-  else if (edge===1) { x=WORLD_W+margin; y=Math.random()*WORLD_H; }
-  else if (edge===2) { x=Math.random()*WORLD_W; y=WORLD_H+margin; }
-  else               { x=-margin; y=Math.random()*WORLD_H; }
+  let attempts = 0;
+  do {
+    const edge = Math.floor(Math.random() * 4);
+    if      (edge === 0) { x = margin + Math.random() * (WORLD_W - margin*2); y = margin; }
+    else if (edge === 1) { x = WORLD_W - margin; y = margin + Math.random() * (WORLD_H - margin*2); }
+    else if (edge === 2) { x = margin + Math.random() * (WORLD_W - margin*2); y = WORLD_H - margin; }
+    else                 { x = margin; y = margin + Math.random() * (WORLD_H - margin*2); }
+    attempts++;
+  } while (attempts < 20 && obstacles.some(o => circleRect(x, y, 16, o)));
   zombies.push(new Zombie(x, y, wave));
   zombiesSpawned++;
 }
