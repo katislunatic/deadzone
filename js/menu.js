@@ -53,6 +53,8 @@ function spinSlotMachine() {
   // easeOutCubic
   function easeOut(t) { return 1 - Math.pow(1-t, 3); }
 
+  let lastTickItem = -1;
+
   function animFrame() {
     frame++;
     const t = Math.min(frame / totalFrames, 1);
@@ -60,10 +62,19 @@ function spinSlotMachine() {
     currentPos = eased * targetPos;
     strip.style.transform = `translateY(-${currentPos}px)`;
 
+    // Play a tick each time we pass a new item — slower ticks near the end
+    const currentItem = Math.floor(currentPos / itemH);
+    if (currentItem !== lastTickItem) {
+      lastTickItem = currentItem;
+      // Only tick if playSound is available (game loaded)
+      if (typeof playSound === 'function') playSound('slot_spin_tick');
+    }
+
     if (t < 1) {
       requestAnimationFrame(animFrame);
     } else {
-      // Done
+      // Done — landing sound
+      if (typeof playSound === 'function') playSound('slot_spin_land');
       isSpinning = false;
       slotChosenMap = winner;
       const map = MAPS[winner];
