@@ -50,33 +50,67 @@ class Player extends Entity {
     ctx.translate(this.x, this.y);
     ctx.rotate(this.facing);
 
-    if (this.onHorse) {
-      // horse body
-      ctx.fillStyle = '#8B5E2A';
-      ctx.beginPath(); ctx.ellipse(0, 4, 20, 12, 0, 0, Math.PI*2); ctx.fill();
-      // horse head
-      ctx.fillStyle = '#7A4E1A';
-      ctx.beginPath(); ctx.ellipse(18, -2, 9, 7, -0.3, 0, Math.PI*2); ctx.fill();
-    }
+    const P = 2; // pixel size
+    const flash = this.invincible > 0 && Math.floor(this.age/3)%2===0;
 
     // shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.beginPath(); ctx.ellipse(0, 4, this.radius+2, 6, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.beginPath(); ctx.ellipse(0, 6, 14, 5, 0, 0, Math.PI*2); ctx.fill();
 
-    // body
-    ctx.fillStyle = this.invincible > 0 ? '#ff8866' : this.color;
-    ctx.beginPath(); ctx.arc(0, 0, this.radius, 0, Math.PI*2); ctx.fill();
+    if (this.onHorse) {
+      // pixel horse body
+      const hp = [
+        [0,0,'#7a4e1a'],[1,0,'#8b5e2a'],[2,0,'#8b5e2a'],[3,0,'#7a4e1a'],
+        [-1,1,'#7a4e1a'],[0,1,'#9b6e3a'],[1,1,'#9b6e3a'],[2,1,'#9b6e3a'],[3,1,'#9b6e3a'],[4,1,'#6a3e10'],
+        [-1,2,'#8b5e2a'],[0,2,'#8b5e2a'],[1,2,'#8b5e2a'],[2,2,'#8b5e2a'],[3,2,'#8b5e2a'],[4,2,'#8b5e2a'],
+        [0,3,'#6a3e10'],[1,3,'#6a3e10'],[2,3,'#6a3e10'],
+        // legs
+        [-1,4,'#5a2e08'],[1,4,'#5a2e08'],[3,4,'#5a2e08'],
+        // head
+        [5,-1,'#6a3e10'],[6,-1,'#7a4e1a'],[5,0,'#7a4e1a'],[6,0,'#6a3e10'],[7,0,'#5a2e08'],
+      ];
+      for (const [px,py,c] of hp) {
+        ctx.fillStyle = c;
+        ctx.fillRect((px-3)*P*2, (py-3)*P*2, P*2, P*2);
+      }
+    }
 
-    // hat
-    ctx.fillStyle = '#3d2010';
-    ctx.beginPath(); ctx.ellipse(0, -2, 10, 5, 0, 0, Math.PI*2); ctx.fill();
-    ctx.fillRect(-6, -12, 12, 10);
-    ctx.fillStyle = '#5c3018';
-    ctx.fillRect(-8, -4, 16, 3);
+    // pixel cowboy — 16x16 grid, each pixel is P×P
+    const pixels = [
+      // hat top
+      [-2,-7,'#2a1208'],[-1,-7,'#2a1208'],[0,-7,'#2a1208'],[1,-7,'#2a1208'],
+      [-3,-6,'#3d2010'],[-2,-6,'#3d2010'],[-1,-6,'#4a2818'],[0,-6,'#4a2818'],[1,-6,'#3d2010'],[2,-6,'#3d2010'],
+      [-3,-5,'#3d2010'],[-2,-5,'#3d2010'],[-1,-5,'#3d2010'],[0,-5,'#3d2010'],[1,-5,'#3d2010'],[2,-5,'#3d2010'],
+      // hat brim
+      [-5,-4,'#5c3018'],[-4,-4,'#5c3018'],[-3,-4,'#6b3a20'],[-2,-4,'#6b3a20'],[-1,-4,'#6b3a20'],[0,-4,'#6b3a20'],[1,-4,'#6b3a20'],[2,-4,'#6b3a20'],[3,-4,'#5c3018'],[4,-4,'#5c3018'],
+      // face
+      [-2,-3,'#e8c888'],[-1,-3,'#e8c888'],[0,-3,'#e8c888'],[1,-3,'#e8c888'],
+      [-2,-2,'#e8c888'],[-1,-2,'#d4a060'],[0,-2,'#d4a060'],[1,-2,'#e8c888'],
+      // eyes
+      [-1,-2,'#2a1800'],[1,-2,'#2a1800'],
+      // body / shirt
+      [-3,-1,'#8b6030'],[-2,-1,'#c87830'],[-1,-1,'#d88840'],[0,-1,'#d88840'],[1,-1,'#c87830'],[2,-1,'#8b6030'],
+      [-3,0,'#8b6030'],[-2,0,'#c87830'],[-1,0,'#d88840'],[0,0,'#d88840'],[1,0,'#c87830'],[2,0,'#8b6030'],
+      // belt
+      [-3,1,'#3d2010'],[-2,1,'#5c3018'],[-1,1,'#6b3a20'],[0,1,'#f0c040'],[1,1,'#5c3018'],[2,1,'#3d2010'],
+      // legs
+      [-2,2,'#4a3020'],[-1,2,'#6b4830'],[0,2,'#6b4830'],[1,2,'#4a3020'],
+      [-2,3,'#3a2518'],[-1,3,'#5a3820'],[0,3,'#5a3820'],[1,3,'#3a2518'],
+      // boots
+      [-2,4,'#2a1808'],[-1,4,'#3a2010'],[0,4,'#3a2010'],[1,4,'#2a1808'],
+    ];
 
-    // gun barrel
-    ctx.fillStyle = '#888';
-    ctx.fillRect(10, -2, 18, 4);
+    for (const [px,py,c] of pixels) {
+      ctx.fillStyle = flash ? '#ff9977' : c;
+      ctx.fillRect(px*P, py*P, P, P);
+    }
+
+    // gun
+    const gunColor = '#aaaaaa';
+    const gunDark  = '#666666';
+    ctx.fillStyle = gunDark;  ctx.fillRect(8,  -P,   4,  P*2);
+    ctx.fillStyle = gunColor; ctx.fillRect(12, -P,   10, P);
+    ctx.fillStyle = '#444';   ctx.fillRect(8,  P,    6,  P);
 
     ctx.restore();
   }
@@ -151,42 +185,64 @@ class Zombie extends Entity {
     return distToPlayer < this.radius + 14;
   }
   draw(ctx) {
+    const P = this.type === 'big' ? 3 : 2;
+    const isBig = this.type === 'big';
+    const skin = isBig ? '#2a7a1a' : '#3a9a2a';
+    const skinD = isBig ? '#1a5a10' : '#2a7a1a';
+    const shirtCol = isBig ? '#8a2020' : '#3a5a8a';
+    const shirtD   = isBig ? '#6a1010' : '#2a4a6a';
+
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.facingAngle);
 
     // shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.beginPath(); ctx.ellipse(0, 4, this.radius+2, 6, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.beginPath(); ctx.ellipse(0, isBig?8:6, this.radius+2, isBig?6:4, 0, 0, Math.PI*2); ctx.fill();
 
-    // body
-    const green = this.type === 'big' ? '#3a8a2a' : '#4aaa3a';
-    ctx.fillStyle = green;
-    ctx.beginPath(); ctx.arc(0, 0, this.radius, 0, Math.PI*2); ctx.fill();
+    // pixel zombie body
+    const pixels = [
+      // head
+      [-2,-6,skin],[-1,-6,skin],[0,-6,skin],[1,-6,skin],
+      [-2,-5,skin],[-1,-5,skinD],[0,-5,skinD],[1,-5,skin],
+      // eyes — glowing red
+      [-1,-5,'#ff2222'],[1,-5,'#ff2222'],
+      // teeth
+      [-1,-3,'#ddddcc'],[0,-3,'#ddddcc'],
+      // neck
+      [-1,-4,skin],[0,-4,skin],
+      // torso — torn shirt
+      [-3,-3,shirtD],[-2,-3,shirtCol],[-1,-3,shirtCol],[0,-3,shirtCol],[1,-3,shirtCol],[2,-3,shirtD],
+      [-3,-2,shirtD],[-2,-2,shirtCol],[-1,-2,skinD],[0,-2,skinD],[1,-2,shirtCol],[2,-2,shirtD],
+      [-3,-1,shirtD],[-2,-1,shirtCol],[-1,-1,shirtCol],[0,-1,shirtCol],[1,-1,shirtCol],[2,-1,shirtD],
+      // belt/waist
+      [-2,0,'#2a1a08'],[-1,0,'#3a2810'],[0,0,'#3a2810'],[1,0,'#2a1a08'],
+      // legs
+      [-2,1,skinD],[-1,1,'#4a3828'],[0,1,'#4a3828'],[1,1,skinD],
+      [-2,2,skinD],[-1,2,'#3a2818'],[0,2,'#3a2818'],[1,2,skinD],
+      // feet
+      [-2,3,'#1a1008'],[-1,3,'#2a1a0a'],[0,3,'#2a1a0a'],[1,3,'#1a1008'],
+      // outstretched arms
+      [-4,-2,skin],[-4,-1,skin],
+      [3,-2,skin],[3,-1,skin],
+    ];
 
-    // shirt rips
-    ctx.strokeStyle = '#2a6a1a'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(-4,-6); ctx.lineTo(-2,4); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(3,-5); ctx.lineTo(5,3); ctx.stroke();
+    for (const [px,py,c] of pixels) {
+      ctx.fillStyle = c;
+      ctx.fillRect(px*P, py*P, P, P);
+    }
 
-    // eyes
-    ctx.fillStyle = '#ff4444';
-    ctx.beginPath(); ctx.arc(-5, -4, 3, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(5, -4, 3, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(-5,-4,1.5,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(5,-4,1.5,0,Math.PI*2); ctx.fill();
+    // scratch marks on torso
+    ctx.strokeStyle = skinD; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-P,-2*P); ctx.lineTo(0,P); ctx.stroke();
 
-    // mouth
-    ctx.strokeStyle = '#aa2020'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(-5, 5); ctx.quadraticCurveTo(0, 9, 5, 5); ctx.stroke();
+    ctx.restore();
 
     // hp bar
-    ctx.restore();
-    const bw = this.radius * 2.5, bx = this.x - bw/2, by = this.y - this.radius - 8;
-    ctx.fillStyle = '#1a0a0a';
-    ctx.fillRect(bx, by, bw, 4);
-    ctx.fillStyle = `hsl(${(this.hp/this.maxHp)*100}, 80%, 45%)`;
+    const bw = this.radius * 2.8, bx = this.x - bw/2, by = this.y - this.radius - (isBig?14:10);
+    ctx.fillStyle = '#0a0505';
+    ctx.fillRect(bx-1, by-1, bw+2, 6);
+    ctx.fillStyle = `hsl(${(this.hp/this.maxHp)*110}, 80%, 40%)`;
     ctx.fillRect(bx, by, bw * (this.hp/this.maxHp), 4);
   }
 }
@@ -203,20 +259,51 @@ class Civilian extends Entity {
     this.speed = 1.8 + Math.random() * 0.8;
     this.panicSpeed = 3.5;
     this.facingAngle = 0;
-    this.scream = 0; // countdown for speech bubble
+    this.scream = 0;
+    // Infection
+    this.infected = false;
+    this.infectTimer = 0;  // countdown to full turn
+    this.biteCooldown = 0;
   }
   update(px, py, zombies, obstacles) {
-    // check if zombies nearby → panic
+    if (this.biteCooldown > 0) this.biteCooldown--;
+
+    // Check if a zombie is touching us — get bitten
+    if (!this.infected) {
+      for (const z of zombies) {
+        if (dist(this.x, this.y, z.x, z.y) < this.radius + z.radius + 2) {
+          if (this.biteCooldown <= 0) {
+            this.infected = true;
+            this.infectTimer = 300; // 5 seconds to turn
+            this.scream = 180;
+            break;
+          }
+        }
+      }
+    }
+
+    // Turning into zombie
+    if (this.infected) {
+      this.infectTimer--;
+      if (this.infectTimer <= 0) {
+        // Signal to game loop that we turned — return special value
+        this.turned = true;
+        this.alive = false;
+        return 'turned';
+      }
+    }
+
+    // check if zombies nearby → panic (infected still flee, briefly)
     let nearestZDist = Infinity;
+    let nearestZ = null;
     for (const z of zombies) {
       const d = dist(this.x, this.y, z.x, z.y);
-      if (d < nearestZDist) nearestZDist = d;
+      if (d < nearestZDist) { nearestZDist = d; nearestZ = z; }
     }
-    const isPanicking = nearestZDist < 180;
+    const isPanicking = !this.infected && nearestZDist < 180;
 
     if (isPanicking) {
       if (this.panicTimer <= 0) {
-        // flee away from nearest zombie
         let fx=0, fy=0;
         for (const z of zombies) {
           const d = dist(this.x, this.y, z.x, z.y);
@@ -230,8 +317,16 @@ class Civilian extends Entity {
       this.panicTimer--;
       this.vx = Math.cos(this.panicDir) * this.panicSpeed + (Math.random()-0.5)*1.5;
       this.vy = Math.sin(this.panicDir) * this.panicSpeed + (Math.random()-0.5)*1.5;
+    } else if (this.infected) {
+      // Infected stumble around slowly
+      if (this.wanderTimer <= 0) {
+        this.panicDir = Math.random() * Math.PI * 2;
+        this.wanderTimer = 30 + Math.random() * 40;
+      }
+      this.wanderTimer--;
+      this.vx = Math.cos(this.panicDir) * this.speed * 0.3;
+      this.vy = Math.sin(this.panicDir) * this.speed * 0.3;
     } else {
-      // wander
       if (this.wanderTimer <= 0) {
         this.panicDir = Math.random() * Math.PI * 2;
         this.wanderTimer = 60 + Math.random() * 90;
@@ -245,34 +340,80 @@ class Civilian extends Entity {
     if (this.scream > 0) this.scream--;
   }
   draw(ctx) {
+    const P = 2;
+    const ip = this.infected ? 1 - (this.infectTimer / 300) : 0;
+
+    // blend skin/shirt toward zombie colors as infection progresses
+    const lerpColor = (c1, c2, t) => {
+      const r1=parseInt(c1.slice(1,3),16), g1=parseInt(c1.slice(3,5),16), b1=parseInt(c1.slice(5,7),16);
+      const r2=parseInt(c2.slice(1,3),16), g2=parseInt(c2.slice(3,5),16), b2=parseInt(c2.slice(5,7),16);
+      return `rgb(${Math.round(r1+(r2-r1)*t)},${Math.round(g1+(g2-g1)*t)},${Math.round(b1+(b2-b1)*t)})`;
+    };
+    const skinBase = this.color || '#e8c888';
+    const skin  = lerpColor(skinBase, '#8aaa6a', ip);
+    const skinD = lerpColor('#c8a070', '#5a8a3a', ip);
+    const shirt = lerpColor(this.shirtColor || '#4488cc', '#2a6a1a', ip);
+    const shirtD= lerpColor('#336699', '#1a4a10', ip);
+    const eyeCol = ip > 0.3 ? '#ff3333' : '#1a0a00';
+
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.facingAngle);
 
     // shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    ctx.beginPath(); ctx.ellipse(0, 3, this.radius+1, 5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath(); ctx.ellipse(0, 5, 10, 4, 0, 0, Math.PI*2); ctx.fill();
 
-    // body / shirt
-    ctx.fillStyle = this.shirtColor;
-    ctx.beginPath(); ctx.arc(0, 0, this.radius, 0, Math.PI*2); ctx.fill();
+    // pixel civilian
+    const pixels = [
+      // head
+      [-1,-6,skin],[0,-6,skin],
+      [-2,-5,skin],[-1,-5,skinD],[0,-5,skinD],[1,-5,skin],
+      [-2,-4,skin],[-1,-4,skin],[0,-4,skin],[1,-4,skin],
+      // eyes
+      [-1,-4,eyeCol],[1,-4,eyeCol],
+      // hair
+      [-2,-6,'#3a2010'],[-1,-7,'#2a1808'],[0,-7,'#2a1808'],[1,-6,'#3a2010'],
+      // body
+      [-2,-3,shirtD],[-1,-3,shirt],[0,-3,shirt],[1,-3,shirtD],
+      [-2,-2,shirtD],[-1,-2,shirt],[0,-2,shirt],[1,-2,shirtD],
+      [-2,-1,shirtD],[-1,-1,shirt],[0,-1,shirt],[1,-1,shirtD],
+      // arms
+      [-3,-2,skin],[-3,-1,skin],
+      [2,-2,skin],[2,-1,skin],
+      // waist
+      [-2,0,'#3a2818'],[-1,0,'#4a3828'],[0,0,'#4a3828'],[1,0,'#3a2818'],
+      // legs
+      [-2,1,'#2a3a60'],[-1,1,'#3a5080'],[0,1,'#3a5080'],[1,1,'#2a3a60'],
+      [-2,2,'#2a3a60'],[-1,2,'#2a3a60'],[0,2,'#2a3a60'],[1,2,'#2a3a60'],
+      // feet
+      [-2,3,'#1a1008'],[-1,3,'#2a1808'],[0,3,'#2a1808'],[1,3,'#1a1008'],
+    ];
 
-    // head
-    ctx.fillStyle = this.color;
-    ctx.beginPath(); ctx.arc(0, -4, 8, 0, Math.PI*2); ctx.fill();
-
-    // eyes
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(-3, -5, 1.5, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(3, -5, 1.5, 0, Math.PI*2); ctx.fill();
+    for (const [px,py,c] of pixels) {
+      ctx.fillStyle = c;
+      ctx.fillRect(px*P, py*P, P, P);
+    }
 
     ctx.restore();
 
-    // panic speech bubble
-    if (this.scream > 0 && this.scream > 80) {
+    // infection bar
+    if (this.infected) {
+      const barW = 30, bx = this.x - barW/2, by = this.y - 24;
+      ctx.fillStyle = '#0a0505';
+      ctx.fillRect(bx-1, by-1, barW+2, 6);
+      ctx.fillStyle = `hsl(${120*(1-ip)}, 75%, 38%)`;
+      ctx.fillRect(bx, by, barW*(1-ip), 4);
+    }
+
+    // panic text
+    if (this.scream > 80) {
       ctx.save();
-      ctx.font = '14px serif';
-      ctx.fillText(['😱','🏃','❗','HELP!'][Math.floor(this.age/10)%4], this.x + 10, this.y - 20);
+      ctx.font = 'bold 11px Share Tech Mono, monospace';
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#000'; ctx.shadowBlur = 3;
+      const words = ['HELP!','RUN!','AAH!','NO!'];
+      ctx.fillText(words[Math.floor(this.age/15)%4], this.x + 12, this.y - 18);
       ctx.restore();
     }
   }
@@ -303,16 +444,37 @@ class Bullet extends Entity {
     }
   }
   draw(ctx) {
+    const angle = Math.atan2(this.vy, this.vx);
     // trail
     for (let i=0; i<this.trail.length; i++) {
-      const alpha = i/this.trail.length * 0.5;
-      ctx.fillStyle = this.color.replace(')',`,${alpha})`).replace('rgb','rgba');
-      ctx.beginPath(); ctx.arc(this.trail[i].x, this.trail[i].y, 2, 0, Math.PI*2); ctx.fill();
+      const alpha = (i/this.trail.length) * 0.6;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = this.friendly ? '#ffe090' : '#ff6040';
+      ctx.beginPath(); ctx.arc(this.trail[i].x, this.trail[i].y, 1.5, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
     }
-    ctx.fillStyle = this.color;
-    ctx.shadowBlur = 8; ctx.shadowColor = this.color;
-    ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2); ctx.fill();
-    ctx.shadowBlur = 0;
+    // pixel bullet
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(angle);
+    if (this.friendly) {
+      // brass casing
+      ctx.fillStyle = '#c8a020'; ctx.fillRect(-4, -2, 4, 4);
+      // tip
+      ctx.fillStyle = '#ffe060'; ctx.fillRect(0, -1, 4, 2);
+      // glow
+      ctx.shadowBlur = 6; ctx.shadowColor = '#ffe060';
+      ctx.fillStyle = '#fff8a0'; ctx.fillRect(2, -1, 2, 2);
+      ctx.shadowBlur = 0;
+    } else {
+      ctx.fillStyle = '#cc2010'; ctx.fillRect(-4, -2, 4, 4);
+      ctx.fillStyle = '#ff4030'; ctx.fillRect(0, -1, 4, 2);
+      ctx.shadowBlur = 6; ctx.shadowColor = '#ff4030';
+      ctx.fillStyle = '#ff8070'; ctx.fillRect(2, -1, 2, 2);
+      ctx.shadowBlur = 0;
+    }
+    ctx.restore();
   }
 }
 
