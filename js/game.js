@@ -45,14 +45,18 @@ function init() {
 
   // Pointer Lock change handler
   document.addEventListener('pointerlockchange', () => {
-    // Crosshair is always visible; position source switches between
-    // virtual (locked) and real cursor (unlocked) in the mousemove handler
+    // When lock is released while playing, ESC was pressed — auto pause
+    if (gameState === 'playing' && document.pointerLockElement !== canvas) {
+      gameState = 'paused';
+      document.getElementById('pause-overlay').style.display = 'flex';
+    }
   });
 
   // Input
   window.addEventListener('keydown', e => {
     keys[e.code] = true;
-    if (e.code === 'Escape') togglePause();
+    // Only handle ESC when already paused (to resume) — pausing is handled by pointerlockchange
+    if (e.code === 'Escape' && gameState === 'paused') togglePause();
   });
   window.addEventListener('keyup',  e => keys[e.code] = false);
 
