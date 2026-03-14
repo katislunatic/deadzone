@@ -61,8 +61,15 @@ function init() {
     if (e.code === 'Escape' && gameState === 'paused') togglePause();
     // Weapon switching 1-4
     if (gameState === 'playing') {
-      const wepMap = { 'Digit1':'revolver', 'Digit2':'shotgun', 'Digit3':'rifle', 'Digit4':'smg' };
-      if (wepMap[e.code]) selectWeapon(wepMap[e.code]);
+      if (keybinds) {
+        const wepMap = {
+          [keybinds.weapon1]:'revolver',
+          [keybinds.weapon2]:'shotgun',
+          [keybinds.weapon3]:'rifle',
+          [keybinds.weapon4]:'smg'
+        };
+        if (wepMap[e.code]) selectWeapon(wepMap[e.code]);
+      }
     }
   });
   window.addEventListener('keyup',  e => keys[e.code] = false);
@@ -335,10 +342,10 @@ function loop() {
   const wep = getActiveWeapon();
   let spd = player.speed;
   let dx=0, dy=0;
-  if (keys['KeyW']||keys['ArrowUp'])    dy -= 1;
-  if (keys['KeyS']||keys['ArrowDown'])  dy += 1;
-  if (keys['KeyA']||keys['ArrowLeft'])  dx -= 1;
-  if (keys['KeyD']||keys['ArrowRight']) dx += 1;
+  if (keys['ArrowUp']    || (keybinds && keys[keybinds.moveUp]))    dy -= 1;
+  if (keys['ArrowDown']  || (keybinds && keys[keybinds.moveDown]))  dy += 1;
+  if (keys['ArrowLeft']  || (keybinds && keys[keybinds.moveLeft]))  dx -= 1;
+  if (keys['ArrowRight'] || (keybinds && keys[keybinds.moveRight])) dx += 1;
   // Mobile joystick
   if (window.joystickDelta) { dx += window.joystickDelta.x; dy += window.joystickDelta.y; }
   const dlen = Math.sqrt(dx*dx+dy*dy);
@@ -355,8 +362,8 @@ function loop() {
   player.facing = Math.atan2(worldMouseY - player.y, worldMouseX - player.x);
 
   // Shoot
-  if (mouse.down || keys['Space']) tryShoot();
-  if (keys['KeyR']) startReload();
+  if (mouse.down || (keybinds && keys[keybinds.shoot])) tryShoot();
+  if (keybinds && keys[keybinds.reload]) startReload();
   if (player.invincible > 0) player.invincible--;
 
   // Horse stomp — damages zombies player runs over
