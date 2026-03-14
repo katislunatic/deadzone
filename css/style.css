@@ -844,3 +844,64 @@ body {
 #pause-settings-btn.open svg {
   transform: rotate(90deg);
 }
+
+/* ── KEYBINDS ───────────────────────────────── */
+.keybind-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.keybind-btn {
+  flex: 1;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  padding: 0.35rem 0.75rem;
+  background: #0d0b07;
+  border: 1px solid #3a2e1a;
+  border-radius: 5px;
+  color: var(--gold);
+  cursor: pointer;
+  transition: all 0.12s;
+  text-align: center;
+  min-width: 80px;
+}
+
+.keybind-btn:hover {
+  border-color: var(--gold-dark);
+  background: #1a1408;
+}
+
+.keybind-btn.listening {
+  border-color: var(--blood);
+  color: var(--blood);
+  background: #1a0808;
+  animation: keybindPulse 0.8s ease infinite;
+}
+
+@keyframes keybindPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.keybind-reset {
+  background: none;
+  border: 1px solid #2a2010;
+  border-radius: 4px;
+  color: var(--dim);
+  font-size: 0.9rem;
+  width: 26px; height: 26px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.12s;
+  padding: 0;
+}
+
+.keybind-reset:hover {
+  border-color: var(--gold-dark);
+  color: var(--gold);
+  transform: rotate(-30deg);
+}
