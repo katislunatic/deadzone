@@ -158,6 +158,7 @@ function startGame(mapIdArg) {
   document.getElementById('shop-screen').style.display = 'none';
   document.getElementById('gameover-screen').style.display = 'none';
   document.getElementById('hud').style.display = 'flex';
+  document.getElementById('hud-bottom').style.display = 'flex';
 
   // Center virtual mouse on game start
   virtualMouseX = canvas.width / 2;
@@ -654,6 +655,7 @@ function showGameOver() {
 function goToMenu() {
   document.getElementById('gameover-screen').style.display = 'none';
   document.getElementById('hud').style.display = 'none';
+  document.getElementById('hud-bottom').style.display = 'none';
   document.getElementById('pause-overlay').style.display = 'none';
   exitPointerLock();
   lastMapId = mapId;
