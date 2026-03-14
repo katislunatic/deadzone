@@ -45,9 +45,8 @@ function init() {
 
   // Pointer Lock change handler
   document.addEventListener('pointerlockchange', () => {
-    const locked = document.pointerLockElement === canvas;
-    // Show/hide crosshair based on lock state
-    crosshairEl.style.display = locked ? 'block' : 'none';
+    // Crosshair is always visible; position source switches between
+    // virtual (locked) and real cursor (unlocked) in the mousemove handler
   });
 
   // Input
