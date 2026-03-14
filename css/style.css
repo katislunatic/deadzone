@@ -197,15 +197,72 @@ body {
 #hud-bottom {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
   display: flex; align-items: center; gap: 1.5rem;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+  padding: 0.6rem 2rem 0.8rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
   z-index: 50;
   pointer-events: none;
 }
 
-#hud-bottom #health-bar { width: 200px; }
-#hud-bottom .hud-value { font-size: 1.3rem; }
-#hud-bottom .hud-label { font-size: 0.7rem; }
+#hud-bottom #health-bar { width: 180px; }
+#hud-bottom .hud-value { font-size: 1.2rem; }
+#hud-bottom .hud-label { font-size: 0.65rem; margin-bottom: 2px; }
+
+#weapon-slots {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: all;
+}
+
+#weapon-slot-row {
+  display: flex;
+  gap: 6px;
+}
+
+.weapon-slot {
+  width: 56px; height: 56px;
+  background: rgba(0,0,0,0.7);
+  border: 2px solid rgba(240,192,64,0.25);
+  border-radius: 8px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.12s;
+  position: relative;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.weapon-slot:hover {
+  border-color: rgba(240,192,64,0.6);
+  background: rgba(30,20,5,0.9);
+}
+
+.weapon-slot.active {
+  border-color: var(--gold);
+  background: rgba(40,28,5,0.95);
+  box-shadow: 0 0 12px rgba(240,192,64,0.4);
+}
+
+.weapon-slot.empty {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.weapon-slot-key {
+  position: absolute; top: 3px; left: 5px;
+  font-size: 0.55rem;
+  color: var(--dim);
+}
+
+.weapon-slot-icon { font-size: 1.4rem; line-height: 1; }
+
+.weapon-slot-name {
+  font-size: 0.5rem;
+  color: var(--dim);
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+  text-transform: uppercase;
+}
 
 .hud-block {
   background: rgba(0,0,0,0.6);
