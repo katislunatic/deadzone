@@ -60,7 +60,7 @@ const MAPS = {
       { x: 640,  y: 0,    w: 65,   h: 1200, color: '#b89558' },
       { x: 1100, y: 0,    w: 65,   h: 1200, color: '#b89558' },
     ],
-    spawnX: 672, spawnY: 415,
+    spawnX: 400, spawnY: 415,
     bgDecals: ['🌵','🪨','💀'],
   },
 
@@ -122,7 +122,7 @@ const MAPS = {
       { x: 1060, y: 0,    w: 80,   h: 1200, color: '#222530' },
       { x: 1330, y: 0,    w: 80,   h: 1200, color: '#222530' },
     ],
-    spawnX: 835, spawnY: 420,
+    spawnX: 600, spawnY: 420,
     bgDecals: ['🚗','💡','🗑️'],
   },
 
@@ -185,7 +185,7 @@ const MAPS = {
       { x: 640,  y: 0,    w: 90,   h: 1200, color: '#5c4a2a' },
       { x: 1100, y: 0,    w: 90,   h: 1200, color: '#5c4a2a' },
     ],
-    spawnX: 685, spawnY: 318,
+    spawnX: 400, spawnY: 318,
     bgDecals: ['🌿','🌻','🍂'],
   },
 
@@ -198,8 +198,8 @@ const MAPS = {
     ambientColor: '#202820',
     dustParticles: true,
     obstacles: [
-      // mausoleum (center)
-      { x: 680,  y: 480,  w: 200, h: 160, color: '#2a2a30' },
+      // mausoleum (offset from roads)
+      { x: 880,  y: 680,  w: 200, h: 160, color: '#2a2a30' },
       // chapel
       { x: 1200, y: 80,   w: 200, h: 180, color: '#1e2018' },
       // second chapel
@@ -237,7 +237,7 @@ const MAPS = {
       { x: 0,    y: 310,  w: 680,  h: 40,  color: '#181e18' },
       { x: 850,  y: 310,  w: 750,  h: 40,  color: '#181e18' },
     ],
-    spawnX: 775, spawnY: 605,
+    spawnX: 400, spawnY: 605,
     bgDecals: ['💀','🦇','🌑'],
   }
 };
