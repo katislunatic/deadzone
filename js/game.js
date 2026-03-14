@@ -8,6 +8,8 @@ let mouse = { x: 400, y: 300, down: false };
 let upgrades, playerStats;
 let lastMapId = null;
 let waveAnnounceTimer = 0;
+let locatorTimer = 0;      // counts up when <=3 zombies remain
+let lastLocatorCount = 0;  // tracks zombie count to reset timer on a kill
 let zombiesLeftThisWave = 0;
 let zombiesSpawned = 0;
 let spawnTimer = 0;
@@ -206,6 +208,8 @@ function nextWave() {
   zombiesSpawned = 0;
   spawnTimer = 0;
   waveAnnounceTimer = 120;
+  locatorTimer = 0;
+  lastLocatorCount = 0;
 
   const el = document.getElementById('wave-announce');
   el.textContent = `WAVE ${wave}`;
@@ -659,8 +663,21 @@ function render() {
 
   ctx.restore();
 
-  // Zombie locator arrows — show when 3 or fewer zombies remain
-  if (zombies.length > 0 && zombies.length <= 3) {
+  // Zombie locator arrows — only after struggling for 8 seconds with <=3 left
+  const LOCATOR_THRESHOLD = 3;
+  const LOCATOR_DELAY = 60 * 45; // 45 seconds at 60fps
+
+  if (zombies.length > 0 && zombies.length <= LOCATOR_THRESHOLD) {
+    // Reset timer if a zombie just got killed (count dropped)
+    if (zombies.length < lastLocatorCount) locatorTimer = 0;
+    lastLocatorCount = zombies.length;
+    locatorTimer++;
+  } else {
+    locatorTimer = 0;
+    lastLocatorCount = zombies.length;
+  }
+
+  if (zombies.length > 0 && zombies.length <= LOCATOR_THRESHOLD && locatorTimer >= LOCATOR_DELAY) {
     const camX = window._camX || 0, camY = window._camY || 0;
     const screenW = canvas.width, screenH = canvas.height;
     const screenCX = screenW / 2, screenCY = screenH / 2;
