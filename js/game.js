@@ -578,19 +578,26 @@ function renderShop() {
   for (const upg of upgrades) {
     if (upg.default) continue; // revolver is always owned, skip
 
-    const owned    = upg.level >= upg.maxLevel;
+    const isConsumable = upg.category === 'consumable';
+    const owned    = !isConsumable && upg.level >= upg.maxLevel;
     const cantAfford = player.coins < upg.cost;
     const div = document.createElement('div');
-    div.className = 'shop-item' + (owned ? ' owned' : '') + (owned ? '' : cantAfford ? ' cant-afford' : '');
+    div.className = 'shop-item' + (owned ? ' owned' : '') + (!owned && cantAfford ? ' cant-afford' : '');
 
-    // level dots
+    // level dots (not for consumables)
     const maxL = Math.min(upg.maxLevel, 3);
-    const dots = upg.maxLevel > 1 ? `<div class="level-dots">${Array.from({length:maxL},(_,i)=>`<div class="level-dot ${i<upg.level?'filled':''}"></div>`).join('')}</div>` : '';
+    const dots = !isConsumable && upg.maxLevel > 1 ? `<div class="level-dots">${Array.from({length:maxL},(_,i)=>`<div class="level-dot ${i<upg.level?'filled':''}"></div>`).join('')}</div>` : '';
+
+    // Show current HP for medkit
+    const extraInfo = isConsumable && upg.id === 'medkit'
+      ? `<div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#2ecc71;margin-top:2px;">HP: ${Math.round(player.hp)}/${player.maxHp}</div>`
+      : '';
 
     div.innerHTML = `
       <div class="item-icon">${upg.emoji}</div>
       <div class="item-name">${upg.name}</div>
       <div class="item-desc">${upg.desc}</div>
+      ${extraInfo}
       <div class="item-price">${owned ? (upg.maxLevel===1?'✅ OWNED':'✅ MAXED') : `🪙 ${upg.cost}`}</div>
       ${dots}
     `;
@@ -607,14 +614,27 @@ function buyUpgrade(id) {
   if (!upg || player.coins < upg.cost || upg.level >= upg.maxLevel) return;
   player.coins -= upg.cost;
   upg.level++;
+
   if (upg.effect) {
-    if (upg.category==='player') upg.effect(player);
-    else upg.effect(playerStats);
+    // Route effect to the right target based on category
+    if (upg.category === 'player' || upg.category === 'consumable') {
+      upg.effect(player);
+    } else {
+      // gun_mod, weapon mods etc — apply to playerStats
+      upg.effect(playerStats);
+    }
   }
-  // Update weapon clip if needed
+
+  // Always refresh clip size after any purchase
   const wep = getActiveWeapon();
-  maxClip = (wep.stats.clip||6) + (playerStats.clipBonus||0);
+  maxClip = (wep.stats.clip || 6) + (playerStats.clipBonus || 0);
   currentClip = maxClip;
+
+  // Refresh health bar immediately
+  const hpPct = (player.hp / player.maxHp) * 100;
+  document.getElementById('health-fill').style.width = hpPct + '%';
+  document.getElementById('shop-coins-display').textContent = `🪙 ${player.coins} coins`;
+
   renderShop();
 }
 
