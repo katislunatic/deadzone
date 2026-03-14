@@ -50,7 +50,13 @@
     <button class="btn btn-primary" id="play-btn" onclick="playChosen()" disabled>
       SPIN FIRST
     </button>
-    <button class="btn btn-gold" onclick="openSettings()" style="width:auto; padding:0.75rem 1.25rem;">⚙️</button>
+    <button class="btn btn-gold" onclick="openSettings()" style="width:auto; padding:0.75rem 1.25rem; display:flex; align-items:center; gap:0.4rem;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" fill="currentColor"/>
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M9.394 2.276a1.5 1.5 0 0 1 5.212 0l.3 1.05a1 1 0 0 0 1.366.632l.99-.44a1.5 1.5 0 0 1 1.906.602l.606 1.05a1.5 1.5 0 0 1-.37 1.972l-.857.64a1 1 0 0 0 0 1.636l.857.64a1.5 1.5 0 0 1 .37 1.972l-.606 1.05a1.5 1.5 0 0 1-1.906.602l-.99-.44a1 1 0 0 0-1.366.632l-.3 1.05a1.5 1.5 0 0 1-5.212 0l-.3-1.05a1 1 0 0 0-1.366-.632l-.99.44a1.5 1.5 0 0 1-1.906-.602l-.606-1.05a1.5 1.5 0 0 1 .37-1.972l.857-.64a1 1 0 0 0 0-1.636l-.857-.64a1.5 1.5 0 0 1-.37-1.972l.606-1.05a1.5 1.5 0 0 1 1.906-.602l.99.44a1 1 0 0 0 1.366-.632l.3-1.05z" fill="currentColor"/>
+        <circle cx="12" cy="12" r="3" fill="#1a0e00"/>
+      </svg>
+    </button>
   </div>
 
   <div style="margin-top:1.5rem; font-family:'Share Tech Mono',monospace; font-size:0.7rem; color:#5a4830; text-align:center; max-width:400px; line-height:1.8;">
@@ -64,7 +70,14 @@
 ──────────────────────────────────────────── -->
 <div id="settings-overlay">
   <div class="settings-panel">
-    <div class="settings-title">⚙️ Settings</div>
+    <div class="settings-title" style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" fill="#f0c040"/>
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M9.394 2.276a1.5 1.5 0 0 1 5.212 0l.3 1.05a1 1 0 0 0 1.366.632l.99-.44a1.5 1.5 0 0 1 1.906.602l.606 1.05a1.5 1.5 0 0 1-.37 1.972l-.857.64a1 1 0 0 0 0 1.636l.857.64a1.5 1.5 0 0 1 .37 1.972l-.606 1.05a1.5 1.5 0 0 1-1.906.602l-.99-.44a1 1 0 0 0-1.366.632l-.3 1.05a1.5 1.5 0 0 1-5.212 0l-.3-1.05a1 1 0 0 0-1.366-.632l-.99.44a1.5 1.5 0 0 1-1.906-.602l-.606-1.05a1.5 1.5 0 0 1 .37-1.972l-.857-.64a1 1 0 0 0 0-1.636l-.857-.64a1.5 1.5 0 0 1-.37-1.972l.606-1.05a1.5 1.5 0 0 1 1.906-.602l.99.44a1 1 0 0 0 1.366-.632l.3-1.05z" fill="#f0c040"/>
+        <circle cx="12" cy="12" r="3" fill="#1a0e00"/>
+      </svg>
+      Settings
+    </div>
 
     <div class="settings-section">
       <div class="settings-section-label">Volume</div>
@@ -218,6 +231,50 @@
   <div style="display:flex;gap:1rem;margin-top:1.5rem;">
     <button class="btn btn-gold" onclick="togglePause()" style="width:150px;">Resume</button>
     <button class="btn btn-primary" onclick="goToMenu()" style="width:150px;">Quit</button>
+  </div>
+
+  <!-- Inline settings panel inside pause -->
+  <div class="pause-settings">
+    <div class="settings-section-label" style="text-align:center;">Settings</div>
+
+    <div class="settings-section">
+      <div class="settings-section-label">Volume</div>
+      <div class="settings-row">
+        <label class="settings-label">Master</label>
+        <input type="range" class="settings-slider" id="p-vol-master" min="0" max="100" value="80">
+        <span class="settings-val" id="p-vol-master-val">80%</span>
+      </div>
+      <div class="settings-row">
+        <label class="settings-label">Guns</label>
+        <input type="range" class="settings-slider" id="p-vol-guns" min="0" max="100" value="100">
+        <span class="settings-val" id="p-vol-guns-val">100%</span>
+      </div>
+      <div class="settings-row">
+        <label class="settings-label">Death</label>
+        <input type="range" class="settings-slider" id="p-vol-death" min="0" max="100" value="100">
+        <span class="settings-val" id="p-vol-death-val">100%</span>
+      </div>
+      <div class="settings-row">
+        <label class="settings-label">Reload</label>
+        <input type="range" class="settings-slider" id="p-vol-reload" min="0" max="100" value="100">
+        <span class="settings-val" id="p-vol-reload-val">100%</span>
+      </div>
+      <div class="settings-row">
+        <label class="settings-label">UI / Shop</label>
+        <input type="range" class="settings-slider" id="p-vol-ui" min="0" max="100" value="100">
+        <span class="settings-val" id="p-vol-ui-val">100%</span>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label">Graphics</div>
+      <div class="settings-row">
+        <label class="settings-label">Blood Effects</label>
+        <div class="settings-toggle-wrap">
+          <button class="settings-toggle active" id="p-toggle-blood" onclick="toggleSetting('blood'); syncPauseSettings();">ON</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
