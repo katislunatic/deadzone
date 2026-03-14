@@ -58,6 +58,7 @@ function applySettingsToUI() {
 function openSettings() {
   applySettingsToUI();
   document.getElementById('settings-overlay').style.display = 'flex';
+  if (typeof renderKeybindsUI === 'function') renderKeybindsUI('keybinds-container');
 
   // Wire up sliders live
   const sliders = [
@@ -148,5 +149,8 @@ function togglePauseSettings() {
   const isOpen = panel.classList.contains('open');
   panel.classList.toggle('open', !isOpen);
   btn.classList.toggle('open', !isOpen);
-  if (!isOpen) syncPauseSettings();
+  if (!isOpen) {
+    syncPauseSettings();
+    if (typeof renderKeybindsUI === 'function') renderKeybindsUI('p-keybinds-container');
+  }
 }
