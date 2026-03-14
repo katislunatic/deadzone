@@ -344,10 +344,27 @@
      MOBILE CONTROLS
 ──────────────────────────────────────────── -->
 <div id="mobile-controls">
-  <div class="joystick-area" id="joystick-area">
-    <div class="joystick-dot" id="joystick-dot"></div>
+  <!-- Left stick: movement -->
+  <div class="mobile-stick-wrap" id="move-stick-wrap">
+    <div class="stick-label">MOVE</div>
+    <div class="joystick-area" id="joystick-area">
+      <div class="joystick-dot" id="joystick-dot"></div>
+    </div>
   </div>
-  <button class="fire-btn btn" id="fire-btn">FIRE</button>
+
+  <!-- Center: reload + squeeze buttons -->
+  <div class="mobile-center-btns">
+    <button class="mobile-action-btn" id="mobile-reload-btn">RELOAD</button>
+    <button class="mobile-action-btn mobile-squeeze-btn" id="mobile-squeeze-btn">SQUEEZE</button>
+  </div>
+
+  <!-- Right stick: aim + fire -->
+  <div class="mobile-stick-wrap" id="aim-stick-wrap">
+    <div class="stick-label">AIM &amp; FIRE</div>
+    <div class="joystick-area aim-stick" id="aim-stick-area">
+      <div class="joystick-dot" id="aim-stick-dot"></div>
+    </div>
+  </div>
 </div>
 
 
