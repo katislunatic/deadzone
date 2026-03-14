@@ -592,6 +592,20 @@ function closeShop() {
 // ── GAME OVER ─────────────────────────────────────────────────────────
 function showGameOver() {
   const el = document.getElementById('gameover-screen');
+  // Force animation replay by resetting then re-displaying
+  el.style.display = 'none';
+  el.style.animation = 'none';
+  // Reset word animations too
+  const you = el.querySelector('.go-you');
+  const died = el.querySelector('.go-died');
+  const shock = el.querySelector('.go-shockwave');
+  [you, died, shock].forEach(e => { if(e) e.style.animation = 'none'; });
+  // Force reflow
+  void el.offsetWidth;
+  // Re-enable animations
+  el.style.animation = '';
+  [you, died, shock].forEach(e => { if(e) e.style.animation = ''; });
+
   el.style.display = 'flex';
   document.getElementById('go-score').innerHTML = `
     Score: <b>${score.toLocaleString()}</b><br>
