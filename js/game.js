@@ -126,7 +126,7 @@ function startGame(mapIdArg) {
   upgrades = getUpgrades();
   playerStats = { gunDamageMult:1, fireRateMult:1, clipBonus:0, reloadMult:1, coinMult:1 };
 
-  player = new Player(WORLD_W/2, WORLD_H/2);
+  player = new Player(mapData.spawnX || WORLD_W/2, mapData.spawnY || WORLD_H/2);
   player.coins = 0;
   bullets = []; zombies = []; civilians = []; particles = []; dustParticles = [];
   wave = 0; score = 0; frameCount = 0; totalKills = 0; civKills = 0;
@@ -462,13 +462,7 @@ function render() {
       // roof tint
       ctx.fillStyle = 'rgba(255,255,255,0.05)';
       ctx.fillRect(obs.x, obs.y, obs.w, obs.h*0.3);
-      // label
-      if (obs.label) {
-        ctx.font = obs.label.length>2 ? '11px Special Elite' : '18px serif';
-        ctx.fillStyle = '#fff'; ctx.textAlign='center';
-        ctx.fillText(obs.label, obs.x+obs.w/2, obs.y+obs.h/2+6);
-        ctx.textAlign='left';
-      }
+      // labels removed
     }
   }
 
