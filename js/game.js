@@ -528,6 +528,7 @@ function updateHUD() {
 
 // ── SHOP ─────────────────────────────────────────────────────────────
 function showShop() {
+  exitPointerLock();  // release mouse so the shop UI is clickable
   const el = document.getElementById('shop-screen');
   el.style.display = 'block';
   renderShop();
