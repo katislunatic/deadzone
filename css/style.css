@@ -1018,3 +1018,13 @@ body {
   background: linear-gradient(90deg, #ff8844, #ffcc44);
   box-shadow: 0 0 6px rgba(255,180,60,0.6);
 }
+
+#squeeze-fill.depleted {
+  background: linear-gradient(90deg, #661111, #aa2222);
+  animation: squeezePulse 0.5s ease infinite;
+}
+
+@keyframes squeezePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
