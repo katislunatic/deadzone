@@ -659,6 +659,65 @@ function render() {
 
   ctx.restore();
 
+  // Zombie locator arrows — show when 3 or fewer zombies remain
+  if (zombies.length > 0 && zombies.length <= 3) {
+    const camX = window._camX || 0, camY = window._camY || 0;
+    const screenW = canvas.width, screenH = canvas.height;
+    const screenCX = screenW / 2, screenCY = screenH / 2;
+    const arrowDist = 80; // px from screen edge padding
+
+    for (const z of zombies) {
+      // Convert zombie world pos to screen pos
+      const sx = z.x - camX;
+      const sy = z.y - camY;
+
+      // Only show arrow if zombie is off-screen
+      const onScreen = sx > 20 && sx < screenW - 20 && sy > 20 && sy < screenH - 20;
+      if (onScreen) continue;
+
+      // Angle from screen center to zombie
+      const angle = Math.atan2(sy - screenCY, sx - screenCX);
+
+      // Clamp arrow position to screen edges with padding
+      const pad = 48;
+      const clampX = Math.max(pad, Math.min(screenW - pad, screenCX + Math.cos(angle) * 9999));
+      const clampY = Math.max(pad, Math.min(screenH - pad, screenCY + Math.sin(angle) * 9999));
+
+      // Pulse opacity
+      const pulse = 0.6 + Math.sin(frameCount * 0.12) * 0.4;
+
+      ctx.save();
+      ctx.translate(clampX, clampY);
+      ctx.rotate(angle);
+      ctx.globalAlpha = pulse;
+
+      // Arrow shape
+      const aw = 14, ah = 10;
+      ctx.beginPath();
+      ctx.moveTo(aw, 0);          // tip
+      ctx.lineTo(-aw * 0.4,  ah); // bottom left
+      ctx.lineTo(-aw * 0.4, -ah); // top left
+      ctx.closePath();
+      ctx.fillStyle = '#ff3333';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Distance label
+      const worldDist = Math.round(dist(player.x, player.y, z.x, z.y));
+      ctx.rotate(-angle);
+      ctx.font = 'bold 9px Share Tech Mono, monospace';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.fillText(worldDist + 'm', 0, 26);
+      ctx.textAlign = 'left';
+
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+  }
+
   // Reload arc (screen space)
   if (reloading) {
     const reloadFrames = Math.round(60 * (playerStats.reloadMult||1));
