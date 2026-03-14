@@ -59,9 +59,12 @@ function init() {
   // Pointer-lock mouse movement: accumulate virtual position
   document.addEventListener('mousemove', e => {
     if (document.pointerLockElement === canvas) {
-      const scale = getWorldScale();
-      virtualMouseX = Math.max(0, Math.min(canvas.width,  virtualMouseX + e.movementX));
-      virtualMouseY = Math.max(0, Math.min(canvas.height, virtualMouseY + e.movementY));
+      // movementX/Y are in screen pixels; convert to canvas logical pixels
+      const rect = canvas.getBoundingClientRect();
+      const displayScaleX = rect.width  / canvas.width;
+      const displayScaleY = rect.height / canvas.height;
+      virtualMouseX = Math.max(0, Math.min(canvas.width,  virtualMouseX + e.movementX / displayScaleX));
+      virtualMouseY = Math.max(0, Math.min(canvas.height, virtualMouseY + e.movementY / displayScaleY));
       mouse.x = virtualMouseX;
       mouse.y = virtualMouseY;
       // Move the SVG crosshair to match
@@ -91,9 +94,24 @@ function init() {
   requestAnimationFrame(loop);
 }
 
+// Logical viewport — same zoom as original game
+const VIEWPORT_W = 800;
+const VIEWPORT_H = 600;
+
 function resizeCanvas() {
-  canvas.width  = window.innerWidth;
-  canvas.height = window.innerHeight;
+  // Scale up the 800x600 viewport to fill the screen
+  const scaleX = window.innerWidth  / VIEWPORT_W;
+  const scaleY = window.innerHeight / VIEWPORT_H;
+  const displayScale = Math.min(scaleX, scaleY);
+
+  canvas.width  = VIEWPORT_W;
+  canvas.height = VIEWPORT_H;
+  canvas.style.width  = Math.round(VIEWPORT_W * displayScale) + 'px';
+  canvas.style.height = Math.round(VIEWPORT_H * displayScale) + 'px';
+  canvas.style.position = 'fixed';
+  canvas.style.left = Math.round((window.innerWidth  - VIEWPORT_W * displayScale) / 2) + 'px';
+  canvas.style.top  = Math.round((window.innerHeight - VIEWPORT_H * displayScale) / 2) + 'px';
+  canvas.style.imageRendering = 'crisp-edges';
 }
 
 // ── START GAME ────────────────────────────────────────────────────────
