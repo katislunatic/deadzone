@@ -106,13 +106,17 @@ const VIEWPORT_H = 600;
 
 function resizeCanvas() {
   // Scale up the 800x600 viewport to fill the screen
+  const scaleX = window.innerWidth  / VIEWPORT_W;
+  const scaleY = window.innerHeight / VIEWPORT_H;
+  const displayScale = Math.min(scaleX, scaleY);
+
   canvas.width  = VIEWPORT_W;
   canvas.height = VIEWPORT_H;
-  canvas.style.width  = window.innerWidth  + 'px';
-  canvas.style.height = window.innerHeight + 'px';
+  canvas.style.width  = Math.round(VIEWPORT_W * displayScale) + 'px';
+  canvas.style.height = Math.round(VIEWPORT_H * displayScale) + 'px';
   canvas.style.position = 'fixed';
-  canvas.style.left = '0';
-  canvas.style.top  = '0';
+  canvas.style.left = Math.round((window.innerWidth  - VIEWPORT_W * displayScale) / 2) + 'px';
+  canvas.style.top  = Math.round((window.innerHeight - VIEWPORT_H * displayScale) / 2) + 'px';
   canvas.style.imageRendering = 'crisp-edges';
 }
 
@@ -269,7 +273,6 @@ function startReload() {
 // ── MAIN LOOP ─────────────────────────────────────────────────────────
 function loop() {
   requestAnimationFrame(loop);
-  if (gameState === 'paused') { render(); return; }
   if (gameState !== 'playing') { drawBackground(); return; }
 
   frameCount++;
