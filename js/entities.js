@@ -336,4 +336,4 @@ function circlesOverlap(a, b) {
   return dist(a.x,a.y,b.x,b.y) < a.radius + b.radius;
 }
 
-const WORLD_W = 800, WORLD_H = 600;
+const WORLD_W = 1600, WORLD_H = 1200;
