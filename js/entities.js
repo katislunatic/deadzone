@@ -116,32 +116,42 @@ class Zombie extends Entity {
     const distToPlayer = Math.sqrt(dx*dx + dy*dy);
     this.facingAngle = Math.atan2(dy, dx);
 
-    // --- Pathfinding: cast rays to find a clear path to player ---
-    // Check if direct path is blocked
-    const directBlocked = this._pathBlocked(this.x, this.y, px, py, obstacles);
+    // --- Pathfinding with hysteresis to prevent jitter ---
+    // Only re-evaluate path every 15 frames
+    if (this.age % 15 === 0 || this.waypoint === undefined) {
+      const directBlocked = this._pathBlocked(this.x, this.y, px, py, obstacles);
+      if (directBlocked) {
+        this.blockedFrames = (this.blockedFrames || 0) + 1;
+        this.clearFrames = 0;
+      } else {
+        this.clearFrames = (this.clearFrames || 0) + 1;
+        this.blockedFrames = 0;
+      }
+      // Only acquire waypoint after being blocked for 2 checks in a row
+      if (this.blockedFrames >= 2 && !this.waypoint) {
+        this.waypoint = this._findWaypoint(px, py, obstacles);
+        this.waypointTimer = 180; // hold waypoint for 3 seconds
+      }
+      // Only clear waypoint after path has been clear for 2 checks in a row
+      if (this.clearFrames >= 2 && this.waypoint) {
+        this.waypoint = null;
+        this.waypointTimer = 0;
+        this.blockedFrames = 0;
+      }
+    }
 
     let targetX = px, targetY = py;
-
-    if (directBlocked) {
-      // Maintain or find a waypoint
-      if (!this.waypoint || this.waypointTimer <= 0) {
-        this.waypoint = this._findWaypoint(px, py, obstacles);
-        this.waypointTimer = 120;
+    if (this.waypoint && this.waypointTimer > 0) {
+      targetX = this.waypoint.x;
+      targetY = this.waypoint.y;
+      this.waypointTimer--;
+      // Reached waypoint — clear it and head to player
+      if (dist(this.x, this.y, this.waypoint.x, this.waypoint.y) < 28) {
+        this.waypoint = null;
+        this.waypointTimer = 0;
+        this.blockedFrames = 0;
+        this.clearFrames = 0;
       }
-      if (this.waypoint) {
-        targetX = this.waypoint.x;
-        targetY = this.waypoint.y;
-        this.waypointTimer--;
-        // Reached waypoint or direct path is now clear — drop it
-        if (dist(this.x, this.y, this.waypoint.x, this.waypoint.y) < 28
-            || !this._pathBlocked(this.x, this.y, px, py, obstacles)) {
-          this.waypoint = null;
-          this.waypointTimer = 0;
-        }
-      }
-    } else {
-      this.waypoint = null;
-      this.waypointTimer = 0;
     }
 
     const tdx = targetX - this.x, tdy = targetY - this.y;
