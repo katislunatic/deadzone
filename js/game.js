@@ -323,6 +323,7 @@ function startReload() {
 function loop() {
   requestAnimationFrame(loop);
   if (gameState === 'paused') { render(); return; }
+  if (gameState === 'shop')   { render(); return; }  // keep world visible behind shop
   if (gameState !== 'playing') { drawBackground(); return; }
 
   frameCount++;
@@ -544,7 +545,7 @@ function loop() {
   // Wave clear
   if (zombiesSpawned >= zombiesLeftThisWave && zombies.length === 0) {
     gameState = 'shop';
-    showShop();
+    showWaveComplete(wave);
   }
 
   // Game over
@@ -741,17 +742,43 @@ function updateHUD() {
 }
 
 // ── SHOP ─────────────────────────────────────────────────────────────
-function showShop() {
+function showWaveComplete(waveNum) {
   exitPointerLock();
-  // Brief delay so the wave-clear moment lands before the shop slides in
+
+  const overlay = document.getElementById('wave-complete-overlay');
+  const title   = document.getElementById('wc-title');
+  const sub     = document.getElementById('wc-sub');
+
+  title.textContent = `Wave ${waveNum} Complete`;
+  sub.textContent   = 'Heading to the Outfitter...';
+
+  // Reset animations by cloning nodes
+  const newTitle = title.cloneNode(true);
+  const newSub   = sub.cloneNode(true);
+  title.parentNode.replaceChild(newTitle, title);
+  sub.parentNode.replaceChild(newSub, sub);
+
+  overlay.classList.add('visible');
+
+  // After 1.8s fade out overlay, then show shop
   setTimeout(() => {
-    const el = document.getElementById('shop-screen');
-    el.style.display = 'block';
-    // Force reflow then add open class for CSS transition
-    void el.offsetWidth;
-    el.classList.add('shop-open');
-    renderShop();
-  }, 800);
+    overlay.style.transition = 'opacity 0.4s ease';
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+      overlay.classList.remove('visible');
+      overlay.style.opacity = '';
+      overlay.style.transition = '';
+      showShop();
+    }, 400);
+  }, 1800);
+}
+
+function showShop() {
+  const el = document.getElementById('shop-screen');
+  el.style.display = 'block';
+  void el.offsetWidth;
+  el.classList.add('shop-open');
+  renderShop();
 }
 
 function renderShop() {
