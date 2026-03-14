@@ -114,6 +114,19 @@
     </div>
 
     <div class="accordion-section">
+      <button class="accordion-btn" onclick="toggleAccordion('acc-keybinds')">
+        <span>⌨️ Keybinds</span>
+        <span style="display:flex;align-items:center;gap:0.5rem;">
+          <button onclick="event.stopPropagation();resetAllKeybinds()" class="keybind-reset-all">RESET ALL</button>
+          <span class="accordion-arrow">▼</span>
+        </span>
+      </button>
+      <div class="accordion-body" id="acc-keybinds">
+        <div id="keybinds-container"></div>
+      </div>
+    </div>
+
+    <div class="accordion-section">
       <button class="accordion-btn" onclick="toggleAccordion('acc-graphics')">
         <span>🎨 Graphics</span><span class="accordion-arrow">▼</span>
       </button>
@@ -124,19 +137,6 @@
             <button class="settings-toggle active" id="toggle-blood" onclick="toggleSetting('blood')">ON</button>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="accordion-section">
-      <button class="accordion-btn" onclick="toggleAccordion('acc-keybinds')">
-        <span>⌨️ Keybinds</span>
-        <span style="display:flex;align-items:center;gap:0.5rem;">
-          <button onclick="event.stopPropagation();resetAllKeybinds()" class="keybind-reset-all">RESET ALL</button>
-          <span class="accordion-arrow">▼</span>
-        </span>
-      </button>
-      <div class="accordion-body" id="acc-keybinds">
-        <div id="keybinds-container"></div>
       </div>
     </div>
 
@@ -311,6 +311,19 @@
     </div>
 
     <div class="accordion-section">
+      <button class="accordion-btn" onclick="toggleAccordion('p-acc-keybinds')">
+        <span>⌨️ Keybinds</span>
+        <span style="display:flex;align-items:center;gap:0.5rem;">
+          <button onclick="event.stopPropagation();resetAllKeybinds()" class="keybind-reset-all">RESET ALL</button>
+          <span class="accordion-arrow">▼</span>
+        </span>
+      </button>
+      <div class="accordion-body" id="p-acc-keybinds">
+        <div id="p-keybinds-container"></div>
+      </div>
+    </div>
+
+    <div class="accordion-section">
       <button class="accordion-btn" onclick="toggleAccordion('p-acc-graphics')">
         <span>🎨 Graphics</span><span class="accordion-arrow">▼</span>
       </button>
@@ -321,19 +334,6 @@
             <button class="settings-toggle active" id="p-toggle-blood" onclick="toggleSetting('blood'); syncPauseSettings();">ON</button>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="accordion-section">
-      <button class="accordion-btn" onclick="toggleAccordion('p-acc-keybinds')">
-        <span>⌨️ Keybinds</span>
-        <span style="display:flex;align-items:center;gap:0.5rem;">
-          <button onclick="event.stopPropagation();resetAllKeybinds()" class="keybind-reset-all">RESET ALL</button>
-          <span class="accordion-arrow">▼</span>
-        </span>
-      </button>
-      <div class="accordion-body" id="p-acc-keybinds">
-        <div id="p-keybinds-container"></div>
       </div>
     </div>
   </div>
