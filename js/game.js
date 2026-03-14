@@ -50,6 +50,7 @@ function init() {
     if (gameState === 'playing' && document.pointerLockElement !== canvas) {
       gameState = 'paused';
       document.getElementById('pause-overlay').style.display = 'flex';
+      if (typeof syncPauseSettings === 'function') syncPauseSettings();
     }
   });
 
