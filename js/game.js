@@ -353,6 +353,19 @@ function loop() {
   else { player.vx = 0; player.vy = 0; }
   player.move(obstacles);
 
+  // Squeeze mechanic
+  const squeezePressed = keybinds && keys[keybinds.squeeze];
+  if (squeezePressed && player.squeezeStamina > 0) {
+    player.squeezing = true;
+    player.radius = 5;               // tiny radius — slips through gaps
+    player.squeezeStamina = Math.max(0, player.squeezeStamina - 1.4);
+  } else {
+    player.squeezing = false;
+    player.radius = player.baseRadius;
+    // Regen stamina when not squeezing
+    if (player.squeezeStamina < 100) player.squeezeStamina = Math.min(100, player.squeezeStamina + 0.35);
+  }
+
   // Player facing
   // Convert screen-space mouse to world-space, then aim from player
   const sc = window._scale || 1;
@@ -666,6 +679,13 @@ function updateHUD() {
   document.getElementById('hud-zombies').textContent = remaining + ' left';
   const clipTxt = reloading ? 'RELOAD' : `${currentClip}/${maxClip}`;
   document.getElementById('hud-ammo').textContent = clipTxt;
+
+  // Squeeze stamina bar
+  const sqFill = document.getElementById('squeeze-fill');
+  if (sqFill) {
+    sqFill.style.width = player.squeezeStamina + '%';
+    sqFill.classList.toggle('draining', player.squeezing);
+  }
 
   // Weapon slots
   const row = document.getElementById('weapon-slot-row');
