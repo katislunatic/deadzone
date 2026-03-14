@@ -690,10 +690,16 @@ function updateHUD() {
 
 // ── SHOP ─────────────────────────────────────────────────────────────
 function showShop() {
-  exitPointerLock();  // release mouse so the shop UI is clickable
-  const el = document.getElementById('shop-screen');
-  el.style.display = 'block';
-  renderShop();
+  exitPointerLock();
+  // Brief delay so the wave-clear moment lands before the shop slides in
+  setTimeout(() => {
+    const el = document.getElementById('shop-screen');
+    el.style.display = 'block';
+    // Force reflow then add open class for CSS transition
+    void el.offsetWidth;
+    el.classList.add('shop-open');
+    renderShop();
+  }, 800);
 }
 
 function renderShop() {
@@ -707,7 +713,8 @@ function renderShop() {
 
     const isConsumable = upg.category === 'consumable';
     const owned    = !isConsumable && upg.level >= upg.maxLevel;
-    const cantAfford = player.coins < upg.cost;
+    const isFullHealth = upg.id === 'medkit' && player.hp >= player.maxHp;
+    const cantAfford = player.coins < upg.cost || isFullHealth;
     const div = document.createElement('div');
     div.className = 'shop-item' + (owned ? ' owned' : '') + (!owned && cantAfford ? ' cant-afford' : '');
 
@@ -717,7 +724,7 @@ function renderShop() {
 
     // Show current HP for medkit
     const extraInfo = isConsumable && upg.id === 'medkit'
-      ? `<div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#2ecc71;margin-top:2px;">HP: ${Math.round(player.hp)}/${player.maxHp}</div>`
+      ? `<div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:${player.hp >= player.maxHp ? '#e74c3c' : '#2ecc71'};margin-top:2px;">${player.hp >= player.maxHp ? '✦ FULL HP' : `HP: ${Math.round(player.hp)}/${player.maxHp}`}</div>`
       : '';
 
     div.innerHTML = `
@@ -772,7 +779,9 @@ function buyUpgrade(id) {
 }
 
 function closeShop() {
-  document.getElementById('shop-screen').style.display = 'none';
+  const el = document.getElementById('shop-screen');
+  el.classList.remove('shop-open');
+  el.style.display = 'none';
   gameState = 'playing';
   requestPointerLock();
   nextWave();
