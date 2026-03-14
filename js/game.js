@@ -18,6 +18,24 @@ let crosshairEl;
 let dustParticles = [];
 
 // ── INIT ──────────────────────────────────────────────────────────────
+// Virtual mouse position in canvas/world space (used when pointer is locked)
+let virtualMouseX = 400, virtualMouseY = 300;
+
+function getWorldScale() {
+  // Scale factor from canvas pixels to world pixels
+  const sw = canvas.width / WORLD_W;
+  const sh = canvas.height / WORLD_H;
+  return Math.min(sw, sh);
+}
+
+function requestPointerLock() {
+  if (canvas.requestPointerLock) canvas.requestPointerLock();
+}
+
+function exitPointerLock() {
+  if (document.exitPointerLock) document.exitPointerLock();
+}
+
 function init() {
   canvas = document.getElementById('game-canvas');
   ctx = canvas.getContext('2d');
@@ -25,25 +43,47 @@ function init() {
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
+  // Pointer Lock change handler
+  document.addEventListener('pointerlockchange', () => {
+    const locked = document.pointerLockElement === canvas;
+    // Show/hide crosshair based on lock state
+    crosshairEl.style.display = locked ? 'block' : 'none';
+  });
+
   // Input
   window.addEventListener('keydown', e => {
     keys[e.code] = true;
     if (e.code === 'Escape') togglePause();
   });
   window.addEventListener('keyup',  e => keys[e.code] = false);
-  canvas.addEventListener('mousemove', e => {
-    const r = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / r.width, scaleY = canvas.height / r.height;
-    mouse.x = (e.clientX - r.left) * scaleX;
-    mouse.y = (e.clientY - r.top)  * scaleY;
-    crosshairEl.style.left = e.clientX + 'px';
-    crosshairEl.style.top  = e.clientY + 'px';
-  });
+
+  // Pointer-lock mouse movement: accumulate virtual position
   document.addEventListener('mousemove', e => {
-    crosshairEl.style.left = e.clientX + 'px';
-    crosshairEl.style.top  = e.clientY + 'px';
+    if (document.pointerLockElement === canvas) {
+      const scale = getWorldScale();
+      virtualMouseX = Math.max(0, Math.min(canvas.width,  virtualMouseX + e.movementX));
+      virtualMouseY = Math.max(0, Math.min(canvas.height, virtualMouseY + e.movementY));
+      mouse.x = virtualMouseX;
+      mouse.y = virtualMouseY;
+      // Move the SVG crosshair to match
+      crosshairEl.style.left = virtualMouseX + 'px';
+      crosshairEl.style.top  = virtualMouseY + 'px';
+    } else {
+      // Fallback when not locked (menus etc.)
+      crosshairEl.style.left = e.clientX + 'px';
+      crosshairEl.style.top  = e.clientY + 'px';
+    }
   });
-  canvas.addEventListener('mousedown', e => { if (e.button===0) mouse.down=true; });
+
+  canvas.addEventListener('mousedown', e => {
+    if (e.button === 0) {
+      mouse.down = true;
+      // Re-request lock if not already locked (e.g. after tab switch)
+      if (gameState === 'playing' && document.pointerLockElement !== canvas) {
+        requestPointerLock();
+      }
+    }
+  });
   canvas.addEventListener('mouseup',   e => { if (e.button===0) mouse.down=false; });
 
   // Mobile joystick
@@ -80,7 +120,14 @@ function startGame(mapIdArg) {
   document.getElementById('gameover-screen').style.display = 'none';
   document.getElementById('hud').style.display = 'flex';
 
+  // Center virtual mouse on game start
+  virtualMouseX = canvas.width / 2;
+  virtualMouseY = canvas.height / 2;
+  mouse.x = virtualMouseX;
+  mouse.y = virtualMouseY;
+
   gameState = 'playing';
+  requestPointerLock();
   nextWave();
 }
 
@@ -212,8 +259,12 @@ function loop() {
   player.move(obstacles);
 
   // Player facing
-  const cx = canvas.width/2, cy = canvas.height/2;
-  player.facing = Math.atan2(mouse.y - cy, mouse.x - cx);
+  // Convert screen-space mouse to world-space, then aim from player
+  const sc = window._scale || 1;
+  const _cx = window._camX || 0, _cy = window._camY || 0;
+  const worldMouseX = mouse.x / sc + _cx;
+  const worldMouseY = mouse.y / sc + _cy;
+  player.facing = Math.atan2(worldMouseY - player.y, worldMouseX - player.x);
 
   // Shoot
   if (mouse.down || keys['Space']) tryShoot();
@@ -341,11 +392,23 @@ function loop() {
 // ── RENDER ────────────────────────────────────────────────────────────
 function render() {
   const cw = canvas.width, ch = canvas.height;
-  // Camera: center on player, clamp to world
-  const camX = Math.max(0, Math.min(WORLD_W - cw, player.x - cw/2));
-  const camY = Math.max(0, Math.min(WORLD_H - ch, player.y - ch/2));
+
+  // Scale world to fill screen completely
+  const scale = Math.max(cw / WORLD_W, ch / WORLD_H);
+  const viewW = cw / scale;
+  const viewH = ch / scale;
+
+  // Camera: center on player, clamp to world edges
+  const camX = Math.max(0, Math.min(WORLD_W - viewW, player.x - viewW / 2));
+  const camY = Math.max(0, Math.min(WORLD_H - viewH, player.y - viewH / 2));
+
+  // Expose for reload arc (screen-space)
+  window._camX = camX;
+  window._camY = camY;
+  window._scale = scale;
 
   ctx.save();
+  ctx.scale(scale, scale);
   ctx.translate(-camX, -camY);
 
   drawBackground(ctx, camX, camY, cw, ch);
@@ -422,13 +485,18 @@ function render() {
   if (reloading) {
     const reloadFrames = Math.round(60 * (playerStats.reloadMult||1));
     const progress = reloadProgress / reloadFrames;
-    const sx = player.x - camX, sy = player.y - camY;
+    // Convert world pos to screen pos using stored scale/cam
+    const sc = window._scale || 1;
+    const cx = window._camX || 0, cy = window._camY || 0;
+    const sx = (player.x - cx) * sc;
+    const sy = (player.y - cy) * sc;
+    const r = 22 * sc;
     ctx.beginPath();
-    ctx.arc(sx, sy, 22, -Math.PI/2, -Math.PI/2 + Math.PI*2*progress);
+    ctx.arc(sx, sy, r, -Math.PI/2, -Math.PI/2 + Math.PI*2*progress);
     ctx.strokeStyle = '#f0c040'; ctx.lineWidth = 3; ctx.stroke();
     ctx.fillStyle = 'rgba(240,192,64,0.7)';
-    ctx.font = '9px Share Tech Mono'; ctx.textAlign='center';
-    ctx.fillText('RELOAD', sx, sy+32); ctx.textAlign='left';
+    ctx.font = `${9*sc}px Share Tech Mono`; ctx.textAlign='center';
+    ctx.fillText('RELOAD', sx, sy + 32*sc); ctx.textAlign='left';
   }
 }
 
@@ -517,6 +585,7 @@ function buyUpgrade(id) {
 function closeShop() {
   document.getElementById('shop-screen').style.display = 'none';
   gameState = 'playing';
+  requestPointerLock();
   nextWave();
 }
 
@@ -535,6 +604,8 @@ function showGameOver() {
 function goToMenu() {
   document.getElementById('gameover-screen').style.display = 'none';
   document.getElementById('hud').style.display = 'none';
+  document.getElementById('pause-overlay').style.display = 'none';
+  exitPointerLock();
   lastMapId = mapId;
   showMenu();
 }
@@ -564,9 +635,11 @@ function togglePause() {
   if (gameState === 'playing') {
     gameState = 'paused';
     document.getElementById('pause-overlay').style.display = 'flex';
+    exitPointerLock();
   } else if (gameState === 'paused') {
     gameState = 'playing';
     document.getElementById('pause-overlay').style.display = 'none';
+    requestPointerLock();
   }
 }
 
