@@ -132,13 +132,7 @@ body {
   letter-spacing: 0.1em;
 }
 
-.slot-center-line {
-  position: absolute; top: 50%; left: 0; right: 0;
-  height: 2px; background: var(--gold);
-  transform: translateY(-50%);
-  z-index: 3;
-  box-shadow: 0 0 8px var(--gold);
-}
+.slot-center-line { display: none; }
 
 .btn {
   font-family: 'Rye', serif;
