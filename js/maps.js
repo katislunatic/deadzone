@@ -284,7 +284,7 @@ const MAPS = {
       { x: 60,   y: 300,  w: 250, h: 12,  color: '#5c3a18' },
       { x: 500,  y: 440,  w: 400, h: 12,  color: '#5c3a18' },
       { x: 1000, y: 600,  w: 500, h: 12,  color: '#5c3a18' },
-      { x: 60,   y: 700,  w: 12,  h: 400, color: '#5c3a18' },
+      // (left fence removed to keep passage open)
       { x: 1540, y: 400,  w: 12,  h: 400, color: '#5c3a18' },
       // water trough
       { x: 750,  y: 380,  w: 100, h: 40,  color: '#3a5a7a' },
@@ -414,9 +414,11 @@ const MAPS = {
       // corridors and paths
       { x: 0,    y: 380,  w: 1600, h: 60,  color: '#2a2a38' },
       { x: 240,  y: 0,    w: 60,   h: 1200, color: '#2a2a38' },
+      { x: 560,  y: 0,    w: 60,   h: 380,  color: '#2a2a38' },
       { x: 1240, y: 0,    w: 60,   h: 600,  color: '#2a2a38' },
       { x: 0,    y: 800,  w: 1600, h: 55,  color: '#2a2a38' },
       { x: 1100, y: 380,  w: 60,   h: 600,  color: '#2a2a38' },
+      { x: 0,    y: 560,  w: 240,  h: 50,  color: '#2a2a38' },
     ],
     spawnX: 680, spawnY: 420,
     bgDecals: ['📚','🖊️','🚌'],
@@ -560,51 +562,64 @@ const MAPS = {
     ambientColor: '#242424',
     dustParticles: false,
     obstacles: [
-      // storage tanks (large circles)
-      { x: 60,   y: 60,   w: 160, h: 160, color: '#2a2a2a', round: true },
-      { x: 260,  y: 60,   w: 160, h: 160, color: '#252525', round: true },
-      { x: 460,  y: 60,   w: 160, h: 160, color: '#2a2a2a', round: true },
-      { x: 1000, y: 60,   w: 180, h: 180, color: '#cc4400', round: true },
-      { x: 1220, y: 60,   w: 160, h: 160, color: '#aa3800', round: true },
-      { x: 1420, y: 70,   w: 140, h: 140, color: '#cc4400', round: true },
-      // processing buildings
-      { x: 60,   y: 420,  w: 220, h: 160, color: '#1a1a1a' },
-      { x: 340,  y: 400,  w: 180, h: 180, color: '#181818' },
-      { x: 580,  y: 420,  w: 200, h: 160, color: '#1a1a1a' },
-      { x: 1100, y: 380,  w: 220, h: 200, color: '#181818' },
-      { x: 1380, y: 400,  w: 180, h: 180, color: '#1a1a1a' },
-      // cooling towers
-      { x: 700,  y: 80,   w: 100, h: 100, color: '#2e2e2e', round: true },
-      { x: 820,  y: 80,   w: 100, h: 100, color: '#2e2e2e', round: true },
-      // pipes / walkways
-      { x: 0,    y: 350,  w: 700, h: 18,  color: '#333' },
-      { x: 900,  y: 350,  w: 700, h: 18,  color: '#333' },
-      { x: 700,  y: 200,  w: 18,  h: 400, color: '#333' },
-      { x: 880,  y: 200,  w: 18,  h: 400, color: '#333' },
-      // barrels scattered
-      { x: 250,  y: 290,  w: 35,  h: 35,  color: '#8B4513', round: true },
-      { x: 295,  y: 285,  w: 30,  h: 30,  color: '#cc4400', round: true },
-      { x: 950,  y: 280,  w: 35,  h: 35,  color: '#cc4400', round: true },
-      { x: 990,  y: 290,  w: 30,  h: 30,  color: '#8B4513', round: true },
-      // control room
-      { x: 660,  y: 560,  w: 280, h: 180, color: '#1e1e28' },
-      // chain link fences
-      { x: 60,   y: 700,  w: 500, h: 14,  color: '#3a3a3a' },
-      { x: 1040, y: 680,  w: 500, h: 14,  color: '#3a3a3a' },
-      { x: 60,   y: 700,  w: 14,  h: 380, color: '#3a3a3a' },
-      { x: 1540, y: 680,  w: 14,  h: 380, color: '#3a3a3a' },
-      // waste pits
-      { x: 200,  y: 880,  w: 180, h: 120, color: '#1a1400', round: true },
-      { x: 800,  y: 850,  w: 200, h: 140, color: '#1a1400', round: true },
-      { x: 1300, y: 870,  w: 180, h: 120, color: '#1a1400', round: true },
+      // storage tanks top-left cluster
+      { x: 60,   y: 60,   w: 150, h: 150, color: '#2a2a2a', round: true },
+      { x: 250,  y: 55,   w: 150, h: 150, color: '#252525', round: true },
+      { x: 440,  y: 65,   w: 140, h: 140, color: '#2a2a2a', round: true },
+      // orange tanks top-right
+      { x: 1050, y: 55,   w: 160, h: 160, color: '#cc4400', round: true },
+      { x: 1260, y: 60,   w: 140, h: 140, color: '#aa3800', round: true },
+      { x: 1440, y: 65,   w: 130, h: 130, color: '#cc4400', round: true },
+      // cooling towers (smaller, not blocking road)
+      { x: 695,  y: 55,   w: 90,  h: 90,  color: '#2e2e2e', round: true },
+      { x: 810,  y: 55,   w: 90,  h: 90,  color: '#2e2e2e', round: true },
+      // processing buildings — leave clear passages between them
+      { x: 60,   y: 450,  w: 200, h: 140, color: '#1a1a1a' },
+      { x: 360,  y: 430,  w: 160, h: 160, color: '#181818' },
+      // gap at ~520-640 for passage
+      { x: 780,  y: 440,  w: 160, h: 150, color: '#1a1a1a' },
+      { x: 1100, y: 420,  w: 200, h: 170, color: '#181818' },
+      { x: 1380, y: 440,  w: 180, h: 150, color: '#1a1a1a' },
+      // short decorative pipes (don't span full width)
+      { x: 60,   y: 310,  w: 280, h: 14,  color: '#333' },
+      { x: 480,  y: 305,  w: 200, h: 14,  color: '#333' },
+      { x: 900,  y: 310,  w: 260, h: 14,  color: '#333' },
+      { x: 1280, y: 305,  w: 200, h: 14,  color: '#333' },
+      // vertical pipe stubs (short — don't block passages)
+      { x: 630,  y: 180,  w: 14,  h: 140, color: '#333' },
+      { x: 940,  y: 185,  w: 14,  h: 130, color: '#333' },
+      { x: 630,  y: 450,  w: 14,  h: 120, color: '#333' },
+      { x: 940,  y: 450,  w: 14,  h: 120, color: '#333' },
+      // barrels
+      { x: 250,  y: 340,  w: 32,  h: 32,  color: '#8B4513', round: true },
+      { x: 290,  y: 335,  w: 28,  h: 28,  color: '#cc4400', round: true },
+      { x: 970,  y: 340,  w: 32,  h: 32,  color: '#cc4400', round: true },
+      { x: 1010, y: 335,  w: 28,  h: 28,  color: '#8B4513', round: true },
+      { x: 500,  y: 800,  w: 30,  h: 30,  color: '#cc4400', round: true },
+      { x: 1100, y: 820,  w: 30,  h: 30,  color: '#8B4513', round: true },
+      // control room (central, between the two vertical roads)
+      { x: 680,  y: 580,  w: 240, h: 160, color: '#1e1e28' },
+      // fence segments with gaps (not full walls)
+      { x: 60,   y: 720,  w: 220, h: 12,  color: '#3a3a3a' },
+      { x: 380,  y: 720,  w: 200, h: 12,  color: '#3a3a3a' },
+      // gap at 580-660 for passage
+      { x: 1000, y: 710,  w: 220, h: 12,  color: '#3a3a3a' },
+      { x: 1300, y: 720,  w: 220, h: 12,  color: '#3a3a3a' },
+      // waste pits (smaller)
+      { x: 180,  y: 890,  w: 140, h: 100, color: '#1a1400', round: true },
+      { x: 800,  y: 870,  w: 160, h: 110, color: '#1a1400', round: true },
+      { x: 1340, y: 890,  w: 140, h: 100, color: '#1a1400', round: true },
     ],
     roads: [
-      { x: 0,    y: 260,  w: 1600, h: 70,  color: '#1a1a1a' },
-      { x: 0,    y: 750,  w: 1600, h: 60,  color: '#1a1a1a' },
-      { x: 640,  y: 0,    w: 80,   h: 1200, color: '#1a1a1a' },
-      { x: 860,  y: 0,    w: 80,   h: 1200, color: '#1a1a1a' },
+      { x: 0,    y: 290,  w: 1600, h: 70,  color: '#1a1a1a' },
+      { x: 0,    y: 760,  w: 1600, h: 60,  color: '#1a1a1a' },
+      { x: 620,  y: 0,    w: 80,   h: 1200, color: '#1a1a1a' },
+      { x: 900,  y: 0,    w: 80,   h: 1200, color: '#1a1a1a' },
+      // extra cross-road for connectivity
+      { x: 0,    y: 540,  w: 620,  h: 50,  color: '#1a1a1a' },
+      { x: 980,  y: 540,  w: 620,  h: 50,  color: '#1a1a1a' },
     ],
-    spawnX: 750, spawnY: 300,
+    spawnX: 750, spawnY: 325,
     bgDecals: ['🛢️','⚠️','🔧'],
   },
 
