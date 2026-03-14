@@ -392,22 +392,18 @@ function loop() {
 function render() {
   const cw = canvas.width, ch = canvas.height;
 
-  // Scale world to fill screen completely
-  const scale = Math.max(cw / WORLD_W, ch / WORLD_H);
-  const viewW = cw / scale;
-  const viewH = ch / scale;
+  // 1:1 pixel scale — camera scrolls through the larger world
+  const scale = 1;
 
   // Camera: center on player, clamp to world edges
-  const camX = Math.max(0, Math.min(WORLD_W - viewW, player.x - viewW / 2));
-  const camY = Math.max(0, Math.min(WORLD_H - viewH, player.y - viewH / 2));
+  const camX = Math.max(0, Math.min(WORLD_W - cw, player.x - cw / 2));
+  const camY = Math.max(0, Math.min(WORLD_H - ch, player.y - ch / 2));
 
-  // Expose for reload arc (screen-space)
   window._camX = camX;
   window._camY = camY;
   window._scale = scale;
 
   ctx.save();
-  ctx.scale(scale, scale);
   ctx.translate(-camX, -camY);
 
   drawBackground(ctx, camX, camY, cw, ch);
