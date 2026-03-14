@@ -245,6 +245,69 @@ function playSound(type) {
         break;
       }
 
+      case 'civilian_hit': {
+        // Horrified scream — sharp intake + descending wail
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(900, t);
+        osc.frequency.exponentialRampToValueAtTime(300, t + 0.35);
+        gain.gain.setValueAtTime(0.35, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(t); osc.stop(t + 0.45);
+        // Thud underneath
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'sawtooth';
+        osc2.frequency.setValueAtTime(120, t);
+        osc2.frequency.exponentialRampToValueAtTime(40, t + 0.15);
+        gain2.gain.setValueAtTime(0.3, t);
+        gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+        osc2.connect(gain2); gain2.connect(ctx.destination);
+        osc2.start(t); osc2.stop(t + 0.2);
+        break;
+      }
+
+      case 'slot_spin_tick': {
+        // Quick mechanical tick for each reel item passing
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(500 + Math.random()*200, t);
+        gain.gain.setValueAtTime(0.08, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(t); osc.stop(t + 0.04);
+        break;
+      }
+
+      case 'slot_spin_land': {
+        // Slot machine landing — mechanical thunk + rising ding
+        // Thunk
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, t);
+        osc.frequency.exponentialRampToValueAtTime(60, t + 0.12);
+        gain.gain.setValueAtTime(0.4, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(t); osc.stop(t + 0.18);
+        // Win ding sequence
+        [523, 659, 784, 1046].forEach((f, i) => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'sine';
+          o.frequency.setValueAtTime(f, t + 0.1 + i*0.07);
+          g.gain.setValueAtTime(0.18, t + 0.1 + i*0.07);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.1 + i*0.07 + 0.15);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(t + 0.1 + i*0.07); o.stop(t + 0.1 + i*0.07 + 0.18);
+        });
+        break;
+      }
+
       case 'civilian_turned': {
         // Eerie warble
         const osc = ctx.createOscillator();
