@@ -109,3 +109,35 @@ function isBloodEnabled() {
 
 // Load on startup
 window.addEventListener('DOMContentLoaded', loadSettings);
+
+// Sync pause menu sliders with current settings
+function syncPauseSettings() {
+  const sliders = [
+    ['p-vol-master', 'volMaster'],
+    ['p-vol-guns',   'volGuns'],
+    ['p-vol-death',  'volDeath'],
+    ['p-vol-reload', 'volReload'],
+    ['p-vol-ui',     'volUi'],
+  ];
+  for (const [id, key] of sliders) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    el.value = gameSettings[key];
+    document.getElementById(id + '-val').textContent = gameSettings[key] + '%';
+    el.oninput = () => {
+      gameSettings[key] = parseInt(el.value);
+      document.getElementById(id + '-val').textContent = el.value + '%';
+      // Also sync the main settings sliders
+      const mainId = id.replace('p-', '');
+      const mainEl = document.getElementById(mainId);
+      if (mainEl) mainEl.value = el.value;
+      saveSettings();
+    };
+  }
+  // Blood toggle
+  const bloodBtn = document.getElementById('p-toggle-blood');
+  if (bloodBtn) {
+    bloodBtn.textContent = gameSettings.blood ? 'ON' : 'OFF';
+    bloodBtn.classList.toggle('active', gameSettings.blood);
+  }
+}
