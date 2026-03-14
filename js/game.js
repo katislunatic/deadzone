@@ -356,7 +356,15 @@ function loop() {
   // Squeeze mechanic
   const squeezePressed = keybinds && keys[keybinds.squeeze];
   const wasSquezing = player.squeezing;
-  if (squeezePressed && player.squeezeStamina > 0) {
+
+  // Depleted flag: once stamina hits 0, can't re-squeeze until recharged to 30
+  if (!player.squeezeDeplete) player.squeezeDeplete = false;
+  if (player.squeezeStamina <= 0) player.squeezeDeplete = true;
+  if (player.squeezeStamina >= 30) player.squeezeDeplete = false;
+
+  const canSqueeze = squeezePressed && player.squeezeStamina > 0 && !player.squeezeDeplete;
+
+  if (canSqueeze) {
     player.squeezing = true;
     player.radius = 5;
     player.squeezeStamina = Math.max(0, player.squeezeStamina - 1.4);
@@ -370,7 +378,6 @@ function loop() {
     if (wasSquezing) {
       for (const obs of obstacles) {
         if (!circleRect(player.x, player.y, player.radius, obs)) continue;
-        // Find closest edge and push out
         const cx = obs.x + obs.w / 2;
         const cy = obs.y + obs.h / 2;
         const overlapX = (obs.w / 2 + player.radius) - Math.abs(player.x - cx);
@@ -703,6 +710,7 @@ function updateHUD() {
   if (sqFill) {
     sqFill.style.width = player.squeezeStamina + '%';
     sqFill.classList.toggle('draining', player.squeezing);
+    sqFill.classList.toggle('depleted', player.squeezeDeplete);
   }
   // Update squeeze label with current keybind
   const sqLabel = document.querySelector('#squeeze-bar-wrap .hud-label');
