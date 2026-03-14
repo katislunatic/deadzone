@@ -44,11 +44,17 @@ class Player extends Entity {
     this.invincible = 0; // frames of i-frames
     this.reloadTimer = 0;
     this.coins = 0;
+    // Squeeze mechanic
+    this.squeezing = false;
+    this.squeezeStamina = 100;   // 0-100, drains while squeezing
+    this.baseRadius = 14;
   }
   draw(ctx) {
     const P = 3; // bigger pixel size
     const flash = this.invincible > 0 && Math.floor(this.age/3)%2===0;
     const moving = Math.abs(this.vx) > 0.2 || Math.abs(this.vy) > 0.2;
+    // Squeeze: squish the sprite vertically
+    const squishY = this.squeezing ? 0.55 : 1.0;
     const moveAngle = moving ? Math.atan2(this.vy, this.vx) : this.facing;
     const facingLeft = Math.cos(moveAngle) < 0;
 
@@ -65,6 +71,7 @@ class Player extends Entity {
     ctx.save();
     ctx.translate(this.x, this.y);
     if (facingLeft) ctx.scale(-1, 1);
+    ctx.scale(1, squishY); // squeeze squish
 
     // shadow
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
