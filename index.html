@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DEADZONE — Top-Down Zombie Shooter</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ── CUSTOM CROSSHAIR ── -->
+<svg id="crosshair" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="12" r="4" fill="none" stroke="#f0c040" stroke-width="1.5"/>
+  <line x1="12" y1="1"  x2="12" y2="7"  stroke="#f0c040" stroke-width="1.5"/>
+  <line x1="12" y1="17" x2="12" y2="23" stroke="#f0c040" stroke-width="1.5"/>
+  <line x1="1"  y1="12" x2="7"  y2="12" stroke="#f0c040" stroke-width="1.5"/>
+  <line x1="17" y1="12" x2="23" y2="12" stroke="#f0c040" stroke-width="1.5"/>
+</svg>
+
+<!-- ── DAMAGE FLASH ── -->
+<div id="damage-flash"></div>
+
+<!-- ─────────────────────────────────────────
+     MENU SCREEN
+──────────────────────────────────────────── -->
+<div id="menu-screen">
+  <h1 class="game-title">DEADZONE</h1>
+  <p class="subtitle">Top-Down Zombie Survival</p>
+
+  <div id="slot-machine">
+    <div class="slot-reel">
+      <div class="slot-center-line"></div>
+      <div class="reel-strip" id="reel-strip">
+        <!-- populated by JS -->
+        <div class="reel-item">
+          <span style="font-size:2.5rem">🤠</span>
+          <span>Spin to Select</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="map-result" id="map-result">Pull the lever, cowboy.</div>
+
+    <button class="btn btn-primary" id="spin-btn" onclick="spinSlotMachine()">
+      🎰 SPIN
+    </button>
+  </div>
+
+  <div class="menu-buttons">
+    <button class="btn btn-primary" id="play-btn" onclick="playChosen()" disabled>
+      SPIN FIRST
+    </button>
+  </div>
+
+  <div style="margin-top:1.5rem; font-family:'Share Tech Mono',monospace; font-size:0.7rem; color:#5a4830; text-align:center; max-width:400px; line-height:1.8;">
+    WASD / Arrow Keys — Move &nbsp;|&nbsp; Mouse — Aim &nbsp;|&nbsp; Click / Space — Shoot<br>
+    R — Reload &nbsp;|&nbsp; ESC — Pause &nbsp;|&nbsp; Shoot civilians = −100 pts
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────
+     GAME CANVAS
+──────────────────────────────────────────── -->
+<canvas id="game-canvas"></canvas>
+
+
+<!-- ─────────────────────────────────────────
+     HUD
+──────────────────────────────────────────── -->
+<div id="hud" style="display:none;">
+  <div class="hud-block">
+    <div>
+      <div class="hud-label">Score</div>
+      <div class="hud-value" id="hud-score">0</div>
+    </div>
+  </div>
+
+  <div class="hud-block" id="health-bar-wrap">
+    <div>
+      <div class="hud-label">HP</div>
+      <div id="health-bar"><div id="health-fill" style="width:100%"></div></div>
+    </div>
+  </div>
+
+  <div class="hud-block">
+    <div>
+      <div class="hud-label">Wave</div>
+      <div class="wave-badge" id="hud-wave">WAVE 1</div>
+    </div>
+  </div>
+
+  <div class="hud-block">
+    <div>
+      <div class="hud-label">Ammo</div>
+      <div class="hud-value ammo-display" id="hud-ammo">6/6</div>
+    </div>
+  </div>
+
+  <div class="hud-block">
+    <div>
+      <div class="hud-label">Coins</div>
+      <div class="hud-value" style="color:#f0c040" id="hud-coins">0</div>
+    </div>
+  </div>
+
+  <div class="hud-block">
+    <div>
+      <div class="hud-label">Map</div>
+      <div class="hud-value" style="font-size:0.75rem" id="hud-map">—</div>
+    </div>
+  </div>
+
+  <div class="hud-block">
+    <div>
+      <div class="hud-label">Zombies</div>
+      <div class="hud-value" style="font-size:0.85rem;color:#c0392b" id="hud-zombies">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- Wave announce -->
+<div id="wave-announce"></div>
+
+<!-- Kill feed -->
+<div id="killfeed"></div>
+
+
+<!-- ─────────────────────────────────────────
+     SHOP SCREEN
+──────────────────────────────────────────── -->
+<div id="shop-screen">
+  <div class="shop-header">
+    <div class="shop-title">🛒 The Outfitter</div>
+    <div class="shop-coins" id="shop-coins-display">🪙 0 coins</div>
+    <div style="font-family:'Share Tech Mono',monospace; font-size:0.75rem; color:#9a8060; margin-top:0.5rem;">
+      Wave complete. Stock up before the next horde.
+    </div>
+  </div>
+  <div class="shop-grid" id="shop-grid"></div>
+  <button class="btn btn-primary shop-close-btn" onclick="closeShop()">⚔️ NEXT WAVE</button>
+</div>
+
+
+<!-- ─────────────────────────────────────────
+     GAME OVER
+──────────────────────────────────────────── -->
+<div id="gameover-screen">
+  <div class="go-title">YOU DIED</div>
+  <div class="go-stats" id="go-score"></div>
+  <div style="display:flex; gap:1rem; margin-top:1rem;">
+    <button class="btn btn-primary" onclick="goToMenu()" style="padding:0.75rem 2rem">
+      MAIN MENU
+    </button>
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────
+     PAUSE
+──────────────────────────────────────────── -->
+<div id="pause-overlay">
+  <div class="pause-title">PAUSED</div>
+  <div style="font-family:'Share Tech Mono',monospace; color:#9a8060; font-size:0.85rem;">Press ESC to resume</div>
+  <div style="display:flex;gap:1rem;margin-top:1.5rem;">
+    <button class="btn btn-gold" onclick="togglePause()">Resume</button>
+    <button class="btn btn-primary" onclick="goToMenu()">Quit</button>
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────
+     MOBILE CONTROLS
+──────────────────────────────────────────── -->
+<div id="mobile-controls">
+  <div class="joystick-area" id="joystick-area">
+    <div class="joystick-dot" id="joystick-dot"></div>
+  </div>
+  <button class="fire-btn btn" id="fire-btn">FIRE</button>
+</div>
+
+
+<!-- ─────────────────────────────────────────
+     SCRIPTS
+──────────────────────────────────────────── -->
+<script src="js/maps.js"></script>
+<script src="js/upgrades.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/game.js"></script>
+<script src="js/menu.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    init();
+    showMenu();
+  });
+</script>
+</body>
+</html>
