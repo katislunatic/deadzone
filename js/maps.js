@@ -11,15 +11,15 @@ const MAPS = {
     dustParticles: true,
     obstacles: [
       // saloon
-      { x: 120,  y: 80,   w: 220, h: 140, color: '#7a4a1e', label: 'SALOON' },
+      { x: 120,  y: 80,   w: 220, h: 140, color: '#7a4a1e' },
       // sheriff office
-      { x: 520,  y: 90,   w: 180, h: 130, color: '#6b3d14', label: 'SHERIFF' },
+      { x: 520,  y: 90,   w: 180, h: 130, color: '#6b3d14' },
       // bank
-      { x: 950,  y: 80,   w: 200, h: 140, color: '#5c3218', label: 'BANK' },
+      { x: 950,  y: 80,   w: 200, h: 140, color: '#5c3218' },
       // general store
-      { x: 1250, y: 90,   w: 200, h: 130, color: '#7a4a1e', label: 'STORE' },
+      { x: 1250, y: 90,   w: 200, h: 130, color: '#7a4a1e' },
       // stables
-      { x: 80,   y: 420,  w: 160, h: 200, color: '#8b5e2a', label: '🐴' },
+      { x: 80,   y: 420,  w: 160, h: 200, color: '#8b5e2a' },
       // water tower
       { x: 700,  y: 350,  w: 80,  h: 80,  color: '#5c3d1e', round: true },
       // water tower 2
@@ -36,9 +36,9 @@ const MAPS = {
       { x: 1050, y: 720,  w: 340, h: 14,  color: '#6b4a1a' },
       { x: 1350, y: 800,  w: 200, h: 14,  color: '#6b4a1a' },
       // mine entrance
-      { x: 1380, y: 350,  w: 140, h: 110, color: '#3d2a0a', label: '⛏️' },
+      { x: 1380, y: 350,  w: 140, h: 110, color: '#3d2a0a' },
       // mine 2
-      { x: 200,  y: 900,  w: 140, h: 100, color: '#3d2a0a', label: '⛏️' },
+      { x: 200,  y: 900,  w: 140, h: 100, color: '#3d2a0a' },
       // wagons
       { x: 550,  y: 580,  w: 100, h: 60,  color: '#8b5e2a' },
       { x: 1100, y: 480,  w: 100, h: 60,  color: '#7a4e1a' },
@@ -49,7 +49,7 @@ const MAPS = {
       { x: 750,  y: 1080, w: 24,  h: 50,  color: '#2d7a3a', round: true },
       { x: 1400, y: 980,  w: 26,  h: 55,  color: '#2d7a3a', round: true },
       // outpost shack
-      { x: 900,  y: 900,  w: 160, h: 120, color: '#6b3d14', label: '🏚️' },
+      { x: 900,  y: 900,  w: 160, h: 120, color: '#6b3d14' },
       // rocks
       { x: 300,  y: 600,  w: 60,  h: 45,  color: '#7a6040', round: true },
       { x: 1200, y: 650,  w: 55,  h: 42,  color: '#7a6040', round: true },
@@ -60,7 +60,7 @@ const MAPS = {
       { x: 640,  y: 0,    w: 65,   h: 1200, color: '#b89558' },
       { x: 1100, y: 0,    w: 65,   h: 1200, color: '#b89558' },
     ],
-    spawnBias: { x: 800, y: 600 },
+    spawnX: 672, spawnY: 415,
     bgDecals: ['🌵','🪨','💀'],
   },
 
@@ -74,23 +74,23 @@ const MAPS = {
     dustParticles: false,
     obstacles: [
       // city blocks — top row
-      { x: 40,   y: 40,   w: 200, h: 180, color: '#1e2228', label: '🏢' },
+      { x: 40,   y: 40,   w: 200, h: 180, color: '#1e2228' },
       { x: 300,  y: 30,   w: 180, h: 220, color: '#252830' },
-      { x: 560,  y: 50,   w: 220, h: 170, color: '#1a1d22', label: '🏬' },
+      { x: 560,  y: 50,   w: 220, h: 170, color: '#1a1d22' },
       { x: 870,  y: 40,   w: 190, h: 190, color: '#222530' },
-      { x: 1150, y: 35,   w: 210, h: 180, color: '#1e2228', label: '🏢' },
+      { x: 1150, y: 35,   w: 210, h: 180, color: '#1e2228' },
       { x: 1430, y: 50,   w: 140, h: 170, color: '#252830' },
       // city blocks — middle row
       { x: 40,   y: 500,  w: 190, h: 170, color: '#1e2228' },
-      { x: 310,  y: 510,  w: 170, h: 160, color: '#252830', label: '🏪' },
+      { x: 310,  y: 510,  w: 170, h: 160, color: '#252830' },
       { x: 570,  y: 490,  w: 200, h: 180, color: '#1a1d22' },
-      { x: 870,  y: 500,  w: 190, h: 170, color: '#222530', label: '🏬' },
+      { x: 870,  y: 500,  w: 190, h: 170, color: '#222530' },
       { x: 1160, y: 490,  w: 200, h: 180, color: '#1e2228' },
       { x: 1440, y: 510,  w: 140, h: 160, color: '#252830' },
       // city blocks — bottom row
-      { x: 40,   y: 920,  w: 200, h: 180, color: '#1e2228', label: '🏢' },
+      { x: 40,   y: 920,  w: 200, h: 180, color: '#1e2228' },
       { x: 310,  y: 930,  w: 180, h: 170, color: '#252830' },
-      { x: 570,  y: 910,  w: 210, h: 190, color: '#1a1d22', label: '🏬' },
+      { x: 570,  y: 910,  w: 210, h: 190, color: '#1a1d22' },
       { x: 880,  y: 920,  w: 190, h: 180, color: '#222530' },
       { x: 1160, y: 910,  w: 200, h: 190, color: '#1e2228' },
       { x: 1440, y: 930,  w: 140, h: 170, color: '#252830' },
@@ -122,7 +122,7 @@ const MAPS = {
       { x: 1060, y: 0,    w: 80,   h: 1200, color: '#222530' },
       { x: 1330, y: 0,    w: 80,   h: 1200, color: '#222530' },
     ],
-    spawnBias: { x: 800, y: 600 },
+    spawnX: 835, spawnY: 420,
     bgDecals: ['🚗','💡','🗑️'],
   },
 
@@ -136,30 +136,30 @@ const MAPS = {
     dustParticles: false,
     obstacles: [
       // houses — top row
-      { x: 50,   y: 50,   w: 150, h: 130, color: '#8b5a2a', label: '🏠' },
+      { x: 50,   y: 50,   w: 150, h: 130, color: '#8b5a2a' },
       { x: 260,  y: 60,   w: 150, h: 130, color: '#7a4a20' },
-      { x: 470,  y: 50,   w: 150, h: 130, color: '#8b5a2a', label: '🏠' },
+      { x: 470,  y: 50,   w: 150, h: 130, color: '#8b5a2a' },
       { x: 820,  y: 55,   w: 160, h: 140, color: '#7a4a20' },
-      { x: 1060, y: 50,   w: 150, h: 130, color: '#8b5a2a', label: '🏠' },
+      { x: 1060, y: 50,   w: 150, h: 130, color: '#8b5a2a' },
       { x: 1270, y: 60,   w: 150, h: 130, color: '#6b3a18' },
       { x: 1430, y: 50,   w: 140, h: 130, color: '#8b5a2a' },
       // houses — middle row
       { x: 50,   y: 560,  w: 150, h: 130, color: '#6b3a18' },
-      { x: 260,  y: 570,  w: 150, h: 130, color: '#8b5a2a', label: '🏠' },
+      { x: 260,  y: 570,  w: 150, h: 130, color: '#8b5a2a' },
       { x: 820,  y: 560,  w: 160, h: 130, color: '#7a4a20' },
       { x: 1060, y: 565,  w: 150, h: 130, color: '#8b5a2a' },
-      { x: 1430, y: 560,  w: 140, h: 130, color: '#7a4a20', label: '🏠' },
+      { x: 1430, y: 560,  w: 140, h: 130, color: '#7a4a20' },
       // houses — bottom row
-      { x: 50,   y: 970,  w: 150, h: 130, color: '#8b5a2a', label: '🏠' },
+      { x: 50,   y: 970,  w: 150, h: 130, color: '#8b5a2a' },
       { x: 260,  y: 980,  w: 150, h: 130, color: '#7a4a20' },
-      { x: 550,  y: 970,  w: 160, h: 130, color: '#6b3a18', label: '🏠' },
+      { x: 550,  y: 970,  w: 160, h: 130, color: '#6b3a18' },
       { x: 870,  y: 975,  w: 150, h: 130, color: '#8b5a2a' },
-      { x: 1100, y: 970,  w: 150, h: 130, color: '#7a4a20', label: '🏠' },
+      { x: 1100, y: 970,  w: 150, h: 130, color: '#7a4a20' },
       { x: 1360, y: 980,  w: 150, h: 130, color: '#8b5a2a' },
       // church (center)
-      { x: 680,  y: 80,   w: 170, h: 170, color: '#e8e0d0', label: '⛪' },
+      { x: 680,  y: 80,   w: 170, h: 170, color: '#e8e0d0' },
       // town hall
-      { x: 680,  y: 560,  w: 180, h: 150, color: '#d4c8a8', label: '🏛️' },
+      { x: 680,  y: 560,  w: 180, h: 150, color: '#d4c8a8' },
       // park / pond
       { x: 560,  y: 380,  w: 130, h: 100, color: '#2a6aaa', round: true },
       { x: 1150, y: 800,  w: 110, h: 85,  color: '#2a6aaa', round: true },
@@ -176,8 +176,8 @@ const MAPS = {
       { x: 50,   y: 280,  w: 620, h: 12,  color: '#6b4a1a' },
       { x: 870,  y: 280,  w: 620, h: 12,  color: '#6b4a1a' },
       // market stalls
-      { x: 520,  y: 490,  w: 90,  h: 60,  color: '#c8a020', label: '🛒' },
-      { x: 980,  y: 490,  w: 90,  h: 60,  color: '#c8a020', label: '🛒' },
+      { x: 520,  y: 490,  w: 90,  h: 60,  color: '#c8a020' },
+      { x: 980,  y: 490,  w: 90,  h: 60,  color: '#c8a020' },
     ],
     roads: [
       { x: 0,    y: 280,  w: 1600, h: 75,  color: '#5c4a2a' },
@@ -185,7 +185,7 @@ const MAPS = {
       { x: 640,  y: 0,    w: 90,   h: 1200, color: '#5c4a2a' },
       { x: 1100, y: 0,    w: 90,   h: 1200, color: '#5c4a2a' },
     ],
-    spawnBias: { x: 800, y: 600 },
+    spawnX: 685, spawnY: 318,
     bgDecals: ['🌿','🌻','🍂'],
   },
 
@@ -199,11 +199,11 @@ const MAPS = {
     dustParticles: true,
     obstacles: [
       // mausoleum (center)
-      { x: 680,  y: 480,  w: 200, h: 160, color: '#2a2a30', label: '🏛️' },
+      { x: 680,  y: 480,  w: 200, h: 160, color: '#2a2a30' },
       // chapel
-      { x: 1200, y: 80,   w: 200, h: 180, color: '#1e2018', label: '⛪' },
+      { x: 1200, y: 80,   w: 200, h: 180, color: '#1e2018' },
       // second chapel
-      { x: 200,  y: 900,  w: 180, h: 160, color: '#1e2018', label: '⛪' },
+      { x: 200,  y: 900,  w: 180, h: 160, color: '#1e2018' },
       // grave rows — top section
       ...Array.from({length: 8}, (_,i) => ({ x: 60  + i*160, y: 80,  w: 50, h: 75, color: '#3a3a3a' })),
       ...Array.from({length: 8}, (_,i) => ({ x: 60  + i*160, y: 190, w: 50, h: 75, color: '#353535' })),
@@ -237,7 +237,7 @@ const MAPS = {
       { x: 0,    y: 310,  w: 680,  h: 40,  color: '#181e18' },
       { x: 850,  y: 310,  w: 750,  h: 40,  color: '#181e18' },
     ],
-    spawnBias: { x: 800, y: 600 },
+    spawnX: 775, spawnY: 605,
     bgDecals: ['💀','🦇','🌑'],
   }
 };
