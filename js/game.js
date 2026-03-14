@@ -251,18 +251,41 @@ function selectWeapon(id) {
 
 // ── SPAWN ─────────────────────────────────────────────────────────────
 function spawnZombie() {
-  // Spawn just inside the world edges with enough margin to clear border obstacles
-  const margin = 60;
   let x, y;
-  let attempts = 0;
-  do {
-    const edge = Math.floor(Math.random() * 4);
-    if      (edge === 0) { x = margin + Math.random() * (WORLD_W - margin*2); y = margin; }
-    else if (edge === 1) { x = WORLD_W - margin; y = margin + Math.random() * (WORLD_H - margin*2); }
-    else if (edge === 2) { x = margin + Math.random() * (WORLD_W - margin*2); y = WORLD_H - margin; }
-    else                 { x = margin; y = margin + Math.random() * (WORLD_H - margin*2); }
-    attempts++;
-  } while (attempts < 20 && obstacles.some(o => circleRect(x, y, 16, o)));
+  let found = false;
+
+  // If map defines spawn zones, use those instead of world edges
+  if (mapData.zombieSpawnZones) {
+    for (let attempts = 0; attempts < 60; attempts++) {
+      const zone = mapData.zombieSpawnZones[Math.floor(Math.random() * mapData.zombieSpawnZones.length)];
+      x = zone.x + Math.random() * zone.w;
+      y = zone.y + Math.random() * zone.h;
+      if (!obstacles.some(o => circleRect(x, y, 16, o))) { found = true; break; }
+    }
+  }
+
+  // Default: spawn near edges, retry until clear spot found
+  if (!found) {
+    const margin = 60;
+    for (let attempts = 0; attempts < 80; attempts++) {
+      const edge = Math.floor(Math.random() * 4);
+      if      (edge === 0) { x = margin + Math.random() * (WORLD_W - margin*2); y = margin; }
+      else if (edge === 1) { x = WORLD_W - margin; y = margin + Math.random() * (WORLD_H - margin*2); }
+      else if (edge === 2) { x = margin + Math.random() * (WORLD_W - margin*2); y = WORLD_H - margin; }
+      else                 { x = margin; y = margin + Math.random() * (WORLD_H - margin*2); }
+      if (!obstacles.some(o => circleRect(x, y, 16, o))) { found = true; break; }
+    }
+  }
+
+  // Last resort: find any open spot in the world
+  if (!found) {
+    for (let attempts = 0; attempts < 50; attempts++) {
+      x = 80 + Math.random() * (WORLD_W - 160);
+      y = 80 + Math.random() * (WORLD_H - 160);
+      if (!obstacles.some(o => circleRect(x, y, 16, o))) { found = true; break; }
+    }
+  }
+
   zombies.push(new Zombie(x, y, wave));
   zombiesSpawned++;
 }
