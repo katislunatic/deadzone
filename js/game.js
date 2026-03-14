@@ -13,6 +13,7 @@ let zombiesSpawned = 0;
 let spawnTimer = 0;
 let totalKills = 0, civKills = 0;
 let lastShotFrame = 0;
+let selectedWeaponId = 'revolver';
 let currentClip, maxClip, reloading, reloadProgress;
 let crosshairEl;
 let dustParticles = [];
@@ -57,6 +58,11 @@ function init() {
     keys[e.code] = true;
     // Only handle ESC when already paused (to resume) — pausing is handled by pointerlockchange
     if (e.code === 'Escape' && gameState === 'paused') togglePause();
+    // Weapon switching 1-4
+    if (gameState === 'playing') {
+      const wepMap = { 'Digit1':'revolver', 'Digit2':'shotgun', 'Digit3':'rifle', 'Digit4':'smg' };
+      if (wepMap[e.code]) selectWeapon(wepMap[e.code]);
+    }
   });
   window.addEventListener('keyup',  e => keys[e.code] = false);
 
@@ -93,6 +99,19 @@ function init() {
     }
   });
   canvas.addEventListener('mouseup',   e => { if (e.button===0) mouse.down=false; });
+
+  // Scroll wheel weapon switching
+  window.addEventListener('wheel', e => {
+    if (gameState !== 'playing') return;
+    const wepIds = ['revolver','shotgun','rifle','smg'];
+    const owned = wepIds.filter(id => upgrades.find(u => u.id === id && u.level > 0));
+    if (owned.length < 2) return;
+    const idx = owned.indexOf(selectedWeaponId);
+    const next = e.deltaY > 0
+      ? owned[(idx + 1) % owned.length]
+      : owned[(idx - 1 + owned.length) % owned.length];
+    selectWeapon(next);
+  }, { passive: true });
 
   // Mobile joystick
   initMobileControls();
@@ -147,6 +166,7 @@ function startGame(mapIdArg) {
   }
   const sp = findClearSpawn(mapData.spawnX || WORLD_W/2, mapData.spawnY || WORLD_H/2);
   player = new Player(sp.x, sp.y);
+  selectedWeaponId = 'revolver';
   player.coins = 0;
   bullets = []; zombies = []; civilians = []; particles = []; dustParticles = [];
   wave = 0; score = 0; frameCount = 0; totalKills = 0; civKills = 0;
@@ -193,12 +213,26 @@ function nextWave() {
 }
 
 function getActiveWeapon() {
+  const u = upgrades.find(u => u.id === selectedWeaponId && u.level > 0);
+  if (u) return u;
+  // Fallback to revolver
+  return upgrades.find(u => u.id === 'revolver');
+}
+
+function getOwnedWeapons() {
   const wepIds = ['revolver','shotgun','rifle','smg'];
-  for (let i = wepIds.length-1; i>=0; i--) {
-    const u = upgrades.find(u=>u.id===wepIds[i]);
-    if (u && u.level > 0) return u;
-  }
-  return upgrades.find(u=>u.id==='revolver');
+  return wepIds.map(id => upgrades.find(u => u.id === id)).filter(u => u && u.level > 0);
+}
+
+function selectWeapon(id) {
+  const wep = upgrades.find(u => u.id === id && u.level > 0);
+  if (!wep) return;
+  selectedWeaponId = id;
+  // Reset clip for newly selected weapon
+  maxClip = (wep.stats.clip || 6) + (playerStats.clipBonus || 0);
+  currentClip = maxClip;
+  reloading = false; reloadProgress = 0;
+  updateHUD();
 }
 
 // ── SPAWN ─────────────────────────────────────────────────────────────
@@ -362,8 +396,22 @@ function loop() {
     if (!z.alive) zombies.splice(i,1);
   }
 
-  // Update civilians
-  for (const c of civilians) c.update(player.x, player.y, zombies, obstacles);
+  // Update civilians — handle infection turning
+  for (const c of civilians) {
+    const result = c.update(player.x, player.y, zombies, obstacles);
+    if (result === 'turned') {
+      // Spawn a fresh zombie in their place
+      const newZ = new Zombie(c.x, c.y, wave);
+      newZ.speed *= 0.85; // freshly turned — a bit slower
+      zombies.push(newZ);
+      zombiesLeftThisWave++; // counts as an extra zombie
+      // Particle burst
+      for (let p = 0; p < 12; p++) {
+        particles.push(new Particle(c.x, c.y, '#4aaa3a', { spread:6, life:35, size:4 }));
+      }
+      addKillFeed('😱 Civilian turned!', 'civ');
+    }
+  }
 
   // Update bullets
   for (let i=bullets.length-1; i>=0; i--) {
@@ -573,6 +621,13 @@ function drawBackground(ctxArg) {
 }
 
 // ── HUD ───────────────────────────────────────────────────────────────
+const WEAPON_DEFS = [
+  { id: 'revolver', name: 'Revolver', emoji: '🔫', key: '1' },
+  { id: 'shotgun',  name: 'Shotgun',  emoji: '💥', key: '2' },
+  { id: 'rifle',    name: 'Rifle',    emoji: '🎯', key: '3' },
+  { id: 'smg',      name: 'Tommy',    emoji: '⚙️',  key: '4' },
+];
+
 function updateHUD() {
   document.getElementById('hud-score').textContent = score.toLocaleString();
   document.getElementById('hud-wave').textContent  = `WAVE ${wave}`;
@@ -582,8 +637,28 @@ function updateHUD() {
   document.getElementById('health-fill').style.width = hpPct + '%';
   const remaining = zombiesLeftThisWave - zombiesSpawned + zombies.length;
   document.getElementById('hud-zombies').textContent = remaining + ' left';
-  const clipTxt = reloading ? '...' : `${currentClip}/${maxClip}`;
+  const clipTxt = reloading ? 'RELOAD' : `${currentClip}/${maxClip}`;
   document.getElementById('hud-ammo').textContent = clipTxt;
+
+  // Weapon slots
+  const row = document.getElementById('weapon-slot-row');
+  if (row) {
+    row.innerHTML = '';
+    for (const def of WEAPON_DEFS) {
+      const owned = upgrades.find(u => u.id === def.id && u.level > 0);
+      const div = document.createElement('div');
+      div.className = 'weapon-slot' + (owned ? '' : ' empty') + (owned && selectedWeaponId === def.id ? ' active' : '');
+      div.innerHTML = `
+        <span class="weapon-slot-key">${def.key}</span>
+        <span class="weapon-slot-icon">${def.emoji}</span>
+        <span class="weapon-slot-name">${def.name}</span>
+      `;
+      if (owned) {
+        div.addEventListener('click', () => selectWeapon(def.id));
+      }
+      row.appendChild(div);
+    }
+  }
 }
 
 // ── SHOP ─────────────────────────────────────────────────────────────
@@ -648,6 +723,11 @@ function buyUpgrade(id) {
       // gun_mod, weapon mods etc — apply to playerStats
       upg.effect(playerStats);
     }
+  }
+
+  // If bought a weapon, auto-select it
+  if (upg.category === 'weapon') {
+    selectedWeaponId = upg.id;
   }
 
   // Always refresh clip size after any purchase
