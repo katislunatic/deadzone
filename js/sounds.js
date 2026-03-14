@@ -11,8 +11,16 @@ function getAudioCtx() {
 
 function playSound(type) {
   try {
+    const vol = (typeof getVolume === 'function') ? getVolume(type) : 0.8;
+    if (vol <= 0) return;
     const ctx = getAudioCtx();
     const t = ctx.currentTime;
+    // Master gain node for this sound
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(vol, t);
+    master.connect(ctx.destination);
+    // Helper to connect to master instead of destination directly
+    const dest = master;
 
     switch(type) {
 
@@ -30,7 +38,7 @@ function playSound(type) {
         const gain = ctx.createGain();
         gain.gain.setValueAtTime(0.55, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-        src.connect(gain); gain.connect(ctx.destination);
+        src.connect(gain); gain.connect(dest);
         src.start(t);
         break;
       }
@@ -45,7 +53,7 @@ function playSound(type) {
           osc.frequency.exponentialRampToValueAtTime(40, t + 0.25);
           gain.gain.setValueAtTime(0.3, t);
           gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
-          osc.connect(gain); gain.connect(ctx.destination);
+          osc.connect(gain); gain.connect(dest);
           osc.start(t); osc.stop(t + 0.3);
         }
         // Noise layer
@@ -54,7 +62,7 @@ function playSound(type) {
         for (let i = 0; i < d.length; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/d.length, 1.5);
         const src = ctx.createBufferSource(); src.buffer = buf;
         const ng = ctx.createGain(); ng.gain.setValueAtTime(0.6, t);
-        src.connect(ng); ng.connect(ctx.destination); src.start(t);
+        src.connect(ng); ng.connect(dest); src.start(t);
         break;
       }
 
@@ -67,7 +75,7 @@ function playSound(type) {
         osc.frequency.exponentialRampToValueAtTime(80, t + 0.22);
         gain.gain.setValueAtTime(0.4, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
-        osc.connect(gain); gain.connect(ctx.destination);
+        osc.connect(gain); gain.connect(dest);
         osc.start(t); osc.stop(t + 0.25);
         break;
       }
@@ -81,7 +89,7 @@ function playSound(type) {
         osc.frequency.exponentialRampToValueAtTime(60, t + 0.07);
         gain.gain.setValueAtTime(0.25, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
-        osc.connect(gain); gain.connect(ctx.destination);
+        osc.connect(gain); gain.connect(dest);
         osc.start(t); osc.stop(t + 0.1);
         break;
       }
@@ -94,7 +102,7 @@ function playSound(type) {
         osc.frequency.setValueAtTime(800, t);
         gain.gain.setValueAtTime(0.15, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
-        osc.connect(gain); gain.connect(ctx.destination);
+        osc.connect(gain); gain.connect(dest);
         osc.start(t); osc.stop(t + 0.05);
         break;
       }
@@ -108,7 +116,7 @@ function playSound(type) {
           osc.frequency.setValueAtTime(400 + i*200, t + i*0.08);
           gain.gain.setValueAtTime(0.18, t + i*0.08);
           gain.gain.exponentialRampToValueAtTime(0.001, t + i*0.08 + 0.06);
-          osc.connect(gain); gain.connect(ctx.destination);
+          osc.connect(gain); gain.connect(dest);
           osc.start(t + i*0.08); osc.stop(t + i*0.08 + 0.07);
         }
         break;
@@ -123,7 +131,7 @@ function playSound(type) {
         osc.frequency.exponentialRampToValueAtTime(120, t + 0.12);
         gain.gain.setValueAtTime(0.3, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
-        osc.connect(gain); gain.connect(ctx.destination);
+        osc.connect(gain); gain.connect(dest);
         osc.start(t); osc.stop(t + 0.15);
         break;
       }
@@ -137,7 +145,7 @@ function playSound(type) {
         osc.frequency.exponentialRampToValueAtTime(40, t + 0.25);
         gain.gain.setValueAtTime(0.28, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
-        osc.connect(gain); gain.connect(ctx.destination);
+        osc.connect(gain); gain.connect(dest);
         osc.start(t); osc.stop(t + 0.3);
         break;
       }
@@ -151,7 +159,7 @@ function playSound(type) {
         osc.frequency.exponentialRampToValueAtTime(60, t + 0.08);
         gain.gain.setValueAtTime(0.2, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-        osc.connect(gain); gain.connect(ctx.destination);
+        osc.connect(gain); gain.connect(dest);
         osc.start(t); osc.stop(t + 0.12);
         break;
       }
@@ -165,7 +173,7 @@ function playSound(type) {
         osc.frequency.exponentialRampToValueAtTime(40, t + 0.2);
         gain.gain.setValueAtTime(0.5, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
-        osc.connect(gain); gain.connect(ctx.destination);
+        osc.connect(gain); gain.connect(dest);
         osc.start(t); osc.stop(t + 0.25);
         break;
       }
@@ -179,7 +187,7 @@ function playSound(type) {
         osc.frequency.setValueAtTime(1100, t + 0.05);
         gain.gain.setValueAtTime(0.2, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-        osc.connect(gain); gain.connect(ctx.destination);
+        osc.connect(gain); gain.connect(dest);
         osc.start(t); osc.stop(t + 0.2);
         break;
       }
@@ -195,7 +203,7 @@ function playSound(type) {
           gain.gain.setValueAtTime(0, t + i*0.06);
           gain.gain.linearRampToValueAtTime(0.15, t + i*0.06 + 0.1);
           gain.gain.exponentialRampToValueAtTime(0.001, t + i*0.06 + 0.6);
-          osc.connect(gain); gain.connect(ctx.destination);
+          osc.connect(gain); gain.connect(dest);
           osc.start(t + i*0.06); osc.stop(t + i*0.06 + 0.7);
         });
         break;
@@ -211,7 +219,7 @@ function playSound(type) {
           osc.frequency.setValueAtTime(f, t + i*0.18);
           gain.gain.setValueAtTime(0.3, t + i*0.18);
           gain.gain.exponentialRampToValueAtTime(0.001, t + i*0.18 + 0.35);
-          osc.connect(gain); gain.connect(ctx.destination);
+          osc.connect(gain); gain.connect(dest);
           osc.start(t + i*0.18); osc.stop(t + i*0.18 + 0.4);
         });
         break;
@@ -225,7 +233,7 @@ function playSound(type) {
         osc.frequency.setValueAtTime(600, t);
         gain.gain.setValueAtTime(0.12, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
-        osc.connect(gain); gain.connect(ctx.destination);
+        osc.connect(gain); gain.connect(dest);
         osc.start(t); osc.stop(t + 0.05);
         break;
       }
@@ -239,7 +247,7 @@ function playSound(type) {
           osc.frequency.setValueAtTime(f, t + i*0.1);
           gain.gain.setValueAtTime(0.2, t + i*0.1);
           gain.gain.exponentialRampToValueAtTime(0.001, t + i*0.1 + 0.18);
-          osc.connect(gain); gain.connect(ctx.destination);
+          osc.connect(gain); gain.connect(dest);
           osc.start(t + i*0.1); osc.stop(t + i*0.1 + 0.2);
         });
         break;
@@ -254,7 +262,7 @@ function playSound(type) {
         osc.frequency.exponentialRampToValueAtTime(300, t + 0.35);
         gain.gain.setValueAtTime(0.35, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-        osc.connect(gain); gain.connect(ctx.destination);
+        osc.connect(gain); gain.connect(dest);
         osc.start(t); osc.stop(t + 0.45);
         // Thud underneath
         const osc2 = ctx.createOscillator();
@@ -277,7 +285,7 @@ function playSound(type) {
         osc.frequency.setValueAtTime(500 + Math.random()*200, t);
         gain.gain.setValueAtTime(0.08, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
-        osc.connect(gain); gain.connect(ctx.destination);
+        osc.connect(gain); gain.connect(dest);
         osc.start(t); osc.stop(t + 0.04);
         break;
       }
@@ -292,7 +300,7 @@ function playSound(type) {
         osc.frequency.exponentialRampToValueAtTime(60, t + 0.12);
         gain.gain.setValueAtTime(0.4, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
-        osc.connect(gain); gain.connect(ctx.destination);
+        osc.connect(gain); gain.connect(dest);
         osc.start(t); osc.stop(t + 0.18);
         // Win ding sequence
         [523, 659, 784, 1046].forEach((f, i) => {
@@ -302,7 +310,7 @@ function playSound(type) {
           o.frequency.setValueAtTime(f, t + 0.1 + i*0.07);
           g.gain.setValueAtTime(0.18, t + 0.1 + i*0.07);
           g.gain.exponentialRampToValueAtTime(0.001, t + 0.1 + i*0.07 + 0.15);
-          o.connect(g); g.connect(ctx.destination);
+          o.connect(g); g.connect(dest);
           o.start(t + 0.1 + i*0.07); o.stop(t + 0.1 + i*0.07 + 0.18);
         });
         break;
@@ -318,7 +326,7 @@ function playSound(type) {
         osc.frequency.linearRampToValueAtTime(200, t + 0.8);
         gain.gain.setValueAtTime(0.25, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
-        osc.connect(gain); gain.connect(ctx.destination);
+        osc.connect(gain); gain.connect(dest);
         osc.start(t); osc.stop(t + 1.0);
         break;
       }
