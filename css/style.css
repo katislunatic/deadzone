@@ -905,3 +905,81 @@ body {
   color: var(--gold);
   transform: rotate(-30deg);
 }
+
+/* ── ACCORDION ──────────────────────────────── */
+.accordion-section {
+  margin-bottom: 0.5rem;
+  border: 1px solid #2a2010;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.accordion-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+  background: linear-gradient(135deg, #1a1408, #120e07);
+  border: none;
+  cursor: pointer;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  text-transform: uppercase;
+  transition: background 0.15s;
+}
+
+.accordion-btn:hover {
+  background: linear-gradient(135deg, #251c0c, #1a1208);
+}
+
+.accordion-btn.open {
+  color: var(--gold);
+  background: linear-gradient(135deg, #2a1e08, #1e1508);
+  border-bottom: 1px solid #2a2010;
+}
+
+.accordion-arrow {
+  font-size: 0.65rem;
+  color: var(--dim);
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.accordion-btn.open .accordion-arrow {
+  transform: rotate(180deg);
+}
+
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  background: rgba(0,0,0,0.2);
+  transition: max-height 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.3s ease;
+  padding: 0 1rem;
+}
+
+.accordion-body.open {
+  max-height: 600px;
+  padding: 0.75rem 1rem;
+}
+
+.keybind-reset-all {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  background: none;
+  border: 1px solid #3a2e1a;
+  color: var(--dim);
+  border-radius: 3px;
+  padding: 2px 6px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all 0.12s;
+}
+
+.keybind-reset-all:hover {
+  border-color: var(--blood);
+  color: var(--blood);
+}
