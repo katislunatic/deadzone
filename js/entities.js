@@ -106,19 +106,70 @@ class Zombie extends Entity {
     this.scoreValue = this.type === 'big' ? 50 : 15;
     this.coinValue = this.type === 'big' ? 15 : 5;
     this.facingAngle = 0;
+    // Pathfinding state
+    this.stuckTimer = 0;
+    this.lastX = x; this.lastY = y;
+    this.waypoint = null;
+    this.waypointTimer = 0;
   }
   update(px, py, obstacles) {
     this.wobble += 0.12;
     const dx = px - this.x, dy = py - this.y;
-    const dist = Math.sqrt(dx*dx + dy*dy);
+    const distToPlayer = Math.sqrt(dx*dx + dy*dy);
     this.facingAngle = Math.atan2(dy, dx);
-    if (dist > 1) {
-      this.vx = (dx / dist) * this.speed + Math.sin(this.wobble)*0.4;
-      this.vy = (dy / dist) * this.speed + Math.cos(this.wobble)*0.4;
+
+    // Stuck detection — check every 30 frames
+    if (this.age % 30 === 0) {
+      const moved = dist(this.x, this.y, this.lastX, this.lastY);
+      if (moved < this.speed * 4 && distToPlayer > 40) {
+        this.stuckTimer++;
+        if (this.stuckTimer >= 2) {
+          // Pick a waypoint perpendicular to the obstacle — try 8 directions
+          const angles = [Math.PI/2, -Math.PI/2, Math.PI*3/4, -Math.PI*3/4,
+                          Math.PI/4, -Math.PI/4, Math.PI, 0];
+          const baseAngle = Math.atan2(dy, dx);
+          for (const offset of angles) {
+            const tryAngle = baseAngle + offset;
+            const wpx = this.x + Math.cos(tryAngle) * 80;
+            const wpy = this.y + Math.sin(tryAngle) * 80;
+            const clampedX = Math.max(20, Math.min(WORLD_W-20, wpx));
+            const clampedY = Math.max(20, Math.min(WORLD_H-20, wpy));
+            if (!obstacles.some(o => circleRect(clampedX, clampedY, this.radius+4, o))) {
+              this.waypoint = { x: clampedX, y: clampedY };
+              this.waypointTimer = 45;
+              this.stuckTimer = 0;
+              break;
+            }
+          }
+        }
+      } else {
+        this.stuckTimer = 0;
+      }
+      this.lastX = this.x; this.lastY = this.y;
     }
+
+    // Navigate to waypoint if we have one, else go straight to player
+    let targetX = px, targetY = py;
+    if (this.waypoint && this.waypointTimer > 0) {
+      this.waypointTimer--;
+      targetX = this.waypoint.x;
+      targetY = this.waypoint.y;
+      // Clear waypoint when we reach it
+      if (dist(this.x, this.y, this.waypoint.x, this.waypoint.y) < 20) {
+        this.waypoint = null;
+      }
+    }
+
+    const tdx = targetX - this.x, tdy = targetY - this.y;
+    const tdist = Math.sqrt(tdx*tdx + tdy*tdy);
+    if (tdist > 1) {
+      this.vx = (tdx / tdist) * this.speed + Math.sin(this.wobble)*0.3;
+      this.vy = (tdy / tdist) * this.speed + Math.cos(this.wobble)*0.3;
+    }
+    this.facingAngle = Math.atan2(this.vy, this.vx);
     this.move(obstacles);
     if (this.attackCooldown > 0) this.attackCooldown--;
-    return dist < this.radius + 14;
+    return distToPlayer < this.radius + 14;
   }
   draw(ctx) {
     ctx.save();
