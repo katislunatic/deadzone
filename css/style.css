@@ -624,8 +624,20 @@ body {
   background: linear-gradient(145deg, #120e08, #0a0804);
   border: 1px solid #3a2e1a;
   border-radius: 12px;
-  padding: 1.25rem 1.5rem;
   width: min(420px, 90vw);
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  padding: 0 1.5rem;
+  transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.35s ease,
+              padding 0.35s ease;
+}
+
+.pause-settings.open {
+  max-height: 600px;
+  opacity: 1;
+  padding: 1.25rem 1.5rem;
 }
 
 /* ── SETTINGS ───────────────────────────────── */
