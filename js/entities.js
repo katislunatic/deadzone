@@ -46,82 +46,80 @@ class Player extends Entity {
     this.coins = 0;
   }
   draw(ctx) {
-    ctx.save();
-    ctx.translate(this.x, this.y);
-
-    const P = 2; // pixel size
+    const P = 3; // bigger pixel size
     const flash = this.invincible > 0 && Math.floor(this.age/3)%2===0;
-
-    // Determine facing direction from movement (or fallback to aim angle)
     const moving = Math.abs(this.vx) > 0.2 || Math.abs(this.vy) > 0.2;
     const moveAngle = moving ? Math.atan2(this.vy, this.vx) : this.facing;
-    // Flip sprite horizontally if moving/facing left
     const facingLeft = Math.cos(moveAngle) < 0;
+
+    // Walk cycle: 8-frame, driven by age when moving
+    const walkFrame = moving ? Math.floor(this.age / 5) % 8 : 0;
+    // Leg offsets: left leg, right leg Y offset for each frame
+    const legAnim = [
+      [0,0],[1,-1],[2,-1],[2,0],[0,0],[-1,1],[-2,1],[-2,0]
+    ];
+    const [lOff, rOff] = [legAnim[walkFrame], legAnim[(walkFrame+4)%8]];
+    // Bob the body slightly
+    const bobY = moving ? Math.sin(this.age * 0.4) * 0.5 : 0;
+
+    ctx.save();
+    ctx.translate(this.x, this.y);
     if (facingLeft) ctx.scale(-1, 1);
 
     // shadow
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.beginPath(); ctx.ellipse(0, 6, 14, 5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, Math.round(8+bobY), 18, 6, 0, 0, Math.PI*2); ctx.fill();
 
-    if (this.onHorse) {
-      // pixel horse body
-      const hp = [
-        [0,0,'#7a4e1a'],[1,0,'#8b5e2a'],[2,0,'#8b5e2a'],[3,0,'#7a4e1a'],
-        [-1,1,'#7a4e1a'],[0,1,'#9b6e3a'],[1,1,'#9b6e3a'],[2,1,'#9b6e3a'],[3,1,'#9b6e3a'],[4,1,'#6a3e10'],
-        [-1,2,'#8b5e2a'],[0,2,'#8b5e2a'],[1,2,'#8b5e2a'],[2,2,'#8b5e2a'],[3,2,'#8b5e2a'],[4,2,'#8b5e2a'],
-        [0,3,'#6a3e10'],[1,3,'#6a3e10'],[2,3,'#6a3e10'],
-        // legs
-        [-1,4,'#5a2e08'],[1,4,'#5a2e08'],[3,4,'#5a2e08'],
-        // head
-        [5,-1,'#6a3e10'],[6,-1,'#7a4e1a'],[5,0,'#7a4e1a'],[6,0,'#6a3e10'],[7,0,'#5a2e08'],
-      ];
-      for (const [px,py,c] of hp) {
-        ctx.fillStyle = c;
-        ctx.fillRect((px-3)*P*2, (py-3)*P*2, P*2, P*2);
-      }
-    }
-
-    // pixel cowboy — 16x16 grid, each pixel is P×P
-    const pixels = [
-      // hat top
-      [-2,-7,'#2a1208'],[-1,-7,'#2a1208'],[0,-7,'#2a1208'],[1,-7,'#2a1208'],
-      [-3,-6,'#3d2010'],[-2,-6,'#3d2010'],[-1,-6,'#4a2818'],[0,-6,'#4a2818'],[1,-6,'#3d2010'],[2,-6,'#3d2010'],
-      [-3,-5,'#3d2010'],[-2,-5,'#3d2010'],[-1,-5,'#3d2010'],[0,-5,'#3d2010'],[1,-5,'#3d2010'],[2,-5,'#3d2010'],
-      // hat brim
-      [-5,-4,'#5c3018'],[-4,-4,'#5c3018'],[-3,-4,'#6b3a20'],[-2,-4,'#6b3a20'],[-1,-4,'#6b3a20'],[0,-4,'#6b3a20'],[1,-4,'#6b3a20'],[2,-4,'#6b3a20'],[3,-4,'#5c3018'],[4,-4,'#5c3018'],
-      // face
-      [-2,-3,'#e8c888'],[-1,-3,'#e8c888'],[0,-3,'#e8c888'],[1,-3,'#e8c888'],
-      [-2,-2,'#e8c888'],[-1,-2,'#d4a060'],[0,-2,'#d4a060'],[1,-2,'#e8c888'],
-      // eyes
-      [-1,-2,'#2a1800'],[1,-2,'#2a1800'],
-      // body / shirt
-      [-3,-1,'#8b6030'],[-2,-1,'#c87830'],[-1,-1,'#d88840'],[0,-1,'#d88840'],[1,-1,'#c87830'],[2,-1,'#8b6030'],
-      [-3,0,'#8b6030'],[-2,0,'#c87830'],[-1,0,'#d88840'],[0,0,'#d88840'],[1,0,'#c87830'],[2,0,'#8b6030'],
-      // belt
-      [-3,1,'#3d2010'],[-2,1,'#5c3018'],[-1,1,'#6b3a20'],[0,1,'#f0c040'],[1,1,'#5c3018'],[2,1,'#3d2010'],
-      // legs
-      [-2,2,'#4a3020'],[-1,2,'#6b4830'],[0,2,'#6b4830'],[1,2,'#4a3020'],
-      [-2,3,'#3a2518'],[-1,3,'#5a3820'],[0,3,'#5a3820'],[1,3,'#3a2518'],
-      // boots
-      [-2,4,'#2a1808'],[-1,4,'#3a2010'],[0,4,'#3a2010'],[1,4,'#2a1808'],
-    ];
-
-    for (const [px,py,c] of pixels) {
+    const f = (px,py,c) => {
       ctx.fillStyle = flash ? '#ff9977' : c;
-      ctx.fillRect(px*P, py*P, P, P);
-    }
+      ctx.fillRect(px*P, Math.round((py+bobY)*P), P, P);
+    };
+
+    // ── BOOTS (drawn first, animated) ──
+    // Left boot
+    f(-2, 4+lOff[0], '#2a1808'); f(-1, 4+lOff[0], '#3a2010');
+    // Right boot
+    f(0,  4+rOff[0], '#2a1808'); f(1,  4+rOff[0], '#3a2010');
+
+    // ── LEGS (animated) ──
+    f(-2, 2+lOff[1], '#4a3020'); f(-1, 2+lOff[1], '#6b4830');
+    f(-2, 3+lOff[1], '#3a2518'); f(-1, 3+lOff[1], '#5a3820');
+    f(0,  2+rOff[1], '#6b4830'); f(1,  2+rOff[1], '#4a3020');
+    f(0,  3+rOff[1], '#5a3820'); f(1,  3+rOff[1], '#3a2518');
+
+    // ── STATIC UPPER BODY ──
+    // belt
+    f(-3,1,'#3d2010'); f(-2,1,'#5c3018'); f(-1,1,'#6b3a20');
+    f(0,1,'#f0c040');  f(1,1,'#5c3018');  f(2,1,'#3d2010');
+    // shirt
+    f(-3,-1,'#8b6030'); f(-2,-1,'#c87830'); f(-1,-1,'#d88840');
+    f(0,-1,'#d88840');  f(1,-1,'#c87830');  f(2,-1,'#8b6030');
+    f(-3,0,'#8b6030');  f(-2,0,'#c87830');  f(-1,0,'#d88840');
+    f(0,0,'#d88840');   f(1,0,'#c87830');   f(2,0,'#8b6030');
+    // face
+    f(-2,-3,'#e8c888'); f(-1,-3,'#e8c888'); f(0,-3,'#e8c888'); f(1,-3,'#e8c888');
+    f(-2,-2,'#e8c888'); f(-1,-2,'#d4a060'); f(0,-2,'#d4a060'); f(1,-2,'#e8c888');
+    f(-1,-2,'#2a1800'); f(1,-2,'#2a1800'); // eyes
+    // hat brim
+    f(-5,-4,'#5c3018'); f(-4,-4,'#5c3018'); f(-3,-4,'#6b3a20');
+    f(-2,-4,'#6b3a20'); f(-1,-4,'#6b3a20'); f(0,-4,'#6b3a20');
+    f(1,-4,'#6b3a20');  f(2,-4,'#6b3a20');  f(3,-4,'#5c3018'); f(4,-4,'#5c3018');
+    // hat top
+    f(-3,-6,'#3d2010'); f(-2,-6,'#3d2010'); f(-1,-6,'#4a2818');
+    f(0,-6,'#4a2818');  f(1,-6,'#3d2010');  f(2,-6,'#3d2010');
+    f(-3,-5,'#3d2010'); f(-2,-5,'#3d2010'); f(-1,-5,'#3d2010');
+    f(0,-5,'#3d2010');  f(1,-5,'#3d2010');  f(2,-5,'#3d2010');
+    f(-2,-7,'#2a1208'); f(-1,-7,'#2a1208'); f(0,-7,'#2a1208'); f(1,-7,'#2a1208');
 
     ctx.restore();
 
-    // Gun drawn in world space, always aimed at mouse
+    // Gun — separate pass, always aimed at mouse
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.facing);
-    const gunColor = '#aaaaaa';
-    const gunDark  = '#666666';
-    ctx.fillStyle = gunDark;  ctx.fillRect(8,  -P,   4,  P*2);
-    ctx.fillStyle = gunColor; ctx.fillRect(12, -P,   10, P);
-    ctx.fillStyle = '#444';   ctx.fillRect(8,  P,    6,  P);
+    ctx.fillStyle = '#666'; ctx.fillRect(10, -P,   4,   P*2);
+    ctx.fillStyle = '#aaa'; ctx.fillRect(14, -P,   12,  P);
+    ctx.fillStyle = '#444'; ctx.fillRect(10,  P,    7,  P);
     ctx.restore();
   }
   takeDamage(amt) {
@@ -195,57 +193,60 @@ class Zombie extends Entity {
     return distToPlayer < this.radius + 14;
   }
   draw(ctx) {
-    const P = this.type === 'big' ? 3 : 2;
+    const P = this.type === 'big' ? 4 : 3;
     const isBig = this.type === 'big';
     const skin = isBig ? '#2a7a1a' : '#3a9a2a';
     const skinD = isBig ? '#1a5a10' : '#2a7a1a';
     const shirtCol = isBig ? '#8a2020' : '#3a5a8a';
     const shirtD   = isBig ? '#6a1010' : '#2a4a6a';
 
+    const moving = Math.abs(this.vx) > 0.1 || Math.abs(this.vy) > 0.1;
+    // Zombie shamble — slower, limping walk cycle (6 frames)
+    const walkFrame = moving ? Math.floor(this.age / 7) % 6 : 0;
+    const zLegAnim = [[0,0],[1,0],[2,-1],[0,0],[-1,0],[-2,1]];
+    const [zlOff, zrOff] = [zLegAnim[walkFrame], zLegAnim[(walkFrame+3)%6]];
+    const bobY = moving ? Math.sin(this.age * 0.3) * 0.8 : 0;
+    // Zombie arm sway
+    const armSway = moving ? Math.round(Math.sin(this.age * 0.2) * 1) : 0;
+
     ctx.save();
     ctx.translate(this.x, this.y);
-    // Flip based on horizontal movement direction
     if (Math.cos(this.facingAngle) < 0) ctx.scale(-1, 1);
 
     // shadow
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
     ctx.beginPath(); ctx.ellipse(0, isBig?8:6, this.radius+2, isBig?6:4, 0, 0, Math.PI*2); ctx.fill();
 
-    // pixel zombie body
-    const pixels = [
-      // head
-      [-2,-6,skin],[-1,-6,skin],[0,-6,skin],[1,-6,skin],
-      [-2,-5,skin],[-1,-5,skinD],[0,-5,skinD],[1,-5,skin],
-      // eyes — glowing red
-      [-1,-5,'#ff2222'],[1,-5,'#ff2222'],
-      // teeth
-      [-1,-3,'#ddddcc'],[0,-3,'#ddddcc'],
-      // neck
-      [-1,-4,skin],[0,-4,skin],
-      // torso — torn shirt
-      [-3,-3,shirtD],[-2,-3,shirtCol],[-1,-3,shirtCol],[0,-3,shirtCol],[1,-3,shirtCol],[2,-3,shirtD],
-      [-3,-2,shirtD],[-2,-2,shirtCol],[-1,-2,skinD],[0,-2,skinD],[1,-2,shirtCol],[2,-2,shirtD],
-      [-3,-1,shirtD],[-2,-1,shirtCol],[-1,-1,shirtCol],[0,-1,shirtCol],[1,-1,shirtCol],[2,-1,shirtD],
-      // belt/waist
-      [-2,0,'#2a1a08'],[-1,0,'#3a2810'],[0,0,'#3a2810'],[1,0,'#2a1a08'],
-      // legs
-      [-2,1,skinD],[-1,1,'#4a3828'],[0,1,'#4a3828'],[1,1,skinD],
-      [-2,2,skinD],[-1,2,'#3a2818'],[0,2,'#3a2818'],[1,2,skinD],
-      // feet
-      [-2,3,'#1a1008'],[-1,3,'#2a1a0a'],[0,3,'#2a1a0a'],[1,3,'#1a1008'],
-      // outstretched arms
-      [-4,-2,skin],[-4,-1,skin],
-      [3,-2,skin],[3,-1,skin],
-    ];
-
-    for (const [px,py,c] of pixels) {
+    const f = (px,py,c) => {
       ctx.fillStyle = c;
-      ctx.fillRect(px*P, py*P, P, P);
-    }
+      ctx.fillRect(px*P, Math.round((py+bobY)*P), P, P);
+    };
 
-    // scratch marks on torso
-    ctx.strokeStyle = skinD; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(-P,-2*P); ctx.lineTo(0,P); ctx.stroke();
+    // feet (animated)
+    f(-2, 3+zlOff[0], '#1a1008'); f(-1, 3+zlOff[0], '#2a1a0a');
+    f(0,  3+zrOff[0], '#2a1a0a'); f(1,  3+zrOff[0], '#1a1008');
+    // legs (animated)
+    f(-2, 1+zlOff[1], skinD); f(-1, 1+zlOff[1], '#4a3828');
+    f(-2, 2+zlOff[1], skinD); f(-1, 2+zlOff[1], '#3a2818');
+    f(0,  1+zrOff[1], '#4a3828'); f(1, 1+zrOff[1], skinD);
+    f(0,  2+zrOff[1], '#3a2818'); f(1, 2+zrOff[1], skinD);
+
+    // waist
+    f(-2,0,'#2a1a08'); f(-1,0,'#3a2810'); f(0,0,'#3a2810'); f(1,0,'#2a1a08');
+    // torso
+    f(-3,-1,shirtD); f(-2,-1,shirtCol); f(-1,-1,shirtCol); f(0,-1,shirtCol); f(1,-1,shirtCol); f(2,-1,shirtD);
+    f(-3,-2,shirtD); f(-2,-2,shirtCol); f(-1,-2,skinD);    f(0,-2,skinD);    f(1,-2,shirtCol); f(2,-2,shirtD);
+    f(-3,-3,shirtD); f(-2,-3,shirtCol); f(-1,-3,shirtCol); f(0,-3,shirtCol); f(1,-3,shirtCol); f(2,-3,shirtD);
+    // arms outstretched (sway with walk)
+    f(-4,-2+armSway, skin); f(-4,-1+armSway, skin);
+    f(3, -2-armSway, skin); f(3, -1-armSway, skin);
+    // neck
+    f(-1,-4,skin); f(0,-4,skin);
+    // head
+    f(-2,-6,skin); f(-1,-6,skin); f(0,-6,skin); f(1,-6,skin);
+    f(-2,-5,skin); f(-1,-5,skinD); f(0,-5,skinD); f(1,-5,skin);
+    f(-1,-5,'#ff2222'); f(1,-5,'#ff2222'); // eyes
+    f(-1,-3,'#ddddcc'); f(0,-3,'#ddddcc'); // teeth
 
     ctx.restore();
 
@@ -367,45 +368,50 @@ class Civilian extends Entity {
     const shirtD= lerpColor('#336699', '#1a4a10', ip);
     const eyeCol = ip > 0.3 ? '#ff3333' : '#1a0a00';
 
+    const P = 3;
+    const moving = Math.abs(this.vx) > 0.1 || Math.abs(this.vy) > 0.1;
+    const walkFrame = moving ? Math.floor(this.age / 5) % 8 : 0;
+    const legAnim = [[0,0],[1,-1],[2,-1],[2,0],[0,0],[-1,1],[-2,1],[-2,0]];
+    const [lOff, rOff] = [legAnim[walkFrame], legAnim[(walkFrame+4)%8]];
+    const bobY = moving ? Math.sin(this.age * 0.4) * 0.5 : 0;
+
     ctx.save();
     ctx.translate(this.x, this.y);
-    // Flip based on horizontal movement direction
     if (Math.cos(this.facingAngle) < 0) ctx.scale(-1, 1);
 
     // shadow
     ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.beginPath(); ctx.ellipse(0, 5, 10, 4, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, 7, 13, 5, 0, 0, Math.PI*2); ctx.fill();
 
-    // pixel civilian
-    const pixels = [
-      // head
-      [-1,-6,skin],[0,-6,skin],
-      [-2,-5,skin],[-1,-5,skinD],[0,-5,skinD],[1,-5,skin],
-      [-2,-4,skin],[-1,-4,skin],[0,-4,skin],[1,-4,skin],
-      // eyes
-      [-1,-4,eyeCol],[1,-4,eyeCol],
-      // hair
-      [-2,-6,'#3a2010'],[-1,-7,'#2a1808'],[0,-7,'#2a1808'],[1,-6,'#3a2010'],
-      // body
-      [-2,-3,shirtD],[-1,-3,shirt],[0,-3,shirt],[1,-3,shirtD],
-      [-2,-2,shirtD],[-1,-2,shirt],[0,-2,shirt],[1,-2,shirtD],
-      [-2,-1,shirtD],[-1,-1,shirt],[0,-1,shirt],[1,-1,shirtD],
-      // arms
-      [-3,-2,skin],[-3,-1,skin],
-      [2,-2,skin],[2,-1,skin],
-      // waist
-      [-2,0,'#3a2818'],[-1,0,'#4a3828'],[0,0,'#4a3828'],[1,0,'#3a2818'],
-      // legs
-      [-2,1,'#2a3a60'],[-1,1,'#3a5080'],[0,1,'#3a5080'],[1,1,'#2a3a60'],
-      [-2,2,'#2a3a60'],[-1,2,'#2a3a60'],[0,2,'#2a3a60'],[1,2,'#2a3a60'],
-      // feet
-      [-2,3,'#1a1008'],[-1,3,'#2a1808'],[0,3,'#2a1808'],[1,3,'#1a1008'],
-    ];
-
-    for (const [px,py,c] of pixels) {
+    const f = (px,py,c) => {
       ctx.fillStyle = c;
-      ctx.fillRect(px*P, py*P, P, P);
-    }
+      ctx.fillRect(px*P, Math.round((py+bobY)*P), P, P);
+    };
+
+    // feet (animated)
+    f(-2, 3+lOff[0], '#1a1008'); f(-1, 3+lOff[0], '#2a1808');
+    f(0,  3+rOff[0], '#2a1808'); f(1,  3+rOff[0], '#1a1008');
+    // legs (animated)
+    f(-2, 1+lOff[1], '#2a3a60'); f(-1, 1+lOff[1], '#3a5080');
+    f(-2, 2+lOff[1], '#2a3a60'); f(-1, 2+lOff[1], '#2a3a60');
+    f(0,  1+rOff[1], '#3a5080'); f(1,  1+rOff[1], '#2a3a60');
+    f(0,  2+rOff[1], '#2a3a60'); f(1,  2+rOff[1], '#2a3a60');
+
+    // waist
+    f(-2,0,'#3a2818'); f(-1,0,'#4a3828'); f(0,0,'#4a3828'); f(1,0,'#3a2818');
+    // body
+    f(-2,-3,shirtD); f(-1,-3,shirt); f(0,-3,shirt); f(1,-3,shirtD);
+    f(-2,-2,shirtD); f(-1,-2,shirt); f(0,-2,shirt); f(1,-2,shirtD);
+    f(-2,-1,shirtD); f(-1,-1,shirt); f(0,-1,shirt); f(1,-1,shirtD);
+    // arms
+    f(-3,-2,skin); f(-3,-1,skin);
+    f(2,-2,skin);  f(2,-1,skin);
+    // head
+    f(-2,-6,'#3a2010'); f(-1,-7,'#2a1808'); f(0,-7,'#2a1808'); f(1,-6,'#3a2010'); // hair
+    f(-1,-6,skin); f(0,-6,skin);
+    f(-2,-5,skin); f(-1,-5,skinD); f(0,-5,skinD); f(1,-5,skin);
+    f(-2,-4,skin); f(-1,-4,skin);  f(0,-4,skin);  f(1,-4,skin);
+    f(-1,-4,eyeCol); f(1,-4,eyeCol); // eyes
 
     ctx.restore();
 
