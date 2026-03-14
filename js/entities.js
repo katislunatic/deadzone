@@ -124,10 +124,61 @@ class Player extends Entity {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.facing);
-    ctx.fillStyle = '#666'; ctx.fillRect(10, -P,   4,   P*2);
-    ctx.fillStyle = '#aaa'; ctx.fillRect(14, -P,   12,  P);
-    ctx.fillStyle = '#444'; ctx.fillRect(10,  P,    7,  P);
+    this._drawGun(ctx, this.weaponId || 'revolver');
     ctx.restore();
+  }
+
+  _drawGun(ctx, id) {
+    const P = 3;
+    switch(id) {
+      case 'revolver':
+        // Classic revolver — short, thick with cylinder
+        ctx.fillStyle = '#555'; ctx.fillRect(8,  -3,  6,  6);   // grip
+        ctx.fillStyle = '#888'; ctx.fillRect(8,  -4,  6,  2);   // guard
+        ctx.fillStyle = '#777'; ctx.fillRect(14, -2,  4,  4);   // cylinder (round)
+        ctx.fillStyle = '#999'; ctx.fillRect(18, -2,  10, 3);   // barrel
+        ctx.fillStyle = '#bbb'; ctx.fillRect(26, -1,  3,  2);   // muzzle
+        ctx.fillStyle = '#666'; ctx.fillRect(12,  2,  4,  3);   // trigger guard
+        ctx.fillStyle = '#444'; ctx.fillRect(13,  2,  2,  3);   // trigger
+        break;
+
+      case 'shotgun':
+        // Double-barrel shotgun — wide, short, brutal
+        ctx.fillStyle = '#6b3a10'; ctx.fillRect(8,  -4,  8,  8);  // wooden stock
+        ctx.fillStyle = '#555';    ctx.fillRect(8,  -5,  4,  2);  // metal receiver top
+        ctx.fillStyle = '#888';    ctx.fillRect(16, -4,  14, 3);  // barrel top
+        ctx.fillStyle = '#777';    ctx.fillRect(16, -1,  14, 3);  // barrel bottom
+        ctx.fillStyle = '#aaa';    ctx.fillRect(28, -4,  4,  6);  // muzzle ends
+        ctx.fillStyle = '#5c3010'; ctx.fillRect(10,  3,  6,  3);  // grip bottom
+        ctx.fillStyle = '#666';    ctx.fillRect(14, -1,  3,  2);  // pump slide
+        break;
+
+      case 'rifle':
+        // Lever-action rifle — long elegant barrel
+        ctx.fillStyle = '#7a4a18'; ctx.fillRect(8,  -3,  10, 6);  // wooden stock
+        ctx.fillStyle = '#666';    ctx.fillRect(8,  -4,  6,  2);  // receiver top
+        ctx.fillStyle = '#888';    ctx.fillRect(18, -2,  18, 3);  // long barrel
+        ctx.fillStyle = '#aaa';    ctx.fillRect(34, -2,  4,  2);  // muzzle
+        ctx.fillStyle = '#6b3a10'; ctx.fillRect(18,  0,  10, 2);  // fore-stock wood
+        ctx.fillStyle = '#555';    ctx.fillRect(12,  1,  5,  4);  // lever loop
+        ctx.fillStyle = '#444';    ctx.fillRect(14,  3,  2,  3);  // trigger
+        break;
+
+      case 'smg':
+        // Tommy Gun — chunky, boxy, drum mag
+        ctx.fillStyle = '#555';    ctx.fillRect(8,  -5,  8,  10); // main body
+        ctx.fillStyle = '#777';    ctx.fillRect(16, -3,  16, 5);  // barrel jacket
+        ctx.fillStyle = '#999';    ctx.fillRect(30, -2,  5,  3);  // muzzle
+        ctx.fillStyle = '#666';    ctx.fillRect(10,  4,  6,  6);  // drum mag (round)
+        ctx.fillStyle = '#444';    ctx.fillRect(10, -6,  5,  3);  // top handle
+        ctx.fillStyle = '#888';    ctx.fillRect(8,  -7,  3,  2);  // rear sight
+        ctx.fillStyle = '#aaa';    ctx.fillRect(28, -5,  3,  2);  // front sight
+        break;
+
+      default:
+        ctx.fillStyle = '#666'; ctx.fillRect(10, -P, 4, P*2);
+        ctx.fillStyle = '#aaa'; ctx.fillRect(14, -P, 12, P);
+    }
   }
   takeDamage(amt) {
     if (this.invincible > 0) return;
