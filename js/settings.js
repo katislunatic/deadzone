@@ -154,3 +154,12 @@ function togglePauseSettings() {
     if (typeof renderKeybindsUI === 'function') renderKeybindsUI('p-keybinds-container');
   }
 }
+
+function toggleAccordion(id) {
+  const body = document.getElementById(id);
+  const btn = body ? body.previousElementSibling : null;
+  if (!body) return;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (btn) btn.classList.toggle('open', !isOpen);
+}
