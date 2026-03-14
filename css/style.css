@@ -746,3 +746,44 @@ body {
   border-color: #2ecc71;
   color: #2ecc71;
 }
+
+/* ── SETTINGS BUTTON ────────────────────────────────────────────────── */
+#settings-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.2rem;
+  background: linear-gradient(135deg, #2a1a05 0%, #1a0e02 100%);
+  border: 2px solid var(--gold-dark);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  text-transform: uppercase;
+  transition: all 0.15s;
+  box-shadow: 0 3px 0 #7a5800, 0 4px 16px rgba(0,0,0,0.5);
+  flex-shrink: 0;
+}
+
+#settings-btn:hover {
+  background: linear-gradient(135deg, #3a2508 0%, #2a1505 100%);
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 #7a5800, 0 6px 20px rgba(0,0,0,0.5);
+}
+
+#settings-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 0 #7a5800;
+}
+
+#settings-btn svg {
+  filter: drop-shadow(0 0 4px rgba(240,192,64,0.5));
+  transition: transform 0.4s ease;
+}
+
+#settings-btn:hover svg {
+  transform: rotate(45deg);
+}
