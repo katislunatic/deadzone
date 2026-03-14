@@ -68,57 +68,47 @@
 <!-- ─────────────────────────────────────────
      HUD
 ──────────────────────────────────────────── -->
-<!-- Top HUD: score, wave, coins, map, zombies -->
+<!-- Top HUD: Score, Coins, Wave, Zombies, Map -->
 <div id="hud" style="display:none;">
   <div class="hud-block">
-    <div>
-      <div class="hud-label">Score</div>
-      <div class="hud-value" id="hud-score">0</div>
-    </div>
+    <div class="hud-label">Score</div>
+    <div class="hud-value" id="hud-score">0</div>
   </div>
-
   <div class="hud-block">
-    <div>
-      <div class="hud-label">Wave</div>
-      <div class="wave-badge" id="hud-wave">WAVE 1</div>
-    </div>
+    <div class="hud-label">Coins</div>
+    <div class="hud-value" style="color:#f0c040" id="hud-coins">0</div>
   </div>
-
   <div class="hud-block">
-    <div>
-      <div class="hud-label">Coins</div>
-      <div class="hud-value" style="color:#f0c040" id="hud-coins">0</div>
-    </div>
+    <div class="hud-label">Wave</div>
+    <div class="wave-badge" id="hud-wave">WAVE 1</div>
   </div>
-
   <div class="hud-block">
-    <div>
-      <div class="hud-label">Map</div>
-      <div class="hud-value" style="font-size:0.75rem" id="hud-map">—</div>
-    </div>
+    <div class="hud-label">Zombies</div>
+    <div class="hud-value" style="color:#c0392b;font-size:0.85rem" id="hud-zombies">—</div>
   </div>
-
   <div class="hud-block">
-    <div>
-      <div class="hud-label">Zombies</div>
-      <div class="hud-value" style="font-size:0.85rem;color:#c0392b" id="hud-zombies">—</div>
-    </div>
+    <div class="hud-label">Map</div>
+    <div class="hud-value" style="font-size:0.75rem" id="hud-map">—</div>
   </div>
 </div>
 
-<!-- Bottom HUD: HP and Ammo -->
+<!-- Bottom HUD: HP | Weapon Slots | Ammo -->
 <div id="hud-bottom" style="display:none;">
   <div class="hud-block" id="health-bar-wrap">
-    <div>
-      <div class="hud-label">HP</div>
-      <div id="health-bar"><div id="health-fill" style="width:100%"></div></div>
+    <div class="hud-label">HP</div>
+    <div id="health-bar"><div id="health-fill" style="width:100%"></div></div>
+  </div>
+
+  <div id="weapon-slots">
+    <div class="hud-label" style="text-align:center;margin-bottom:4px;">Weapons</div>
+    <div id="weapon-slot-row">
+      <!-- populated by JS -->
     </div>
   </div>
+
   <div class="hud-block">
-    <div>
-      <div class="hud-label">Ammo</div>
-      <div class="hud-value ammo-display" id="hud-ammo">6/6</div>
-    </div>
+    <div class="hud-label">Ammo</div>
+    <div class="hud-value ammo-display" id="hud-ammo">6/6</div>
   </div>
 </div>
 
