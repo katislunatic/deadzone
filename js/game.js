@@ -273,6 +273,7 @@ function startReload() {
 // ── MAIN LOOP ─────────────────────────────────────────────────────────
 function loop() {
   requestAnimationFrame(loop);
+  if (gameState === 'paused') { render(); return; }
   if (gameState !== 'playing') { drawBackground(); return; }
 
   frameCount++;
