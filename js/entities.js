@@ -48,10 +48,16 @@ class Player extends Entity {
   draw(ctx) {
     ctx.save();
     ctx.translate(this.x, this.y);
-    ctx.rotate(this.facing);
 
     const P = 2; // pixel size
     const flash = this.invincible > 0 && Math.floor(this.age/3)%2===0;
+
+    // Determine facing direction from movement (or fallback to aim angle)
+    const moving = Math.abs(this.vx) > 0.2 || Math.abs(this.vy) > 0.2;
+    const moveAngle = moving ? Math.atan2(this.vy, this.vx) : this.facing;
+    // Flip sprite horizontally if moving/facing left
+    const facingLeft = Math.cos(moveAngle) < 0;
+    if (facingLeft) ctx.scale(-1, 1);
 
     // shadow
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
@@ -105,13 +111,17 @@ class Player extends Entity {
       ctx.fillRect(px*P, py*P, P, P);
     }
 
-    // gun
+    ctx.restore();
+
+    // Gun drawn in world space, always aimed at mouse
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.facing);
     const gunColor = '#aaaaaa';
     const gunDark  = '#666666';
     ctx.fillStyle = gunDark;  ctx.fillRect(8,  -P,   4,  P*2);
     ctx.fillStyle = gunColor; ctx.fillRect(12, -P,   10, P);
     ctx.fillStyle = '#444';   ctx.fillRect(8,  P,    6,  P);
-
     ctx.restore();
   }
   takeDamage(amt) {
@@ -194,7 +204,8 @@ class Zombie extends Entity {
 
     ctx.save();
     ctx.translate(this.x, this.y);
-    ctx.rotate(this.facingAngle);
+    // Flip based on horizontal movement direction
+    if (Math.cos(this.facingAngle) < 0) ctx.scale(-1, 1);
 
     // shadow
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
@@ -358,7 +369,8 @@ class Civilian extends Entity {
 
     ctx.save();
     ctx.translate(this.x, this.y);
-    ctx.rotate(this.facingAngle);
+    // Flip based on horizontal movement direction
+    if (Math.cos(this.facingAngle) < 0) ctx.scale(-1, 1);
 
     // shadow
     ctx.fillStyle = 'rgba(0,0,0,0.3)';
