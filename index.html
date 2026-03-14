@@ -80,52 +80,64 @@
       Settings
     </div>
 
-    <div class="settings-section">
-      <div class="settings-section-label">Volume</div>
-
-      <div class="settings-row">
-        <label class="settings-label">Master</label>
-        <input type="range" class="settings-slider" id="vol-master" min="0" max="100" value="80">
-        <span class="settings-val" id="vol-master-val">80%</span>
-      </div>
-      <div class="settings-row">
-        <label class="settings-label">Guns</label>
-        <input type="range" class="settings-slider" id="vol-guns" min="0" max="100" value="100">
-        <span class="settings-val" id="vol-guns-val">100%</span>
-      </div>
-      <div class="settings-row">
-        <label class="settings-label">Death</label>
-        <input type="range" class="settings-slider" id="vol-death" min="0" max="100" value="100">
-        <span class="settings-val" id="vol-death-val">100%</span>
-      </div>
-      <div class="settings-row">
-        <label class="settings-label">Reload</label>
-        <input type="range" class="settings-slider" id="vol-reload" min="0" max="100" value="100">
-        <span class="settings-val" id="vol-reload-val">100%</span>
-      </div>
-      <div class="settings-row">
-        <label class="settings-label">UI / Shop</label>
-        <input type="range" class="settings-slider" id="vol-ui" min="0" max="100" value="100">
-        <span class="settings-val" id="vol-ui-val">100%</span>
-      </div>
-    </div>
-
-    <div class="settings-section">
-      <div class="settings-section-label">Graphics</div>
-      <div class="settings-row">
-        <label class="settings-label">Blood Effects</label>
-        <div class="settings-toggle-wrap">
-          <button class="settings-toggle active" id="toggle-blood" onclick="toggleSetting('blood')">ON</button>
+    <div class="accordion-section">
+      <button class="accordion-btn" onclick="toggleAccordion('acc-volume')">
+        <span>🔊 Volume</span><span class="accordion-arrow">▼</span>
+      </button>
+      <div class="accordion-body" id="acc-volume">
+        <div class="settings-row">
+          <label class="settings-label">Master</label>
+          <input type="range" class="settings-slider" id="vol-master" min="0" max="100" value="80">
+          <span class="settings-val" id="vol-master-val">80%</span>
+        </div>
+        <div class="settings-row">
+          <label class="settings-label">Guns</label>
+          <input type="range" class="settings-slider" id="vol-guns" min="0" max="100" value="100">
+          <span class="settings-val" id="vol-guns-val">100%</span>
+        </div>
+        <div class="settings-row">
+          <label class="settings-label">Death</label>
+          <input type="range" class="settings-slider" id="vol-death" min="0" max="100" value="100">
+          <span class="settings-val" id="vol-death-val">100%</span>
+        </div>
+        <div class="settings-row">
+          <label class="settings-label">Reload</label>
+          <input type="range" class="settings-slider" id="vol-reload" min="0" max="100" value="100">
+          <span class="settings-val" id="vol-reload-val">100%</span>
+        </div>
+        <div class="settings-row">
+          <label class="settings-label">UI / Shop</label>
+          <input type="range" class="settings-slider" id="vol-ui" min="0" max="100" value="100">
+          <span class="settings-val" id="vol-ui-val">100%</span>
         </div>
       </div>
     </div>
 
-    <div class="settings-section">
-      <div class="settings-section-label">
-        Keybinds
-        <button onclick="resetAllKeybinds()" style="float:right; font-family:'Share Tech Mono',monospace; font-size:0.6rem; background:none; border:1px solid #3a2e1a; color:var(--dim); border-radius:3px; padding:2px 6px; cursor:pointer; letter-spacing:0.05em;">RESET ALL</button>
+    <div class="accordion-section">
+      <button class="accordion-btn" onclick="toggleAccordion('acc-graphics')">
+        <span>🎨 Graphics</span><span class="accordion-arrow">▼</span>
+      </button>
+      <div class="accordion-body" id="acc-graphics">
+        <div class="settings-row">
+          <label class="settings-label">Blood Effects</label>
+          <div class="settings-toggle-wrap">
+            <button class="settings-toggle active" id="toggle-blood" onclick="toggleSetting('blood')">ON</button>
+          </div>
+        </div>
       </div>
-      <div id="keybinds-container"></div>
+    </div>
+
+    <div class="accordion-section">
+      <button class="accordion-btn" onclick="toggleAccordion('acc-keybinds')">
+        <span>⌨️ Keybinds</span>
+        <span style="display:flex;align-items:center;gap:0.5rem;">
+          <button onclick="event.stopPropagation();resetAllKeybinds()" class="keybind-reset-all">RESET ALL</button>
+          <span class="accordion-arrow">▼</span>
+        </span>
+      </button>
+      <div class="accordion-body" id="acc-keybinds">
+        <div id="keybinds-container"></div>
+      </div>
     </div>
 
     <button class="btn btn-primary" onclick="closeSettings()" style="width:100%; margin-top:1rem;">
@@ -256,51 +268,64 @@
   <div class="pause-settings" id="pause-settings-panel">
     <div class="settings-section-label" style="text-align:center;">Settings</div>
 
-    <div class="settings-section">
-      <div class="settings-section-label">Volume</div>
-      <div class="settings-row">
-        <label class="settings-label">Master</label>
-        <input type="range" class="settings-slider" id="p-vol-master" min="0" max="100" value="80">
-        <span class="settings-val" id="p-vol-master-val">80%</span>
-      </div>
-      <div class="settings-row">
-        <label class="settings-label">Guns</label>
-        <input type="range" class="settings-slider" id="p-vol-guns" min="0" max="100" value="100">
-        <span class="settings-val" id="p-vol-guns-val">100%</span>
-      </div>
-      <div class="settings-row">
-        <label class="settings-label">Death</label>
-        <input type="range" class="settings-slider" id="p-vol-death" min="0" max="100" value="100">
-        <span class="settings-val" id="p-vol-death-val">100%</span>
-      </div>
-      <div class="settings-row">
-        <label class="settings-label">Reload</label>
-        <input type="range" class="settings-slider" id="p-vol-reload" min="0" max="100" value="100">
-        <span class="settings-val" id="p-vol-reload-val">100%</span>
-      </div>
-      <div class="settings-row">
-        <label class="settings-label">UI / Shop</label>
-        <input type="range" class="settings-slider" id="p-vol-ui" min="0" max="100" value="100">
-        <span class="settings-val" id="p-vol-ui-val">100%</span>
-      </div>
-    </div>
-
-    <div class="settings-section">
-      <div class="settings-section-label">Graphics</div>
-      <div class="settings-row">
-        <label class="settings-label">Blood Effects</label>
-        <div class="settings-toggle-wrap">
-          <button class="settings-toggle active" id="p-toggle-blood" onclick="toggleSetting('blood'); syncPauseSettings();">ON</button>
+    <div class="accordion-section">
+      <button class="accordion-btn" onclick="toggleAccordion('p-acc-volume')">
+        <span>🔊 Volume</span><span class="accordion-arrow">▼</span>
+      </button>
+      <div class="accordion-body" id="p-acc-volume">
+        <div class="settings-row">
+          <label class="settings-label">Master</label>
+          <input type="range" class="settings-slider" id="p-vol-master" min="0" max="100" value="80">
+          <span class="settings-val" id="p-vol-master-val">80%</span>
+        </div>
+        <div class="settings-row">
+          <label class="settings-label">Guns</label>
+          <input type="range" class="settings-slider" id="p-vol-guns" min="0" max="100" value="100">
+          <span class="settings-val" id="p-vol-guns-val">100%</span>
+        </div>
+        <div class="settings-row">
+          <label class="settings-label">Death</label>
+          <input type="range" class="settings-slider" id="p-vol-death" min="0" max="100" value="100">
+          <span class="settings-val" id="p-vol-death-val">100%</span>
+        </div>
+        <div class="settings-row">
+          <label class="settings-label">Reload</label>
+          <input type="range" class="settings-slider" id="p-vol-reload" min="0" max="100" value="100">
+          <span class="settings-val" id="p-vol-reload-val">100%</span>
+        </div>
+        <div class="settings-row">
+          <label class="settings-label">UI / Shop</label>
+          <input type="range" class="settings-slider" id="p-vol-ui" min="0" max="100" value="100">
+          <span class="settings-val" id="p-vol-ui-val">100%</span>
         </div>
       </div>
     </div>
 
-    <div class="settings-section">
-      <div class="settings-section-label">
-        Keybinds
-        <button onclick="resetAllKeybinds()" style="float:right; font-family:'Share Tech Mono',monospace; font-size:0.6rem; background:none; border:1px solid #3a2e1a; color:var(--dim); border-radius:3px; padding:2px 6px; cursor:pointer; letter-spacing:0.05em;">RESET ALL</button>
+    <div class="accordion-section">
+      <button class="accordion-btn" onclick="toggleAccordion('p-acc-graphics')">
+        <span>🎨 Graphics</span><span class="accordion-arrow">▼</span>
+      </button>
+      <div class="accordion-body" id="p-acc-graphics">
+        <div class="settings-row">
+          <label class="settings-label">Blood Effects</label>
+          <div class="settings-toggle-wrap">
+            <button class="settings-toggle active" id="p-toggle-blood" onclick="toggleSetting('blood'); syncPauseSettings();">ON</button>
+          </div>
+        </div>
       </div>
-      <div id="p-keybinds-container"></div>
+    </div>
+
+    <div class="accordion-section">
+      <button class="accordion-btn" onclick="toggleAccordion('p-acc-keybinds')">
+        <span>⌨️ Keybinds</span>
+        <span style="display:flex;align-items:center;gap:0.5rem;">
+          <button onclick="event.stopPropagation();resetAllKeybinds()" class="keybind-reset-all">RESET ALL</button>
+          <span class="accordion-arrow">▼</span>
+        </span>
+      </button>
+      <div class="accordion-body" id="p-acc-keybinds">
+        <div id="p-keybinds-container"></div>
+      </div>
     </div>
   </div>
 </div>
