@@ -2,10 +2,12 @@
 
 let slotChosenMap = null;
 let isSpinning = false;
+let lastSpinResult = null; // tracks last spin result to prevent immediate repeat
 
 function showMenu() {
   document.getElementById('menu-screen').style.display = 'flex';
   slotChosenMap = null;
+  lastSpinResult = null; // allow any map on fresh menu visit
   document.getElementById('map-result').textContent = '';
   document.getElementById('play-btn').disabled = true;
   document.getElementById('play-btn').textContent = 'SPIN FIRST';
@@ -39,8 +41,8 @@ function spinSlotMachine() {
     strip.appendChild(div);
   }
 
-  // Determine winning map (no same as last)
-  const winner = getRandomMap(lastMapId);
+  // Determine winning map — can't repeat the last spin result
+  const winner = getRandomMap(lastSpinResult);
   const winnerIndex = reel.findLastIndex(r => r.id === winner);
 
   // Animate
@@ -77,6 +79,7 @@ function spinSlotMachine() {
       if (typeof playSound === 'function') playSound('slot_spin_land');
       isSpinning = false;
       slotChosenMap = winner;
+      lastSpinResult = winner; // remember this spin so next respin can't repeat it
       const map = MAPS[winner];
       document.getElementById('map-result').textContent = `${map.emoji} ${map.name}`;
       spinBtn.classList.remove('spinning');
