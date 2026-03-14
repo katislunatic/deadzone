@@ -1045,36 +1045,128 @@ function togglePause() {
 
 // ── MOBILE CONTROLS ──────────────────────────────────────────────────
 function initMobileControls() {
-  const joystick = document.getElementById('joystick-area');
-  const dot = document.getElementById('joystick-dot');
-  if (!joystick) return;
-  window.joystickDelta = null;
-  let origin = null;
+  // ── LEFT STICK: Movement ──────────────────────────────────────────
+  const moveStick = document.getElementById('joystick-area');
+  const moveDot   = document.getElementById('joystick-dot');
+  if (!moveStick) return;
 
-  joystick.addEventListener('touchstart', e => {
-    const t = e.touches[0];
-    const r = joystick.getBoundingClientRect();
-    origin = { x: r.left+r.width/2, y: r.top+r.height/2 };
+  window.joystickDelta = null;
+  let moveOrigin = null;
+  const STICK_MAX = 50;
+
+  function stickMove(stick, dot, e, maxR, onMove, onEnd) {
+    if (!stick._origin) return;
+    const t = [...e.touches].find(t => t.identifier === stick._touchId);
+    if (!t) return;
+    const dx = t.clientX - stick._origin.x;
+    const dy = t.clientY - stick._origin.y;
+    const d  = Math.min(Math.sqrt(dx*dx+dy*dy), maxR);
+    const ang = Math.atan2(dy, dx);
+    const cx = Math.cos(ang)*d, cy = Math.sin(ang)*d;
+    dot.style.transform = `translate(calc(-50% + ${cx}px), calc(-50% + ${cy}px))`;
+    onMove(ang, d, maxR);
+    e.preventDefault();
+  }
+
+  moveStick.addEventListener('touchstart', e => {
+    const t = e.changedTouches[0];
+    const r = moveStick.getBoundingClientRect();
+    moveStick._origin = { x: r.left+r.width/2, y: r.top+r.height/2 };
+    moveStick._touchId = t.identifier;
   }, {passive:true});
 
-  joystick.addEventListener('touchmove', e => {
-    if (!origin) return;
-    const t = e.touches[0];
-    const dx = t.clientX-origin.x, dy = t.clientY-origin.y;
-    const d  = Math.min(Math.sqrt(dx*dx+dy*dy), 40);
-    const ang = Math.atan2(dy,dx);
-    window.joystickDelta = { x: Math.cos(ang)*(d/40), y: Math.sin(ang)*(d/40) };
-    dot.style.transform = `translate(calc(-50% + ${Math.cos(ang)*d}px), calc(-50% + ${Math.sin(ang)*d}px))`;
+  moveStick.addEventListener('touchmove', e => {
+    stickMove(moveStick, moveDot, e, STICK_MAX, (ang, d, max) => {
+      const str = d / max;
+      window.joystickDelta = { x: Math.cos(ang)*str, y: Math.sin(ang)*str };
+    }, null);
+  }, {passive:false});
+
+  moveStick.addEventListener('touchend', e => {
+    const t = [...e.changedTouches].find(t => t.identifier === moveStick._touchId);
+    if (!t) return;
+    window.joystickDelta = null;
+    moveDot.style.transform = 'translate(-50%,-50%)';
+    moveStick._origin = null;
+  });
+
+  // ── RIGHT STICK: Aim + Fire ───────────────────────────────────────
+  const aimStick = document.getElementById('aim-stick-area');
+  const aimDot   = document.getElementById('aim-stick-dot');
+  if (!aimStick) return;
+
+  const AIM_DEADZONE = 12; // px — must move this far before firing
+
+  aimStick.addEventListener('touchstart', e => {
+    const t = e.changedTouches[0];
+    const r = aimStick.getBoundingClientRect();
+    aimStick._origin = { x: r.left+r.width/2, y: r.top+r.height/2 };
+    aimStick._touchId = t.identifier;
+    aimStick._active = true;
+    // Don't fire immediately — wait for drag
+  }, {passive:true});
+
+  aimStick.addEventListener('touchmove', e => {
+    if (!aimStick._origin) return;
+    const t = [...e.touches].find(t => t.identifier === aimStick._touchId);
+    if (!t) return;
+
+    const dx = t.clientX - aimStick._origin.x;
+    const dy = t.clientY - aimStick._origin.y;
+    const d  = Math.sqrt(dx*dx + dy*dy);
+    const clamp = Math.min(d, STICK_MAX);
+    const ang = Math.atan2(dy, dx);
+
+    aimDot.style.transform = `translate(calc(-50% + ${Math.cos(ang)*clamp}px), calc(-50% + ${Math.sin(ang)*clamp}px))`;
+
+    if (d > AIM_DEADZONE) {
+      // Aim: update player facing in world space
+      // Convert screen center to world, then apply aim angle offset
+      const camX = window._camX || 0, camY = window._camY || 0;
+      const screenCX = canvas.width/2, screenCY = canvas.height/2;
+      // Set virtual mouse far in the aim direction
+      const aimDist = 300;
+      virtualMouseX = screenCX + Math.cos(ang) * aimDist;
+      virtualMouseY = screenCY + Math.sin(ang) * aimDist;
+      mouse.x = virtualMouseX;
+      mouse.y = virtualMouseY;
+
+      // Fire while dragging
+      mouse.down = true;
+      aimStick.classList.add('firing');
+    } else {
+      mouse.down = false;
+      aimStick.classList.remove('firing');
+    }
+
     e.preventDefault();
   }, {passive:false});
 
-  joystick.addEventListener('touchend', () => {
-    window.joystickDelta = null;
-    dot.style.transform = 'translate(-50%,-50%)';
-    origin = null;
+  aimStick.addEventListener('touchend', e => {
+    const t = [...e.changedTouches].find(t => t.identifier === aimStick._touchId);
+    if (!t) return;
+    mouse.down = false;
+    aimStick._origin = null;
+    aimStick._active = false;
+    aimDot.style.transform = 'translate(-50%,-50%)';
+    aimStick.classList.remove('firing');
   });
 
-  const fireBtn = document.getElementById('fire-btn');
-  fireBtn.addEventListener('touchstart', () => mouse.down=true, {passive:true});
-  fireBtn.addEventListener('touchend',   () => mouse.down=false);
+  aimStick.addEventListener('touchcancel', () => {
+    mouse.down = false;
+    aimDot.style.transform = 'translate(-50%,-50%)';
+    aimStick.classList.remove('firing');
+  });
+
+  // ── Action buttons ────────────────────────────────────────────────
+  const reloadBtn = document.getElementById('mobile-reload-btn');
+  if (reloadBtn) {
+    reloadBtn.addEventListener('touchstart', e => { e.preventDefault(); startReload(); }, {passive:false});
+  }
+
+  const squeezeBtn = document.getElementById('mobile-squeeze-btn');
+  if (squeezeBtn) {
+    squeezeBtn.addEventListener('touchstart', e => { e.preventDefault(); keys['ShiftLeft'] = true; }, {passive:false});
+    squeezeBtn.addEventListener('touchend',   e => { keys['ShiftLeft'] = false; });
+  }
 }
