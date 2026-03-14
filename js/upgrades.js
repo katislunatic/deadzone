@@ -119,7 +119,7 @@ const UPGRADES = [
     name: 'Bandolier',
     emoji: '🎖️',
     desc: 'Faster reload speed',
-    category: 'player',
+    category: 'gun_mod',
     cost: 130,
     maxLevel: 2,
     effect: (s) => { s.reloadMult = (s.reloadMult||1) * 0.6; }
@@ -129,7 +129,7 @@ const UPGRADES = [
     name: 'Lucky Coin',
     emoji: '🪙',
     desc: '+50% coin drops from kills',
-    category: 'player',
+    category: 'gun_mod',
     cost: 200,
     maxLevel: 1,
     effect: (s) => { s.coinMult = (s.coinMult||1) * 1.5; }
