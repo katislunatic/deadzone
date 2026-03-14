@@ -475,6 +475,18 @@ const MAPS = {
       { x: 0,    y: 500,  w: 1600, h: 200, color: '#c07040' },
     ],
     spawnX: 800, spawnY: 600,
+    zombieSpawnZones: [
+      // left edge (clear of rock formations)
+      { x: 20,   y: 340, w: 60,  h: 520 },
+      // right edge
+      { x: 1520, y: 340, w: 60,  h: 520 },
+      // top corridor entry (sides only, clear of canyon walls)
+      { x: 200,  y: 120, w: 140, h: 120 },
+      { x: 1260, y: 120, w: 140, h: 120 },
+      // bottom corridor entry
+      { x: 200,  y: 960, w: 140, h: 100 },
+      { x: 1260, y: 960, w: 140, h: 100 },
+    ],
     bgDecals: ['🪨','💀','🦅'],
   },
 
@@ -529,6 +541,12 @@ const MAPS = {
       { x: 1120, y: 120,  w: 480,  h: 50,  color: '#201c18' },
     ],
     spawnX: 800, spawnY: 640,
+    zombieSpawnZones: [
+      { x: 20,   y: 20,  w: 150, h: 1160 },
+      { x: 1430, y: 20,  w: 150, h: 1160 },
+      { x: 150,  y: 20,  w: 1300, h: 80  },
+      { x: 150,  y: 1100, w: 1300, h: 80 },
+    ],
     bgDecals: ['💀','🕯️','🦇'],
   },
 
@@ -651,6 +669,14 @@ const MAPS = {
       { x: 1150, y: 100,  w: 55,   h: 1100, color: '#222830' },
     ],
     spawnX: 800, spawnY: 310,
+    zombieSpawnZones: [
+      // left edge (below sea)
+      { x: 20,   y: 200, w: 60, h: 900 },
+      // right edge
+      { x: 1520, y: 200, w: 60, h: 900 },
+      // bottom edge
+      { x: 100,  y: 1140, w: 1400, h: 50 },
+    ],
     bgDecals: ['⚓','🚢','🐟'],
   },
 
