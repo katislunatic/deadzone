@@ -361,7 +361,6 @@ function loop() {
           const coins = Math.round(z.coinValue * (playerStats.coinMult||1));
           player.coins += coins;
           particles.push(new Particle(z.x, z.y-10, '#f0c040', { life:60, size:1, upward:1, text:`+${coins}🪙` }));
-          particles.push(new Particle(z.x, z.y-24, '#ffe', { life:50, size:1, upward:0.8, text:`+${z.scoreValue}` }));
           addKillFeed(`☠️ +${z.scoreValue} pts`, 'kill');
           // gore
           for (let p=0; p<14; p++) {
