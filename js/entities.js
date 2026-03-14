@@ -118,28 +118,42 @@ class Zombie extends Entity {
     const distToPlayer = Math.sqrt(dx*dx + dy*dy);
     this.facingAngle = Math.atan2(dy, dx);
 
-    // Stuck detection — check every 30 frames
-    if (this.age % 30 === 0) {
+    // Stuck detection — check every 20 frames
+    if (this.age % 20 === 0) {
       const moved = dist(this.x, this.y, this.lastX, this.lastY);
-      if (moved < this.speed * 4 && distToPlayer > 40) {
+      if (moved < this.speed * 3 && distToPlayer > 40) {
         this.stuckTimer++;
-        if (this.stuckTimer >= 2) {
-          // Pick a waypoint perpendicular to the obstacle — try 8 directions
-          const angles = [Math.PI/2, -Math.PI/2, Math.PI*3/4, -Math.PI*3/4,
-                          Math.PI/4, -Math.PI/4, Math.PI, 0];
+        if (this.stuckTimer >= 1 && !this.waypoint) {
+          // Try perpendicular directions first, then wider arcs
+          // Prefer the side that gets us closer to the player after moving
           const baseAngle = Math.atan2(dy, dx);
-          for (const offset of angles) {
+          const candidates = [
+            Math.PI/2, -Math.PI/2,
+            Math.PI*2/3, -Math.PI*2/3,
+            Math.PI/3, -Math.PI/3,
+          ];
+          let bestWP = null;
+          let bestScore = Infinity;
+          for (const offset of candidates) {
             const tryAngle = baseAngle + offset;
-            const wpx = this.x + Math.cos(tryAngle) * 80;
-            const wpy = this.y + Math.sin(tryAngle) * 80;
-            const clampedX = Math.max(20, Math.min(WORLD_W-20, wpx));
-            const clampedY = Math.max(20, Math.min(WORLD_H-20, wpy));
-            if (!obstacles.some(o => circleRect(clampedX, clampedY, this.radius+4, o))) {
-              this.waypoint = { x: clampedX, y: clampedY };
-              this.waypointTimer = 45;
-              this.stuckTimer = 0;
-              break;
+            // Try multiple distances — find one that's actually clear
+            for (const wpDist of [100, 160, 220]) {
+              const wpx = Math.max(20, Math.min(WORLD_W-20, this.x + Math.cos(tryAngle) * wpDist));
+              const wpy = Math.max(20, Math.min(WORLD_H-20, this.y + Math.sin(tryAngle) * wpDist));
+              if (!obstacles.some(o => circleRect(wpx, wpy, this.radius+6, o))) {
+                // Score by how much closer to player this gets us
+                const score = dist(wpx, wpy, px, py);
+                if (score < bestScore) {
+                  bestScore = score;
+                  bestWP = { x: wpx, y: wpy };
+                }
+                break;
+              }
             }
+          }
+          if (bestWP) {
+            this.waypoint = bestWP;
+            this.stuckTimer = 0;
           }
         }
       } else {
@@ -150,12 +164,12 @@ class Zombie extends Entity {
 
     // Navigate to waypoint if we have one, else go straight to player
     let targetX = px, targetY = py;
-    if (this.waypoint && this.waypointTimer > 0) {
-      this.waypointTimer--;
+    if (this.waypoint) {
       targetX = this.waypoint.x;
       targetY = this.waypoint.y;
-      // Clear waypoint when we reach it
-      if (dist(this.x, this.y, this.waypoint.x, this.waypoint.y) < 20) {
+      const wpDist = dist(this.x, this.y, this.waypoint.x, this.waypoint.y);
+      // Only clear waypoint when we actually reach it OR we're now closer to player directly
+      if (wpDist < 24) {
         this.waypoint = null;
       }
     }
