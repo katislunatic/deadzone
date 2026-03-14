@@ -68,6 +68,7 @@
 <!-- ─────────────────────────────────────────
      HUD
 ──────────────────────────────────────────── -->
+<!-- Top HUD: score, wave, coins, map, zombies -->
 <div id="hud" style="display:none;">
   <div class="hud-block">
     <div>
@@ -76,24 +77,10 @@
     </div>
   </div>
 
-  <div class="hud-block" id="health-bar-wrap">
-    <div>
-      <div class="hud-label">HP</div>
-      <div id="health-bar"><div id="health-fill" style="width:100%"></div></div>
-    </div>
-  </div>
-
   <div class="hud-block">
     <div>
       <div class="hud-label">Wave</div>
       <div class="wave-badge" id="hud-wave">WAVE 1</div>
-    </div>
-  </div>
-
-  <div class="hud-block">
-    <div>
-      <div class="hud-label">Ammo</div>
-      <div class="hud-value ammo-display" id="hud-ammo">6/6</div>
     </div>
   </div>
 
@@ -115,6 +102,22 @@
     <div>
       <div class="hud-label">Zombies</div>
       <div class="hud-value" style="font-size:0.85rem;color:#c0392b" id="hud-zombies">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom HUD: HP and Ammo -->
+<div id="hud-bottom" style="display:none;">
+  <div class="hud-block" id="health-bar-wrap">
+    <div>
+      <div class="hud-label">HP</div>
+      <div id="health-bar"><div id="health-fill" style="width:100%"></div></div>
+    </div>
+  </div>
+  <div class="hud-block">
+    <div>
+      <div class="hud-label">Ammo</div>
+      <div class="hud-value ammo-display" id="hud-ammo">6/6</div>
     </div>
   </div>
 </div>
