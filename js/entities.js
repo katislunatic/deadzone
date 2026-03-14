@@ -352,7 +352,6 @@ class Civilian extends Entity {
     if (this.scream > 0) this.scream--;
   }
   draw(ctx) {
-    const P = 2;
     const ip = this.infected ? 1 - (this.infectTimer / 300) : 0;
 
     // blend skin/shirt toward zombie colors as infection progresses
