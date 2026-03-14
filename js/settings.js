@@ -145,8 +145,8 @@ function syncPauseSettings() {
 function togglePauseSettings() {
   const panel = document.getElementById('pause-settings-panel');
   const btn = document.getElementById('pause-settings-btn');
-  const isOpen = panel.style.display !== 'none';
-  panel.style.display = isOpen ? 'none' : 'block';
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
   btn.classList.toggle('open', !isOpen);
   if (!isOpen) syncPauseSettings();
 }
