@@ -355,15 +355,33 @@ function loop() {
 
   // Squeeze mechanic
   const squeezePressed = keybinds && keys[keybinds.squeeze];
+  const wasSquezing = player.squeezing;
   if (squeezePressed && player.squeezeStamina > 0) {
     player.squeezing = true;
-    player.radius = 5;               // tiny radius — slips through gaps
+    player.radius = 5;
     player.squeezeStamina = Math.max(0, player.squeezeStamina - 1.4);
   } else {
     player.squeezing = false;
     player.radius = player.baseRadius;
     // Regen stamina when not squeezing
     if (player.squeezeStamina < 100) player.squeezeStamina = Math.min(100, player.squeezeStamina + 0.35);
+
+    // If we just released squeeze, push player out of any overlapping obstacle
+    if (wasSquezing) {
+      for (const obs of obstacles) {
+        if (!circleRect(player.x, player.y, player.radius, obs)) continue;
+        // Find closest edge and push out
+        const cx = obs.x + obs.w / 2;
+        const cy = obs.y + obs.h / 2;
+        const overlapX = (obs.w / 2 + player.radius) - Math.abs(player.x - cx);
+        const overlapY = (obs.h / 2 + player.radius) - Math.abs(player.y - cy);
+        if (overlapX < overlapY) {
+          player.x += player.x < cx ? -overlapX : overlapX;
+        } else {
+          player.y += player.y < cy ? -overlapY : overlapY;
+        }
+      }
+    }
   }
 
   // Player facing
@@ -685,6 +703,12 @@ function updateHUD() {
   if (sqFill) {
     sqFill.style.width = player.squeezeStamina + '%';
     sqFill.classList.toggle('draining', player.squeezing);
+  }
+  // Update squeeze label with current keybind
+  const sqLabel = document.querySelector('#squeeze-bar-wrap .hud-label');
+  if (sqLabel && keybinds) {
+    const keyName = typeof getKeyLabel === 'function' ? getKeyLabel(keybinds.squeeze) : 'SHIFT';
+    sqLabel.innerHTML = `Squeeze <span style="font-size:0.6rem;color:var(--dim)">[${keyName}]</span>`;
   }
 
   // Weapon slots
