@@ -120,6 +120,14 @@
       </div>
     </div>
 
+    <div class="settings-section">
+      <div class="settings-section-label">
+        Keybinds
+        <button onclick="resetAllKeybinds()" style="float:right; font-family:'Share Tech Mono',monospace; font-size:0.6rem; background:none; border:1px solid #3a2e1a; color:var(--dim); border-radius:3px; padding:2px 6px; cursor:pointer; letter-spacing:0.05em;">RESET ALL</button>
+      </div>
+      <div id="keybinds-container"></div>
+    </div>
+
     <button class="btn btn-primary" onclick="closeSettings()" style="width:100%; margin-top:1rem;">
       SAVE & CLOSE
     </button>
@@ -286,6 +294,14 @@
         </div>
       </div>
     </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label">
+        Keybinds
+        <button onclick="resetAllKeybinds()" style="float:right; font-family:'Share Tech Mono',monospace; font-size:0.6rem; background:none; border:1px solid #3a2e1a; color:var(--dim); border-radius:3px; padding:2px 6px; cursor:pointer; letter-spacing:0.05em;">RESET ALL</button>
+      </div>
+      <div id="p-keybinds-container"></div>
+    </div>
   </div>
 </div>
 
@@ -305,6 +321,7 @@
      SCRIPTS
 ──────────────────────────────────────────── -->
 <script src="js/settings.js"></script>
+<script src="js/keybinds.js"></script>
 <script src="js/sounds.js"></script>
 <script src="js/maps.js"></script>
 <script src="js/upgrades.js"></script>
