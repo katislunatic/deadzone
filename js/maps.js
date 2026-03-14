@@ -220,11 +220,24 @@ const MAPS = {
       { x: 1490, y: 700,  w: 30,  h: 85,  color: '#2a2010', round: true },
       { x: 500,  y: 700,  w: 28,  h: 80,  color: '#2a2010', round: true },
       { x: 1050, y: 750,  w: 28,  h: 80,  color: '#2a2010', round: true },
-      // perimeter fence
-      { x: 20,   y: 20,   w: 1560, h: 16,  color: '#2a2020' },
-      { x: 20,   y: 1165, w: 1560, h: 16,  color: '#2a2020' },
-      { x: 20,   y: 20,   w: 16,   h: 1160, color: '#2a2020' },
-      { x: 1565, y: 20,   w: 16,   h: 1160, color: '#2a2020' },
+      // perimeter fence — broken segments with gaps so zombies can enter
+      // top fence (gaps at ~400 and ~800 and ~1200)
+      { x: 20,  y: 20, w: 350, h: 14, color: '#2a2020' },
+      { x: 450, y: 20, w: 300, h: 14, color: '#2a2020' },
+      { x: 850, y: 20, w: 300, h: 14, color: '#2a2020' },
+      { x: 1250,y: 20, w: 330, h: 14, color: '#2a2020' },
+      // bottom fence (gaps at ~400 and ~900)
+      { x: 20,  y: 1168, w: 340, h: 14, color: '#2a2020' },
+      { x: 450, y: 1168, w: 400, h: 14, color: '#2a2020' },
+      { x: 940, y: 1168, w: 640, h: 14, color: '#2a2020' },
+      // left fence (gaps at ~400 and ~800)
+      { x: 20,  y: 20,  w: 14, h: 340, color: '#2a2020' },
+      { x: 20,  y: 450, w: 14, h: 300, color: '#2a2020' },
+      { x: 20,  y: 840, w: 14, h: 342, color: '#2a2020' },
+      // right fence (gaps at ~400 and ~800)
+      { x: 1568, y: 20,  w: 14, h: 340, color: '#2a2020' },
+      { x: 1568, y: 450, w: 14, h: 300, color: '#2a2020' },
+      { x: 1568, y: 840, w: 14, h: 342, color: '#2a2020' },
       // coffins
       { x: 420,  y: 560,  w: 75,  h: 38,  color: '#3d2810' },
       { x: 1080, y: 600,  w: 75,  h: 38,  color: '#3d2810' },
