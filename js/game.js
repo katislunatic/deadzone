@@ -59,17 +59,19 @@ function init() {
   // Pointer-lock mouse movement: accumulate virtual position
   document.addEventListener('mousemove', e => {
     if (document.pointerLockElement === canvas) {
-      // movementX/Y are in screen pixels; convert to canvas logical pixels
+      // Accumulate movement with no clamping — full 360 degree aim
       const rect = canvas.getBoundingClientRect();
       const displayScaleX = rect.width  / canvas.width;
       const displayScaleY = rect.height / canvas.height;
-      virtualMouseX = Math.max(0, Math.min(canvas.width,  virtualMouseX + e.movementX / displayScaleX));
-      virtualMouseY = Math.max(0, Math.min(canvas.height, virtualMouseY + e.movementY / displayScaleY));
+      virtualMouseX += e.movementX / displayScaleX;
+      virtualMouseY += e.movementY / displayScaleY;
       mouse.x = virtualMouseX;
       mouse.y = virtualMouseY;
-      // Move the SVG crosshair to match
-      crosshairEl.style.left = virtualMouseX + 'px';
-      crosshairEl.style.top  = virtualMouseY + 'px';
+      // Keep crosshair clamped visually to the screen display area
+      const clampedX = Math.max(rect.left, Math.min(rect.right,  rect.left + (virtualMouseX / canvas.width)  * rect.width));
+      const clampedY = Math.max(rect.top,  Math.min(rect.bottom, rect.top  + (virtualMouseY / canvas.height) * rect.height));
+      crosshairEl.style.left = clampedX + 'px';
+      crosshairEl.style.top  = clampedY + 'px';
     } else {
       // Fallback when not locked (menus etc.)
       crosshairEl.style.left = e.clientX + 'px';
