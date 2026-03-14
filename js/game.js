@@ -112,7 +112,7 @@ function startGame(mapIdArg) {
   wave = 0; score = 0; frameCount = 0; totalKills = 0; civKills = 0;
 
   // Spawn civs
-  for (let i=0; i<8; i++) spawnCivilian();
+  for (let i=0; i<3; i++) spawnCivilian();
 
   document.getElementById('menu-screen').style.display = 'none';
   document.getElementById('shop-screen').style.display = 'none';
@@ -355,7 +355,7 @@ function loop() {
   }
 
   // Respawn civilians
-  if (civilians.length < 6 && frameCount % 300 === 0) spawnCivilian();
+  if (civilians.length < 3 && frameCount % 600 === 0) spawnCivilian();
 
   // Wave clear
   if (zombiesSpawned >= zombiesLeftThisWave && zombies.length === 0) {
