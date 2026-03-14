@@ -591,6 +591,7 @@ function closeShop() {
 
 // ── GAME OVER ─────────────────────────────────────────────────────────
 function showGameOver() {
+  exitPointerLock();
   const el = document.getElementById('gameover-screen');
   // Force animation replay by resetting then re-displaying
   el.style.display = 'none';
