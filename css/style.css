@@ -389,22 +389,27 @@ body {
 
 .go-you {
   display: inline-block;
-  animation: slamLeft 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+  animation: slamDown 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
 }
 
 .go-died {
   display: inline-block;
-  animation: slamRight 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+  animation: slamDown 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.42s both;
 }
 
-@keyframes slamLeft {
-  from { transform: translateX(-120vw); opacity: 0; }
-  to   { transform: translateX(0);      opacity: 1; }
-}
-
-@keyframes slamRight {
-  from { transform: translateX(120vw);  opacity: 0; }
-  to   { transform: translateX(0);      opacity: 1; }
+@keyframes slamDown {
+  from {
+    transform: translateY(-140vh) rotate(-15deg) skewX(-10deg);
+    opacity: 0;
+  }
+  80% {
+    transform: translateY(8px) rotate(1deg) skewX(1deg);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(0) rotate(0deg) skewX(0deg);
+    opacity: 1;
+  }
 }
 
 .go-shockwave {
