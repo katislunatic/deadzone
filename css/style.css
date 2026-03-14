@@ -158,6 +158,11 @@ body {
   box-shadow: 0 4px 0 #5a1a12, var(--shadow);
   width: 100%;
 }
+.menu-buttons .btn-primary,
+#pause-overlay .btn-primary,
+#gameover-screen .btn-primary {
+  width: auto;
+}
 
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #5a1a12, var(--shadow); }
 .btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #5a1a12; }
