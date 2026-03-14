@@ -177,6 +177,7 @@ function startGame(mapIdArg) {
   const sp = findClearSpawn(mapData.spawnX || WORLD_W/2, mapData.spawnY || WORLD_H/2);
   player = new Player(sp.x, sp.y);
   selectedWeaponId = 'revolver';
+  if (player) player.weaponId = 'revolver';
   player.coins = 0;
   bullets = []; zombies = []; civilians = []; particles = []; dustParticles = [];
   wave = 0; score = 0; frameCount = 0; totalKills = 0; civKills = 0;
@@ -242,6 +243,7 @@ function selectWeapon(id) {
   if (!wep) return;
   if (id !== selectedWeaponId) playSound('weapon_switch');
   selectedWeaponId = id;
+  if (player) player.weaponId = id;
   // Reset clip for newly selected weapon
   maxClip = (wep.stats.clip || 6) + (playerStats.clipBonus || 0);
   currentClip = maxClip;
@@ -945,6 +947,7 @@ function buyUpgrade(id) {
   // If bought a weapon, auto-select it
   if (upg.category === 'weapon') {
     selectedWeaponId = upg.id;
+    if (player) player.weaponId = upg.id;
   }
 
   // Always refresh clip size after any purchase
