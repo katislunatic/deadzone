@@ -997,3 +997,24 @@ body {
   border-color: var(--blood);
   color: var(--blood);
 }
+
+/* ── SQUEEZE BAR ─────────────────────────────── */
+#squeeze-bar {
+  width: 120px; height: 10px;
+  background: #0a0a1a;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+#squeeze-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4488ff, #88ccff);
+  border-radius: 999px;
+  transition: width 0.1s;
+}
+
+#squeeze-fill.draining {
+  background: linear-gradient(90deg, #ff8844, #ffcc44);
+  box-shadow: 0 0 6px rgba(255,180,60,0.6);
+}
