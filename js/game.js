@@ -126,7 +126,23 @@ function startGame(mapIdArg) {
   upgrades = getUpgrades();
   playerStats = { gunDamageMult:1, fireRateMult:1, clipBonus:0, reloadMult:1, coinMult:1 };
 
-  player = new Player(mapData.spawnX || WORLD_W/2, mapData.spawnY || WORLD_H/2);
+  // Find a clear spawn point — try the defined spot first, then search nearby
+  function findClearSpawn(sx, sy) {
+    const r = 20;
+    // Try a spiral search outward from the target point
+    for (let radius = 0; radius < 300; radius += 20) {
+      const steps = radius === 0 ? 1 : Math.ceil(2 * Math.PI * radius / 20);
+      for (let s = 0; s < steps; s++) {
+        const angle = (s / steps) * Math.PI * 2;
+        const tx = sx + Math.cos(angle) * radius;
+        const ty = sy + Math.sin(angle) * radius;
+        if (!obstacles.some(o => circleRect(tx, ty, r, o))) return { x: tx, y: ty };
+      }
+    }
+    return { x: sx, y: sy }; // fallback
+  }
+  const sp = findClearSpawn(mapData.spawnX || WORLD_W/2, mapData.spawnY || WORLD_H/2);
+  player = new Player(sp.x, sp.y);
   player.coins = 0;
   bullets = []; zombies = []; civilians = []; particles = []; dustParticles = [];
   wave = 0; score = 0; frameCount = 0; totalKills = 0; civKills = 0;
