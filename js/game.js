@@ -203,6 +203,7 @@ function nextWave() {
   el.textContent = `WAVE ${wave}`;
   el.style.opacity = 1;
   setTimeout(() => el.style.opacity = 0, 2000);
+  playSound('wave_start');
 
   // Setup weapon
   const activeWeapon = getActiveWeapon();
@@ -227,6 +228,7 @@ function getOwnedWeapons() {
 function selectWeapon(id) {
   const wep = upgrades.find(u => u.id === id && u.level > 0);
   if (!wep) return;
+  if (id !== selectedWeaponId) playSound('weapon_switch');
   selectedWeaponId = id;
   // Reset clip for newly selected weapon
   maxClip = (wep.stats.clip || 6) + (playerStats.clipBonus || 0);
@@ -271,12 +273,15 @@ function tryShoot() {
   const fireRate = Math.max(4, stats.fireRate * (playerStats.fireRateMult||1));
   if (frameCount - lastShotFrame < fireRate) return;
   if (reloading) return;
-  if (currentClip <= 0) { startReload(); return; }
+  if (currentClip <= 0) { playSound('empty_click'); startReload(); return; }
 
   const angle = player.facing;
   const dmg = stats.damage * (playerStats.gunDamageMult||1);
   const spd = stats.bulletSpeed;
   const pellets = stats.pellets || 1;
+  // Gunshot sound
+  const sndMap = { revolver:'shoot_revolver', shotgun:'shoot_shotgun', rifle:'shoot_rifle', smg:'shoot_smg' };
+  playSound(sndMap[wep.id] || 'shoot_revolver');
 
   for (let p=0; p<pellets; p++) {
     const spread = (Math.random()-0.5) * stats.spread * 2;
@@ -303,6 +308,7 @@ function tryShoot() {
 function startReload() {
   if (reloading || currentClip === maxClip) return;
   reloading = true; reloadProgress = 0;
+  playSound('reload_start');
 }
 
 // ── MAIN LOOP ─────────────────────────────────────────────────────────
@@ -319,6 +325,7 @@ function loop() {
     reloadProgress++;
     if (reloadProgress >= reloadFrames) {
       reloading = false; reloadProgress = 0; currentClip = maxClip;
+      playSound('reload_done');
       updateHUD();
     }
   }
@@ -369,7 +376,8 @@ function loop() {
             totalKills++;
             const coins = Math.round(z.coinValue * (playerStats.coinMult||1));
             player.coins += coins;
-            particles.push(new Particle(z.x, z.y-10, '#f0c040', { life:60, size:1, upward:1, text:`+${coins}🪙` }));
+            playSound('coin_pickup');
+          particles.push(new Particle(z.x, z.y-10, '#f0c040', { life:60, size:1, upward:1, text:`+${coins}🪙` }));
             addKillFeed(`🐴 +${z.scoreValue} pts`, 'kill');
           }
         }
@@ -391,6 +399,7 @@ function loop() {
     if (touching && z.attackCooldown<=0) {
       player.takeDamage(z.damage);
       z.attackCooldown = 40;
+      playSound('player_hurt');
       flashDamage();
     }
     if (!z.alive) zombies.splice(i,1);
@@ -409,6 +418,7 @@ function loop() {
       for (let p = 0; p < 12; p++) {
         particles.push(new Particle(c.x, c.y, '#4aaa3a', { spread:6, life:35, size:4 }));
       }
+      playSound('civilian_turned');
       addKillFeed('😱 Civilian turned!', 'civ');
     }
   }
@@ -424,6 +434,7 @@ function loop() {
       if (circlesOverlap(b, z)) {
         z.hp -= b.damage;
         b.alive = false;
+        playSound(z.hp <= 0 ? 'zombie_die' : 'zombie_hit');
         // blood splash
         for (let p=0; p<8; p++) {
           particles.push(new Particle(z.x, z.y, '#c0392b', { spread:5, life:25, size:4 }));
@@ -434,6 +445,7 @@ function loop() {
           totalKills++;
           const coins = Math.round(z.coinValue * (playerStats.coinMult||1));
           player.coins += coins;
+          playSound('coin_pickup');
           particles.push(new Particle(z.x, z.y-10, '#f0c040', { life:60, size:1, upward:1, text:`+${coins}🪙` }));
           addKillFeed(`☠️ +${z.scoreValue} pts`, 'kill');
           // gore
@@ -714,6 +726,7 @@ function buyUpgrade(id) {
   if (!upg || player.coins < upg.cost || upg.level >= upg.maxLevel) return;
   player.coins -= upg.cost;
   upg.level++;
+  playSound('shop_buy');
 
   if (upg.effect) {
     // Route effect to the right target based on category
@@ -753,6 +766,7 @@ function closeShop() {
 // ── GAME OVER ─────────────────────────────────────────────────────────
 function showGameOver() {
   exitPointerLock();
+  playSound('player_die');
   const el = document.getElementById('gameover-screen');
   // Force animation replay by resetting then re-displaying
   el.style.display = 'none';
