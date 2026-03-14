@@ -107,8 +107,6 @@ class Zombie extends Entity {
     this.coinValue = this.type === 'big' ? 15 : 5;
     this.facingAngle = 0;
     // Pathfinding state
-    this.stuckTimer = 0;
-    this.lastX = x; this.lastY = y;
     this.waypoint = null;
     this.waypointTimer = 0;
   }
@@ -118,73 +116,88 @@ class Zombie extends Entity {
     const distToPlayer = Math.sqrt(dx*dx + dy*dy);
     this.facingAngle = Math.atan2(dy, dx);
 
-    // Stuck detection — check every 20 frames
-    if (this.age % 20 === 0) {
-      const moved = dist(this.x, this.y, this.lastX, this.lastY);
-      if (moved < this.speed * 3 && distToPlayer > 40) {
-        this.stuckTimer++;
-        if (this.stuckTimer >= 1 && !this.waypoint) {
-          // Try perpendicular directions first, then wider arcs
-          // Prefer the side that gets us closer to the player after moving
-          const baseAngle = Math.atan2(dy, dx);
-          const candidates = [
-            Math.PI/2, -Math.PI/2,
-            Math.PI*2/3, -Math.PI*2/3,
-            Math.PI/3, -Math.PI/3,
-          ];
-          let bestWP = null;
-          let bestScore = Infinity;
-          for (const offset of candidates) {
-            const tryAngle = baseAngle + offset;
-            // Try multiple distances — find one that's actually clear
-            for (const wpDist of [100, 160, 220]) {
-              const wpx = Math.max(20, Math.min(WORLD_W-20, this.x + Math.cos(tryAngle) * wpDist));
-              const wpy = Math.max(20, Math.min(WORLD_H-20, this.y + Math.sin(tryAngle) * wpDist));
-              if (!obstacles.some(o => circleRect(wpx, wpy, this.radius+6, o))) {
-                // Score by how much closer to player this gets us
-                const score = dist(wpx, wpy, px, py);
-                if (score < bestScore) {
-                  bestScore = score;
-                  bestWP = { x: wpx, y: wpy };
-                }
-                break;
-              }
-            }
-          }
-          if (bestWP) {
-            this.waypoint = bestWP;
-            this.stuckTimer = 0;
-          }
-        }
-      } else {
-        this.stuckTimer = 0;
-      }
-      this.lastX = this.x; this.lastY = this.y;
-    }
+    // --- Pathfinding: cast rays to find a clear path to player ---
+    // Check if direct path is blocked
+    const directBlocked = this._pathBlocked(this.x, this.y, px, py, obstacles);
 
-    // Navigate to waypoint if we have one, else go straight to player
     let targetX = px, targetY = py;
-    if (this.waypoint) {
-      targetX = this.waypoint.x;
-      targetY = this.waypoint.y;
-      const wpDist = dist(this.x, this.y, this.waypoint.x, this.waypoint.y);
-      // Only clear waypoint when we actually reach it OR we're now closer to player directly
-      if (wpDist < 24) {
-        this.waypoint = null;
+
+    if (directBlocked) {
+      // Maintain or find a waypoint
+      if (!this.waypoint || this.waypointTimer <= 0) {
+        this.waypoint = this._findWaypoint(px, py, obstacles);
+        this.waypointTimer = 120;
       }
+      if (this.waypoint) {
+        targetX = this.waypoint.x;
+        targetY = this.waypoint.y;
+        this.waypointTimer--;
+        // Reached waypoint or direct path is now clear — drop it
+        if (dist(this.x, this.y, this.waypoint.x, this.waypoint.y) < 28
+            || !this._pathBlocked(this.x, this.y, px, py, obstacles)) {
+          this.waypoint = null;
+          this.waypointTimer = 0;
+        }
+      }
+    } else {
+      this.waypoint = null;
+      this.waypointTimer = 0;
     }
 
     const tdx = targetX - this.x, tdy = targetY - this.y;
     const tdist = Math.sqrt(tdx*tdx + tdy*tdy);
     if (tdist > 1) {
-      this.vx = (tdx / tdist) * this.speed + Math.sin(this.wobble)*0.3;
-      this.vy = (tdy / tdist) * this.speed + Math.cos(this.wobble)*0.3;
+      this.vx = (tdx / tdist) * this.speed + Math.sin(this.wobble)*0.25;
+      this.vy = (tdy / tdist) * this.speed + Math.cos(this.wobble)*0.25;
     }
     this.facingAngle = Math.atan2(this.vy, this.vx);
     this.move(obstacles);
     if (this.attackCooldown > 0) this.attackCooldown--;
     return distToPlayer < this.radius + 14;
   }
+  _pathBlocked(x1, y1, x2, y2, obstacles) {
+    // Cast several points along the line to check for obstacles
+    const steps = 8;
+    for (let i = 1; i < steps; i++) {
+      const t = i / steps;
+      const cx = x1 + (x2 - x1) * t;
+      const cy = y1 + (y2 - y1) * t;
+      if (obstacles.some(o => circleRect(cx, cy, this.radius + 4, o))) return true;
+    }
+    return false;
+  }
+
+  _findWaypoint(px, py, obstacles) {
+    const toPlayer = Math.atan2(py - this.y, px - this.x);
+    // Try perpendicular offsets at increasing distances
+    // Pick whichever side gets us closer to the player
+    const sides = [1, -1];
+    const distances = [80, 140, 200];
+    let bestWP = null, bestDist = Infinity;
+
+    for (const side of sides) {
+      for (const d of distances) {
+        const angle = toPlayer + side * Math.PI / 2;
+        const wpx = Math.max(this.radius+5, Math.min(WORLD_W-this.radius-5,
+                    this.x + Math.cos(angle) * d));
+        const wpy = Math.max(this.radius+5, Math.min(WORLD_H-this.radius-5,
+                    this.y + Math.sin(angle) * d));
+        if (!obstacles.some(o => circleRect(wpx, wpy, this.radius + 6, o))) {
+          // Also check that we can actually walk toward this waypoint
+          if (!this._pathBlocked(this.x, this.y, wpx, wpy, obstacles)) {
+            const score = dist(wpx, wpy, px, py);
+            if (score < bestDist) {
+              bestDist = score;
+              bestWP = { x: wpx, y: wpy };
+            }
+            break; // found a clear distance for this side, move to other side
+          }
+        }
+      }
+    }
+    return bestWP;
+  }
+
   draw(ctx) {
     ctx.save();
     ctx.translate(this.x, this.y);
