@@ -314,9 +314,34 @@ function loop() {
 
   // Shoot
   if (mouse.down || keys['Space']) tryShoot();
-  if (wep.stats.auto && (mouse.down || keys['Space'])) tryShoot();
   if (keys['KeyR']) startReload();
   if (player.invincible > 0) player.invincible--;
+
+  // Horse stomp — damages zombies player runs over
+  if (player.onHorse) {
+    for (let i = zombies.length-1; i >= 0; i--) {
+      const z = zombies[i];
+      if (dist(player.x, player.y, z.x, z.y) < player.radius + z.radius + 5) {
+        const moving = Math.abs(player.vx) > 0.5 || Math.abs(player.vy) > 0.5;
+        if (moving && z.attackCooldown <= 0) {
+          z.hp -= 15;
+          z.attackCooldown = 20; // reuse cooldown to prevent stomp spam
+          for (let p = 0; p < 5; p++) {
+            particles.push(new Particle(z.x, z.y, '#c0392b', { spread:4, life:20, size:3 }));
+          }
+          if (z.hp <= 0) {
+            z.alive = false;
+            score += z.scoreValue;
+            totalKills++;
+            const coins = Math.round(z.coinValue * (playerStats.coinMult||1));
+            player.coins += coins;
+            particles.push(new Particle(z.x, z.y-10, '#f0c040', { life:60, size:1, upward:1, text:`+${coins}🪙` }));
+            addKillFeed(`🐴 +${z.scoreValue} pts`, 'kill');
+          }
+        }
+      }
+    }
+  }
 
   // Spawn zombies
   const spawnInterval = Math.max(30, 80 - wave*4);
