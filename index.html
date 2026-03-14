@@ -146,9 +146,15 @@
      GAME OVER
 ──────────────────────────────────────────── -->
 <div id="gameover-screen">
-  <div class="go-title">YOU DIED</div>
-  <div class="go-stats" id="go-score"></div>
-  <div style="display:flex; gap:1rem; margin-top:1rem;">
+  <div class="go-title">
+    <span class="go-you">YOU</span>
+    <span class="go-died">DIED</span>
+    <div class="go-shockwave"></div>
+  </div>
+  <div class="go-stats-wrap">
+    <div class="go-stats" id="go-score"></div>
+  </div>
+  <div class="go-buttons-wrap" style="display:flex; gap:1rem; margin-top:1rem;">
     <button class="btn btn-primary" onclick="goToMenu()" style="padding:0.75rem 2rem">
       MAIN MENU
     </button>
