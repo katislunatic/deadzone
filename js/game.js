@@ -8,8 +8,6 @@ let mouse = { x: 400, y: 300, down: false };
 let upgrades, playerStats;
 let lastMapId = null;
 let waveAnnounceTimer = 0;
-let locatorTimer = 0;      // counts up when <=3 zombies remain
-let lastLocatorCount = 0;  // tracks zombie count to reset timer on a kill
 let zombiesLeftThisWave = 0;
 let zombiesSpawned = 0;
 let spawnTimer = 0;
@@ -43,14 +41,13 @@ function init() {
   canvas = document.getElementById('game-canvas');
   ctx = canvas.getContext('2d');
   crosshairEl = document.getElementById('crosshair');
-  if (isMobile() && crosshairEl) crosshairEl.style.display = 'none';
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
   // Pointer Lock change handler
   document.addEventListener('pointerlockchange', () => {
     // When lock is released while playing, ESC was pressed — auto pause
-    if (gameState === 'playing' && document.pointerLockElement !== canvas && !isMobile()) {
+    if (gameState === 'playing' && document.pointerLockElement !== canvas) {
       gameState = 'paused';
       document.getElementById('pause-overlay').style.display = 'flex';
       if (typeof syncPauseSettings === 'function') syncPauseSettings();
@@ -134,28 +131,20 @@ function init() {
 const VIEWPORT_W = 800;
 const VIEWPORT_H = 600;
 
-function isMobile() {
-  return window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 900;
-}
-
 function resizeCanvas() {
+  // Scale up the 800x600 viewport to fill the screen
+  const scaleX = window.innerWidth  / VIEWPORT_W;
+  const scaleY = window.innerHeight / VIEWPORT_H;
+  const displayScale = Math.min(scaleX, scaleY);
+
   canvas.width  = VIEWPORT_W;
   canvas.height = VIEWPORT_H;
+  canvas.style.width  = Math.round(VIEWPORT_W * displayScale) + 'px';
+  canvas.style.height = Math.round(VIEWPORT_H * displayScale) + 'px';
   canvas.style.position = 'fixed';
+  canvas.style.left = Math.round((window.innerWidth  - VIEWPORT_W * displayScale) / 2) + 'px';
+  canvas.style.top  = Math.round((window.innerHeight - VIEWPORT_H * displayScale) / 2) + 'px';
   canvas.style.imageRendering = 'crisp-edges';
-
-  if (isMobile()) {
-    canvas.style.width  = window.innerWidth + 'px';
-    canvas.style.height = window.innerHeight + 'px';
-    canvas.style.left = '0';
-    canvas.style.top  = '0';
-  } else {
-    const displayScale = Math.min(window.innerWidth / VIEWPORT_W, window.innerHeight / VIEWPORT_H);
-    canvas.style.width  = Math.round(VIEWPORT_W * displayScale) + 'px';
-    canvas.style.height = Math.round(VIEWPORT_H * displayScale) + 'px';
-    canvas.style.left = Math.round((window.innerWidth  - VIEWPORT_W * displayScale) / 2) + 'px';
-    canvas.style.top  = Math.round((window.innerHeight - VIEWPORT_H * displayScale) / 2) + 'px';
-  }
 }
 
 // ── START GAME ────────────────────────────────────────────────────────
@@ -186,7 +175,6 @@ function startGame(mapIdArg) {
   const sp = findClearSpawn(mapData.spawnX || WORLD_W/2, mapData.spawnY || WORLD_H/2);
   player = new Player(sp.x, sp.y);
   selectedWeaponId = 'revolver';
-  if (player) player.weaponId = 'revolver';
   player.coins = 0;
   bullets = []; zombies = []; civilians = []; particles = []; dustParticles = [];
   wave = 0; score = 0; frameCount = 0; totalKills = 0; civKills = 0;
@@ -207,7 +195,7 @@ function startGame(mapIdArg) {
   mouse.y = virtualMouseY;
 
   gameState = 'playing';
-  if (!isMobile()) requestPointerLock();
+  requestPointerLock();
   nextWave();
 }
 
@@ -218,8 +206,6 @@ function nextWave() {
   zombiesSpawned = 0;
   spawnTimer = 0;
   waveAnnounceTimer = 120;
-  locatorTimer = 0;
-  lastLocatorCount = 0;
 
   const el = document.getElementById('wave-announce');
   el.textContent = `WAVE ${wave}`;
@@ -252,7 +238,6 @@ function selectWeapon(id) {
   if (!wep) return;
   if (id !== selectedWeaponId) playSound('weapon_switch');
   selectedWeaponId = id;
-  if (player) player.weaponId = id;
   // Reset clip for newly selected weapon
   maxClip = (wep.stats.clip || 6) + (playerStats.clipBonus || 0);
   currentClip = maxClip;
@@ -262,41 +247,18 @@ function selectWeapon(id) {
 
 // ── SPAWN ─────────────────────────────────────────────────────────────
 function spawnZombie() {
+  // Spawn just inside the world edges with enough margin to clear border obstacles
+  const margin = 60;
   let x, y;
-  let found = false;
-
-  // If map defines spawn zones, use those instead of world edges
-  if (mapData.zombieSpawnZones) {
-    for (let attempts = 0; attempts < 60; attempts++) {
-      const zone = mapData.zombieSpawnZones[Math.floor(Math.random() * mapData.zombieSpawnZones.length)];
-      x = zone.x + Math.random() * zone.w;
-      y = zone.y + Math.random() * zone.h;
-      if (!obstacles.some(o => circleRect(x, y, 16, o))) { found = true; break; }
-    }
-  }
-
-  // Default: spawn near edges, retry until clear spot found
-  if (!found) {
-    const margin = 60;
-    for (let attempts = 0; attempts < 80; attempts++) {
-      const edge = Math.floor(Math.random() * 4);
-      if      (edge === 0) { x = margin + Math.random() * (WORLD_W - margin*2); y = margin; }
-      else if (edge === 1) { x = WORLD_W - margin; y = margin + Math.random() * (WORLD_H - margin*2); }
-      else if (edge === 2) { x = margin + Math.random() * (WORLD_W - margin*2); y = WORLD_H - margin; }
-      else                 { x = margin; y = margin + Math.random() * (WORLD_H - margin*2); }
-      if (!obstacles.some(o => circleRect(x, y, 16, o))) { found = true; break; }
-    }
-  }
-
-  // Last resort: find any open spot in the world
-  if (!found) {
-    for (let attempts = 0; attempts < 50; attempts++) {
-      x = 80 + Math.random() * (WORLD_W - 160);
-      y = 80 + Math.random() * (WORLD_H - 160);
-      if (!obstacles.some(o => circleRect(x, y, 16, o))) { found = true; break; }
-    }
-  }
-
+  let attempts = 0;
+  do {
+    const edge = Math.floor(Math.random() * 4);
+    if      (edge === 0) { x = margin + Math.random() * (WORLD_W - margin*2); y = margin; }
+    else if (edge === 1) { x = WORLD_W - margin; y = margin + Math.random() * (WORLD_H - margin*2); }
+    else if (edge === 2) { x = margin + Math.random() * (WORLD_W - margin*2); y = WORLD_H - margin; }
+    else                 { x = margin; y = margin + Math.random() * (WORLD_H - margin*2); }
+    attempts++;
+  } while (attempts < 20 && obstacles.some(o => circleRect(x, y, 16, o)));
   zombies.push(new Zombie(x, y, wave));
   zombiesSpawned++;
 }
@@ -361,7 +323,7 @@ function startReload() {
 function loop() {
   requestAnimationFrame(loop);
   if (gameState === 'paused') { render(); return; }
-  if (gameState === 'shop')   { render(); return; }  // keep world visible behind shop
+  if (gameState === 'shop')   { render(); return; }
   if (gameState !== 'playing') { drawBackground(); return; }
 
   frameCount++;
@@ -391,44 +353,6 @@ function loop() {
   if (dlen > 0) { player.vx = dx/dlen*spd; player.vy = dy/dlen*spd; }
   else { player.vx = 0; player.vy = 0; }
   player.move(obstacles);
-
-  // Squeeze mechanic
-  const squeezePressed = keybinds && keys[keybinds.squeeze];
-  const wasSquezing = player.squeezing;
-
-  // Depleted flag: once stamina hits 0, can't re-squeeze until recharged to 30
-  if (!player.squeezeDeplete) player.squeezeDeplete = false;
-  if (player.squeezeStamina <= 0) player.squeezeDeplete = true;
-  if (player.squeezeStamina >= 30) player.squeezeDeplete = false;
-
-  const canSqueeze = squeezePressed && player.squeezeStamina > 0 && !player.squeezeDeplete;
-
-  if (canSqueeze) {
-    player.squeezing = true;
-    player.radius = 5;
-    player.squeezeStamina = Math.max(0, player.squeezeStamina - 1.4);
-  } else {
-    player.squeezing = false;
-    player.radius = player.baseRadius;
-    // Regen stamina when not squeezing
-    if (player.squeezeStamina < 100) player.squeezeStamina = Math.min(100, player.squeezeStamina + 0.35);
-
-    // If we just released squeeze, push player out of any overlapping obstacle
-    if (wasSquezing) {
-      for (const obs of obstacles) {
-        if (!circleRect(player.x, player.y, player.radius, obs)) continue;
-        const cx = obs.x + obs.w / 2;
-        const cy = obs.y + obs.h / 2;
-        const overlapX = (obs.w / 2 + player.radius) - Math.abs(player.x - cx);
-        const overlapY = (obs.h / 2 + player.radius) - Math.abs(player.y - cy);
-        if (overlapX < overlapY) {
-          player.x += player.x < cx ? -overlapX : overlapX;
-        } else {
-          player.y += player.y < cy ? -overlapY : overlapY;
-        }
-      }
-    }
-  }
 
   // Player facing
   // Convert screen-space mouse to world-space, then aim from player
@@ -626,10 +550,6 @@ function render() {
   window._camY = camY;
   window._scale = scale;
 
-  // Fill entire canvas with map bg color first — eliminates black letterbox edges
-  ctx.fillStyle = mapData ? mapData.bg : '#0a0804';
-  ctx.fillRect(0, 0, cw, ch);
-
   ctx.save();
   ctx.translate(-camX, -camY);
 
@@ -697,78 +617,6 @@ function render() {
 
   ctx.restore();
 
-  // Zombie locator arrows — only after struggling for 8 seconds with <=3 left
-  const LOCATOR_THRESHOLD = 3;
-  const LOCATOR_DELAY = 60 * 45; // 45 seconds at 60fps
-
-  if (zombies.length > 0 && zombies.length <= LOCATOR_THRESHOLD) {
-    // Reset timer if a zombie just got killed (count dropped)
-    if (zombies.length < lastLocatorCount) locatorTimer = 0;
-    lastLocatorCount = zombies.length;
-    locatorTimer++;
-  } else {
-    locatorTimer = 0;
-    lastLocatorCount = zombies.length;
-  }
-
-  if (zombies.length > 0 && zombies.length <= LOCATOR_THRESHOLD && locatorTimer >= LOCATOR_DELAY) {
-    const camX = window._camX || 0, camY = window._camY || 0;
-    const screenW = canvas.width, screenH = canvas.height;
-    const screenCX = screenW / 2, screenCY = screenH / 2;
-    const arrowDist = 80; // px from screen edge padding
-
-    for (const z of zombies) {
-      // Convert zombie world pos to screen pos
-      const sx = z.x - camX;
-      const sy = z.y - camY;
-
-      // Only show arrow if zombie is off-screen
-      const onScreen = sx > 20 && sx < screenW - 20 && sy > 20 && sy < screenH - 20;
-      if (onScreen) continue;
-
-      // Angle from screen center to zombie
-      const angle = Math.atan2(sy - screenCY, sx - screenCX);
-
-      // Clamp arrow position to screen edges with padding
-      const pad = 48;
-      const clampX = Math.max(pad, Math.min(screenW - pad, screenCX + Math.cos(angle) * 9999));
-      const clampY = Math.max(pad, Math.min(screenH - pad, screenCY + Math.sin(angle) * 9999));
-
-      // Pulse opacity
-      const pulse = 0.6 + Math.sin(frameCount * 0.12) * 0.4;
-
-      ctx.save();
-      ctx.translate(clampX, clampY);
-      ctx.rotate(angle);
-      ctx.globalAlpha = pulse;
-
-      // Arrow shape
-      const aw = 14, ah = 10;
-      ctx.beginPath();
-      ctx.moveTo(aw, 0);          // tip
-      ctx.lineTo(-aw * 0.4,  ah); // bottom left
-      ctx.lineTo(-aw * 0.4, -ah); // top left
-      ctx.closePath();
-      ctx.fillStyle = '#ff3333';
-      ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // Distance label
-      const worldDist = Math.round(dist(player.x, player.y, z.x, z.y));
-      ctx.rotate(-angle);
-      ctx.font = 'bold 9px Share Tech Mono, monospace';
-      ctx.fillStyle = '#ffffff';
-      ctx.textAlign = 'center';
-      ctx.fillText(worldDist + 'm', 0, 26);
-      ctx.textAlign = 'left';
-
-      ctx.globalAlpha = 1;
-      ctx.restore();
-    }
-  }
-
   // Reload arc (screen space)
   if (reloading) {
     const reloadFrames = Math.round(60 * (playerStats.reloadMult||1));
@@ -820,21 +668,6 @@ function updateHUD() {
   const clipTxt = reloading ? 'RELOAD' : `${currentClip}/${maxClip}`;
   document.getElementById('hud-ammo').textContent = clipTxt;
 
-
-  // Squeeze stamina bar
-  const sqFill = document.getElementById('squeeze-fill');
-  if (sqFill) {
-    sqFill.style.width = player.squeezeStamina + '%';
-    sqFill.classList.toggle('draining', player.squeezing);
-    sqFill.classList.toggle('depleted', player.squeezeDeplete);
-  }
-  // Update squeeze label with current keybind
-  const sqLabel = document.querySelector('#squeeze-bar-wrap .hud-label');
-  if (sqLabel && keybinds) {
-    const keyName = typeof getKeyLabel === 'function' ? getKeyLabel(keybinds.squeeze) : 'SHIFT';
-    sqLabel.innerHTML = `Squeeze <span style="font-size:0.6rem;color:var(--dim)">[${keyName}]</span>`;
-  }
-
   // Weapon slots
   const row = document.getElementById('weapon-slot-row');
   if (row) {
@@ -861,21 +694,19 @@ function showWaveComplete(waveNum) {
   exitPointerLock();
 
   const overlay = document.getElementById('wave-complete-overlay');
-  const title   = document.getElementById('wc-title');
-  const sub     = document.getElementById('wc-sub');
+  if (!overlay) { showShop(); return; }
 
-  title.textContent = `Wave ${waveNum} Complete`;
-  sub.textContent   = 'Heading to the Outfitter...';
+  const title = document.getElementById('wc-title');
+  const sub   = document.getElementById('wc-sub');
+  if (title) title.textContent = `Wave ${waveNum} Complete`;
+  if (sub)   sub.textContent   = 'Heading to the Outfitter...';
 
-  // Reset animations by cloning nodes
-  const newTitle = title.cloneNode(true);
-  const newSub   = sub.cloneNode(true);
-  title.parentNode.replaceChild(newTitle, title);
-  sub.parentNode.replaceChild(newSub, sub);
+  // Reset animation by cloning
+  if (title) { const n = title.cloneNode(true); title.parentNode.replaceChild(n, title); }
+  if (sub)   { const n = sub.cloneNode(true);   sub.parentNode.replaceChild(n, sub); }
 
   overlay.classList.add('visible');
 
-  // After 1.8s fade out overlay, then show shop
   setTimeout(() => {
     overlay.style.transition = 'opacity 0.4s ease';
     overlay.style.opacity = '0';
@@ -907,8 +738,7 @@ function renderShop() {
 
     const isConsumable = upg.category === 'consumable';
     const owned    = !isConsumable && upg.level >= upg.maxLevel;
-    const isFullHealth = upg.id === 'medkit' && player.hp >= player.maxHp;
-    const cantAfford = player.coins < upg.cost || isFullHealth;
+    const cantAfford = player.coins < upg.cost;
     const div = document.createElement('div');
     div.className = 'shop-item' + (owned ? ' owned' : '') + (!owned && cantAfford ? ' cant-afford' : '');
 
@@ -918,7 +748,7 @@ function renderShop() {
 
     // Show current HP for medkit
     const extraInfo = isConsumable && upg.id === 'medkit'
-      ? `<div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:${player.hp >= player.maxHp ? '#e74c3c' : '#2ecc71'};margin-top:2px;">${player.hp >= player.maxHp ? '✦ FULL HP' : `HP: ${Math.round(player.hp)}/${player.maxHp}`}</div>`
+      ? `<div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#2ecc71;margin-top:2px;">HP: ${Math.round(player.hp)}/${player.maxHp}</div>`
       : '';
 
     div.innerHTML = `
@@ -957,7 +787,6 @@ function buyUpgrade(id) {
   // If bought a weapon, auto-select it
   if (upg.category === 'weapon') {
     selectedWeaponId = upg.id;
-    if (player) player.weaponId = upg.id;
   }
 
   // Always refresh clip size after any purchase
@@ -978,7 +807,7 @@ function closeShop() {
   el.classList.remove('shop-open');
   el.style.display = 'none';
   gameState = 'playing';
-  if (!isMobile()) requestPointerLock();
+  requestPointerLock();
   nextWave();
 }
 
@@ -1055,128 +884,36 @@ function togglePause() {
 
 // ── MOBILE CONTROLS ──────────────────────────────────────────────────
 function initMobileControls() {
-  // ── LEFT STICK: Movement ──────────────────────────────────────────
-  const moveStick = document.getElementById('joystick-area');
-  const moveDot   = document.getElementById('joystick-dot');
-  if (!moveStick) return;
-
+  const joystick = document.getElementById('joystick-area');
+  const dot = document.getElementById('joystick-dot');
+  if (!joystick) return;
   window.joystickDelta = null;
-  let moveOrigin = null;
-  const STICK_MAX = 50;
+  let origin = null;
 
-  function stickMove(stick, dot, e, maxR, onMove, onEnd) {
-    if (!stick._origin) return;
-    const t = [...e.touches].find(t => t.identifier === stick._touchId);
-    if (!t) return;
-    const dx = t.clientX - stick._origin.x;
-    const dy = t.clientY - stick._origin.y;
-    const d  = Math.min(Math.sqrt(dx*dx+dy*dy), maxR);
-    const ang = Math.atan2(dy, dx);
-    const cx = Math.cos(ang)*d, cy = Math.sin(ang)*d;
-    dot.style.transform = `translate(calc(-50% + ${cx}px), calc(-50% + ${cy}px))`;
-    onMove(ang, d, maxR);
-    e.preventDefault();
-  }
-
-  moveStick.addEventListener('touchstart', e => {
-    const t = e.changedTouches[0];
-    const r = moveStick.getBoundingClientRect();
-    moveStick._origin = { x: r.left+r.width/2, y: r.top+r.height/2 };
-    moveStick._touchId = t.identifier;
+  joystick.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    const r = joystick.getBoundingClientRect();
+    origin = { x: r.left+r.width/2, y: r.top+r.height/2 };
   }, {passive:true});
 
-  moveStick.addEventListener('touchmove', e => {
-    stickMove(moveStick, moveDot, e, STICK_MAX, (ang, d, max) => {
-      const str = d / max;
-      window.joystickDelta = { x: Math.cos(ang)*str, y: Math.sin(ang)*str };
-    }, null);
+  joystick.addEventListener('touchmove', e => {
+    if (!origin) return;
+    const t = e.touches[0];
+    const dx = t.clientX-origin.x, dy = t.clientY-origin.y;
+    const d  = Math.min(Math.sqrt(dx*dx+dy*dy), 40);
+    const ang = Math.atan2(dy,dx);
+    window.joystickDelta = { x: Math.cos(ang)*(d/40), y: Math.sin(ang)*(d/40) };
+    dot.style.transform = `translate(calc(-50% + ${Math.cos(ang)*d}px), calc(-50% + ${Math.sin(ang)*d}px))`;
+    e.preventDefault();
   }, {passive:false});
 
-  moveStick.addEventListener('touchend', e => {
-    const t = [...e.changedTouches].find(t => t.identifier === moveStick._touchId);
-    if (!t) return;
+  joystick.addEventListener('touchend', () => {
     window.joystickDelta = null;
-    moveDot.style.transform = 'translate(-50%,-50%)';
-    moveStick._origin = null;
+    dot.style.transform = 'translate(-50%,-50%)';
+    origin = null;
   });
 
-  // ── RIGHT STICK: Aim + Fire ───────────────────────────────────────
-  const aimStick = document.getElementById('aim-stick-area');
-  const aimDot   = document.getElementById('aim-stick-dot');
-  if (!aimStick) return;
-
-  const AIM_DEADZONE = 12; // px — must move this far before firing
-
-  aimStick.addEventListener('touchstart', e => {
-    const t = e.changedTouches[0];
-    const r = aimStick.getBoundingClientRect();
-    aimStick._origin = { x: r.left+r.width/2, y: r.top+r.height/2 };
-    aimStick._touchId = t.identifier;
-    aimStick._active = true;
-    // Don't fire immediately — wait for drag
-  }, {passive:true});
-
-  aimStick.addEventListener('touchmove', e => {
-    if (!aimStick._origin) return;
-    const t = [...e.touches].find(t => t.identifier === aimStick._touchId);
-    if (!t) return;
-
-    const dx = t.clientX - aimStick._origin.x;
-    const dy = t.clientY - aimStick._origin.y;
-    const d  = Math.sqrt(dx*dx + dy*dy);
-    const clamp = Math.min(d, STICK_MAX);
-    const ang = Math.atan2(dy, dx);
-
-    aimDot.style.transform = `translate(calc(-50% + ${Math.cos(ang)*clamp}px), calc(-50% + ${Math.sin(ang)*clamp}px))`;
-
-    if (d > AIM_DEADZONE) {
-      // Aim: update player facing in world space
-      // Convert screen center to world, then apply aim angle offset
-      const camX = window._camX || 0, camY = window._camY || 0;
-      const screenCX = canvas.width/2, screenCY = canvas.height/2;
-      // Set virtual mouse far in the aim direction
-      const aimDist = 300;
-      virtualMouseX = screenCX + Math.cos(ang) * aimDist;
-      virtualMouseY = screenCY + Math.sin(ang) * aimDist;
-      mouse.x = virtualMouseX;
-      mouse.y = virtualMouseY;
-
-      // Fire while dragging
-      mouse.down = true;
-      aimStick.classList.add('firing');
-    } else {
-      mouse.down = false;
-      aimStick.classList.remove('firing');
-    }
-
-    e.preventDefault();
-  }, {passive:false});
-
-  aimStick.addEventListener('touchend', e => {
-    const t = [...e.changedTouches].find(t => t.identifier === aimStick._touchId);
-    if (!t) return;
-    mouse.down = false;
-    aimStick._origin = null;
-    aimStick._active = false;
-    aimDot.style.transform = 'translate(-50%,-50%)';
-    aimStick.classList.remove('firing');
-  });
-
-  aimStick.addEventListener('touchcancel', () => {
-    mouse.down = false;
-    aimDot.style.transform = 'translate(-50%,-50%)';
-    aimStick.classList.remove('firing');
-  });
-
-  // ── Action buttons ────────────────────────────────────────────────
-  const reloadBtn = document.getElementById('mobile-reload-btn');
-  if (reloadBtn) {
-    reloadBtn.addEventListener('touchstart', e => { e.preventDefault(); startReload(); }, {passive:false});
-  }
-
-  const squeezeBtn = document.getElementById('mobile-squeeze-btn');
-  if (squeezeBtn) {
-    squeezeBtn.addEventListener('touchstart', e => { e.preventDefault(); keys['ShiftLeft'] = true; }, {passive:false});
-    squeezeBtn.addEventListener('touchend',   e => { keys['ShiftLeft'] = false; });
-  }
+  const fireBtn = document.getElementById('fire-btn');
+  fireBtn.addEventListener('touchstart', () => mouse.down=true, {passive:true});
+  fireBtn.addEventListener('touchend',   () => mouse.down=false);
 }
