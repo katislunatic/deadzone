@@ -275,7 +275,7 @@ class Player extends Entity {
 
 // ── ZOMBIE ───────────────────────────────────────────────────────────
 class Zombie extends Entity {
-  constructor(x, y, wave) {
+  constructor(x, y, wave, opts = {}) {
     super(x, y, 13);
     this.maxHp = 30 + wave * 8;
     this.hp = this.maxHp;
@@ -283,7 +283,7 @@ class Zombie extends Entity {
     this.damage = 10 + wave * 2;
     this.attackCooldown = 0;
     this.wobble = Math.random() * Math.PI * 2;
-    this.type = Math.random() < 0.15 ? 'big' : 'normal';
+    this.type = opts.type || (Math.random() < 0.15 ? 'big' : 'normal');
     if (this.type === 'big') {
       this.radius = 18; this.maxHp *= 2.5; this.hp = this.maxHp;
       this.speed *= 0.6; this.damage *= 2;
@@ -291,7 +291,10 @@ class Zombie extends Entity {
     this.scoreValue = this.type === 'big' ? 50 : 15;
     this.coinValue = this.type === 'big' ? 15 : 5;
     this.facingAngle = 0;
-    this.moveAngle = null; // smoothed movement angle for context steering
+    this.moveAngle = null;
+    // Custom colors for turned civilians
+    this.customShirt = opts.shirtColor || null;
+    this.customSkin  = opts.skinColor  || null;
   }
   update(px, py, obstacles) {
     this.wobble += 0.12;
@@ -338,10 +341,11 @@ class Zombie extends Entity {
   draw(ctx) {
     const P = this.type === 'big' ? 4 : 3;
     const isBig = this.type === 'big';
-    const skin = isBig ? '#2a7a1a' : '#3a9a2a';
-    const skinD = isBig ? '#1a5a10' : '#2a7a1a';
-    const shirtCol = isBig ? '#8a2020' : '#3a5a8a';
-    const shirtD   = isBig ? '#6a1010' : '#2a4a6a';
+    // Use civilian's original colors if this is a turned zombie
+    const skin    = this.customSkin  || (isBig ? '#2a7a1a' : '#3a9a2a');
+    const skinD   = this.customSkin  || (isBig ? '#1a5a10' : '#2a7a1a');
+    const shirtCol= this.customShirt || (isBig ? '#8a2020' : '#3a5a8a');
+    const shirtD  = this.customShirt ? this.customShirt + '99' : (isBig ? '#6a1010' : '#2a4a6a');
 
     const moving = Math.abs(this.vx) > 0.1 || Math.abs(this.vy) > 0.1;
     // Zombie shamble — slower, limping walk cycle (6 frames)
