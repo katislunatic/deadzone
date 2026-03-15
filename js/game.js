@@ -323,6 +323,7 @@ function startReload() {
 // ── MAIN LOOP ─────────────────────────────────────────────────────────
 function loop() {
   requestAnimationFrame(loop);
+  try {
   if (gameState === 'paused') { render(); return; }
   if (gameState === 'shop')   { render(); return; }
   if (gameState !== 'playing') { drawBackground(); return; }
@@ -534,6 +535,16 @@ function loop() {
 
   updateHUD();
   render();
+  } catch(e) {
+    console.error('LOOP ERROR:', e);
+    // Draw red error on canvas
+    ctx.fillStyle = '#300';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#f00';
+    ctx.font = '14px monospace';
+    ctx.fillText('ERROR: ' + e.message, 20, 40);
+    ctx.fillText(e.stack ? e.stack.split('\n')[1] : '', 20, 60);
+  }
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────
