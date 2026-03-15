@@ -606,13 +606,26 @@ body {
   .hud-value { font-size: 0.8rem; }
   .wave-badge { font-size: 0.75rem; }
 
-  /* Bottom HUD: hidden on mobile — too crowded, key info in top HUD */
-  #hud-bottom { display: none !important; }
+  /* Bottom HUD: compact, leave room for sticks */
+  #hud-bottom {
+    padding: 0.4rem 0.75rem;
+    bottom: 210px;
+    gap: 0.75rem;
+    background: rgba(0,0,0,0.75);
+    border-radius: 8px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  #hud-bottom #health-bar { width: 100px; }
+  #hud-bottom #squeeze-bar { width: 80px; }
+  #squeeze-bar-wrap .hud-label span { display: none; } /* hide [SHIFT] on mobile */
 
   /* Weapon slots smaller */
-  .weapon-slot { width: 38px; height: 38px; }
-  .weapon-slot-icon { font-size: 0.9rem; }
-  .weapon-slot-name { display: none; }
+  .weapon-slot { width: 42px; height: 42px; }
+  .weapon-slot-icon { font-size: 1rem; }
+  .weapon-slot-name { font-size: 0.4rem; }
 
   /* Wave announce */
   #wave-announce { font-size: clamp(1.5rem, 6vw, 3rem); }
@@ -1169,20 +1182,4 @@ body {
 @keyframes wcSlam {
   from { transform: translateY(-40px) scale(0.85); opacity: 0; }
   to   { transform: translateY(0) scale(1);        opacity: 1; }
-}
-
-/* Ammo top — hidden on desktop, shown on mobile */
-#hud-ammo-top-wrap { display: none; }
-@media (pointer: coarse) {
-  #hud-ammo-top-wrap { display: flex; }
-}
-
-/* Landscape mobile: shrink controls */
-@media (pointer: coarse) and (orientation: landscape) {
-  #mobile-controls { height: 160px; padding: 0.3rem 0.75rem 0.4rem; }
-  .joystick-area   { width: 100px; height: 100px; }
-  .joystick-dot    { width: 36px; height: 36px; }
-  .stick-label     { font-size: 0.5rem; }
-  .mobile-center-btns { gap: 0.3rem; }
-  .mobile-action-btn  { padding: 0.3rem 0.5rem; font-size: 0.58rem; min-width: 64px; }
 }
