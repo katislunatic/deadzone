@@ -9,6 +9,24 @@ function getAudioCtx() {
   return _audioCtx;
 }
 
+// iOS Safari requires AudioContext to be created AND resumed
+// synchronously inside a user gesture. Unlock on first touch/click.
+function _unlockAudio() {
+  try {
+    const ctx = getAudioCtx();
+    // Play a silent buffer — this fully unlocks the context on iOS
+    const buf = ctx.createBuffer(1, 1, 22050);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(ctx.destination);
+    src.start(0);
+    ctx.resume();
+  } catch(e) {}
+}
+document.addEventListener('touchstart', _unlockAudio, { once: true, capture: true });
+document.addEventListener('touchend',   _unlockAudio, { once: true, capture: true });
+document.addEventListener('click',      _unlockAudio, { once: true, capture: true });
+
 function playSound(type) {
   try {
     const vol = (typeof getVolume === 'function') ? getVolume(type) : 0.8;
