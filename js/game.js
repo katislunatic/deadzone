@@ -537,13 +537,24 @@ function loop() {
   render();
   } catch(e) {
     console.error('LOOP ERROR:', e);
-    // Draw red error on canvas
-    ctx.fillStyle = '#300';
+    ctx.fillStyle = '#1a0000';
     ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle = '#f00';
+    ctx.fillStyle = '#ff4444';
+    ctx.font = 'bold 16px monospace';
+    ctx.fillText('GAME ERROR:', 20, 40);
+    ctx.fillStyle = '#ffff00';
     ctx.font = '14px monospace';
-    ctx.fillText('ERROR: ' + e.message, 20, 40);
-    ctx.fillText(e.stack ? e.stack.split('\n')[1] : '', 20, 60);
+    const msg = 'ERROR: ' + e.message;
+    const words = msg.split(' ');
+    let line = ''; let y = 65;
+    for (const w of words) {
+      if ((line + w).length > 60) { ctx.fillText(line, 20, y); line = w + ' '; y += 20; }
+      else line += w + ' ';
+    }
+    ctx.fillText(line, 20, y);
+    ctx.fillStyle = '#aaaaaa';
+    ctx.font = '12px monospace';
+    if (e.stack) e.stack.split('\n').slice(0,5).forEach((l,i) => ctx.fillText(l, 20, y+30+i*16));
   }
 }
 
