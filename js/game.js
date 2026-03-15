@@ -271,8 +271,27 @@ function spawnZombie() {
     else if (edge === 1) { x = WORLD_W - margin; y = margin + Math.random() * (WORLD_H - margin*2); }
     else if (edge === 2) { x = margin + Math.random() * (WORLD_W - margin*2); y = WORLD_H - margin; }
     else                 { x = margin; y = margin + Math.random() * (WORLD_H - margin*2); }
+    // Hard clamp — always inside world
+    x = Math.max(margin, Math.min(WORLD_W - margin, x));
+    y = Math.max(margin, Math.min(WORLD_H - margin, y));
     attempts++;
-  } while (attempts < 20 && obstacles.some(o => circleRect(x, y, 16, o)));
+  } while (attempts < 50 && obstacles.some(o => circleRect(x, y, 16, o)));
+  // If still inside an obstacle after 50 tries, find nearest open spot
+  if (obstacles.some(o => circleRect(x, y, 16, o))) {
+    for (let r = 20; r < 300; r += 20) {
+      let found = false;
+      const steps = Math.ceil(2 * Math.PI * r / 20);
+      for (let s = 0; s < steps; s++) {
+        const angle = (s / steps) * Math.PI * 2;
+        const tx = Math.max(margin, Math.min(WORLD_W-margin, x + Math.cos(angle)*r));
+        const ty = Math.max(margin, Math.min(WORLD_H-margin, y + Math.sin(angle)*r));
+        if (!obstacles.some(o => circleRect(tx, ty, 16, o))) {
+          x = tx; y = ty; found = true; break;
+        }
+      }
+      if (found) break;
+    }
+  }
   zombies.push(new Zombie(x, y, wave));
   zombiesSpawned++;
 }
@@ -827,9 +846,11 @@ function renderShop() {
 
     const isConsumable = upg.category === 'consumable';
     const owned    = !isConsumable && upg.level >= upg.maxLevel;
+    const fullHp   = upg.id === 'medkit' && player.hp >= player.maxHp;
     const cantAfford = player.coins < upg.cost;
+    const blocked  = owned || fullHp;
     const div = document.createElement('div');
-    div.className = 'shop-item' + (owned ? ' owned' : '') + (!owned && cantAfford ? ' cant-afford' : '');
+    div.className = 'shop-item' + (blocked ? ' owned' : '') + (!blocked && cantAfford ? ' cant-afford' : '');
 
     // level dots (not for consumables)
     const maxL = Math.min(upg.maxLevel, 3);
@@ -845,11 +866,11 @@ function renderShop() {
       <div class="item-name">${upg.name}</div>
       <div class="item-desc">${upg.desc}</div>
       ${extraInfo}
-      <div class="item-price">${owned ? (upg.maxLevel===1?'✅ OWNED':'✅ MAXED') : `🪙 ${upg.cost}`}</div>
+      <div class="item-price">${owned ? (upg.maxLevel===1?'✅ OWNED':'✅ MAXED') : fullHp ? '✅ FULL HP' : `🪙 ${upg.cost}`}</div>
       ${dots}
     `;
 
-    if (!owned && !cantAfford) {
+    if (!blocked && !cantAfford) {
       div.addEventListener('click', () => buyUpgrade(upg.id));
     }
     grid.appendChild(div);
