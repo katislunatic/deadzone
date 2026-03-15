@@ -735,10 +735,8 @@ function render() {
 
   // Entities
   for (const c of civilians) c.draw(ctx);
-  // During dying animation, only draw the killer zombie (others freeze/hide)
-  if (gameState === 'dying') {
-    if (deathAnimZombie) deathAnimZombie.draw(ctx);
-  } else {
+  // During dying animation, hide ALL zombies — killer is drawn only in the animation overlay
+  if (gameState !== 'dying') {
     for (const z of zombies) z.draw(ctx);
   }
   for (const b of bullets)   b.draw(ctx);
