@@ -550,6 +550,10 @@ function render() {
   window._camY = camY;
   window._scale = scale;
 
+  // Fill entire canvas with map bg first — no black letterbox edges
+  ctx.fillStyle = (mapData && mapData.bg) ? mapData.bg : '#0a0804';
+  ctx.fillRect(0, 0, cw, ch);
+
   ctx.save();
   ctx.translate(-camX, -camY);
 
