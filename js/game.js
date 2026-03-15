@@ -705,16 +705,72 @@ function render() {
     if (obs.round) {
       ctx.fillStyle = obs.color;
       ctx.beginPath(); ctx.arc(obs.x+obs.w/2, obs.y+obs.h/2, obs.w/2, 0, Math.PI*2); ctx.fill();
+      // ring detail on round obstacles
+      if (obs.ring) {
+        ctx.strokeStyle = obs.ring; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(obs.x+obs.w/2, obs.y+obs.h/2, obs.w/2-3, 0, Math.PI*2); ctx.stroke();
+      }
     } else {
       // shadow
       ctx.fillStyle = 'rgba(0,0,0,0.3)';
       ctx.fillRect(obs.x+4, obs.y+6, obs.w, obs.h);
+      // base
       ctx.fillStyle = obs.color;
       ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
-      // roof tint
-      ctx.fillStyle = 'rgba(255,255,255,0.05)';
-      ctx.fillRect(obs.x, obs.y, obs.w, obs.h*0.3);
-      // labels removed
+      // roof band
+      const roofH = Math.max(8, obs.h * 0.18);
+      ctx.fillStyle = obs.roofColor || 'rgba(0,0,0,0.25)';
+      ctx.fillRect(obs.x, obs.y, obs.w, roofH);
+      // roof highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.07)';
+      ctx.fillRect(obs.x, obs.y, obs.w, 3);
+      // windows
+      if (obs.windows) {
+        const [cols, rows] = obs.windows;
+        const ww = Math.min(18, (obs.w - 16) / cols - 4);
+        const wh = Math.min(14, (obs.h - roofH - 16) / rows - 4);
+        const xGap = (obs.w - 10) / cols;
+        const yGap = (obs.h - roofH - 10) / rows;
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const wx = obs.x + 6 + c * xGap;
+            const wy = obs.y + roofH + 6 + r * yGap;
+            // random lit/dark per window based on position
+            const lit = ((c * 3 + r * 7 + obs.x) % 5) > 1;
+            ctx.fillStyle = lit ? (obs.windowColor || 'rgba(255,240,180,0.55)') : 'rgba(0,0,0,0.4)';
+            ctx.fillRect(wx, wy, ww, wh);
+            // window frame
+            ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1;
+            ctx.strokeRect(wx, wy, ww, wh);
+          }
+        }
+      }
+      // door
+      if (obs.door) {
+        const dw = obs.door[0] || 16, dh = obs.door[1] || 24;
+        const dx = obs.x + obs.w/2 - dw/2;
+        const dy = obs.y + obs.h - dh;
+        ctx.fillStyle = obs.doorColor || '#2a1008';
+        ctx.fillRect(dx, dy, dw, dh);
+        ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1;
+        ctx.strokeRect(dx, dy, dw, dh);
+        // door knob
+        ctx.fillStyle = '#c8a040';
+        ctx.beginPath(); ctx.arc(dx + dw*0.75, dy + dh*0.55, 2, 0, Math.PI*2); ctx.fill();
+      }
+      // sign above door
+      if (obs.sign) {
+        const sw = obs.sign.length * 7 + 10;
+        const sx = obs.x + obs.w/2 - sw/2;
+        const sy = obs.y + roofH + 2;
+        ctx.fillStyle = obs.signColor || '#c8a040';
+        ctx.fillRect(sx, sy, sw, 12);
+        ctx.fillStyle = '#1a0800';
+        ctx.font = 'bold 8px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(obs.sign, obs.x + obs.w/2, sy + 9);
+        ctx.textAlign = 'left';
+      }
     }
   }
 
