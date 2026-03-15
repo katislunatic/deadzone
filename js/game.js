@@ -946,6 +946,8 @@ function initMobileControls() {
   });
 
   const fireBtn = document.getElementById('fire-btn');
-  fireBtn.addEventListener('touchstart', () => mouse.down=true, {passive:true});
-  fireBtn.addEventListener('touchend',   () => mouse.down=false);
+  if (fireBtn) {
+    fireBtn.addEventListener('touchstart', () => mouse.down=true, {passive:true});
+    fireBtn.addEventListener('touchend',   () => mouse.down=false);
+  }
 }
