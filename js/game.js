@@ -1145,15 +1145,21 @@ function initMobileControls() {
   window.joystickDelta = null;
   let origin = null;
 
+  let moveTouchId = null;
+
   joystick.addEventListener('touchstart', e => {
-    const t = e.touches[0];
+    if (moveTouchId !== null) return; // already tracking a finger
+    const t = e.changedTouches[0];
+    moveTouchId = t.identifier;
     const r = joystick.getBoundingClientRect();
     origin = { x: r.left+r.width/2, y: r.top+r.height/2 };
   }, {passive:true});
 
   joystick.addEventListener('touchmove', e => {
-    if (!origin) return;
-    const t = e.touches[0];
+    if (!origin || moveTouchId === null) return;
+    // Find the specific finger we're tracking
+    const t = Array.from(e.changedTouches).find(t => t.identifier === moveTouchId);
+    if (!t) return;
     const dx = t.clientX-origin.x, dy = t.clientY-origin.y;
     const d  = Math.min(Math.sqrt(dx*dx+dy*dy), 40);
     const ang = Math.atan2(dy,dx);
@@ -1162,11 +1168,17 @@ function initMobileControls() {
     e.preventDefault();
   }, {passive:false});
 
-  joystick.addEventListener('touchend', () => {
+  function moveEnd(e) {
+    const released = Array.from(e.changedTouches).find(t => t.identifier === moveTouchId);
+    if (!released) return;
+    movetouchId = null;
+    moveTouchId = null;
     window.joystickDelta = null;
     dot.style.transform = 'translate(-50%,-50%)';
     origin = null;
-  });
+  }
+  joystick.addEventListener('touchend',    moveEnd);
+  joystick.addEventListener('touchcancel', moveEnd);
 
   const fireBtn = document.getElementById('fire-btn');
   if (fireBtn) {
