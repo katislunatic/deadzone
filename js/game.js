@@ -680,6 +680,20 @@ function render() {
     ctx.stroke(); ctx.setLineDash([]);
   }
 
+  // Decals — ground details drawn on top of roads, under obstacles
+  if (mapData.decals) {
+    for (const d of mapData.decals) {
+      ctx.fillStyle = d.color;
+      if (d.type === 'rect') {
+        ctx.fillRect(d.x, d.y, d.w, d.h);
+      } else if (d.type === 'ellipse') {
+        ctx.beginPath();
+        ctx.ellipse(d.x, d.y, d.rx, d.ry, 0, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+  }
+
   // Grid
   ctx.strokeStyle = mapData.gridColor; ctx.lineWidth = 0.5; ctx.globalAlpha=0.3;
   for (let x=0; x<WORLD_W; x+=40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,WORLD_H); ctx.stroke(); }
