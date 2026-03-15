@@ -680,7 +680,7 @@ function render() {
     ctx.stroke(); ctx.setLineDash([]);
   }
 
-  // Decals — ground details drawn on top of roads, under obstacles
+  // Decals — ground details drawn after roads, before grid
   if (mapData.decals) {
     for (const d of mapData.decals) {
       ctx.fillStyle = d.color;
