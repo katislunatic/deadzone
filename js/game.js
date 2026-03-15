@@ -575,6 +575,9 @@ function loop() {
     return d.life > 0;
   });
 
+  // Sync weapon to player so draw uses correct gun model
+  if (player) player.weaponId = selectedWeaponId;
+
   updateHUD();
   render();
   } catch(e) {
