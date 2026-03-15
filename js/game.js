@@ -343,17 +343,42 @@ function loop() {
 
   // Squeeze — check first so speed is correct this frame
   const squeezeHeld = keybinds && keys[keybinds.squeeze];
-  if (squeezeHeld && player.squeezeStamina > 0) {
+  if (player.squeezeCooldown > 0) player.squeezeCooldown--;
+
+  if (squeezeHeld && player.squeezeStamina > 0 && player.squeezeCooldown === 0) {
     player.squeezing = true;
     player.squeezeStamina = Math.max(0, player.squeezeStamina - 0.8);
-    player.radius = 7; // smaller hitbox
+    player.radius = 7;
+    // Hit zero — trigger cooldown so you can't immediately re-squeeze
+    if (player.squeezeStamina === 0) player.squeezeCooldown = 30; // 0.5s at 60fps
   } else {
+    // When releasing squeeze, push player out of any obstacle they're inside
+    if (player.squeezing) {
+      let pushed = false;
+      for (const obs of obstacles) {
+        if (circleRect(player.x, player.y, player.baseRadius, obs)) {
+          // Find nearest edge and push out
+          const cx = obs.x + obs.w / 2, cy = obs.y + obs.h / 2;
+          const dx = player.x - cx, dy = player.y - cy;
+          const len = Math.sqrt(dx*dx + dy*dy) || 1;
+          const pushDist = player.baseRadius + Math.max(obs.w, obs.h) / 2 + 2;
+          player.x = cx + (dx/len) * pushDist * 0.5;
+          player.y = cy + (dy/len) * pushDist * 0.5;
+          pushed = true;
+          break;
+        }
+      }
+    }
     player.squeezing = false;
     player.radius = player.baseRadius;
     if (!squeezeHeld) player.squeezeStamina = Math.min(100, player.squeezeStamina + 0.4);
   }
+  // Update squeeze bar HUD
   const squeezeFill = document.getElementById('squeeze-fill');
-  if (squeezeFill) squeezeFill.style.width = player.squeezeStamina + '%';
+  if (squeezeFill) {
+    squeezeFill.style.width = player.squeezeStamina + '%';
+    squeezeFill.classList.toggle('exhausted', player.squeezeCooldown > 0);
+  }
 
   // Player movement
   const wep = getActiveWeapon();
