@@ -54,7 +54,7 @@ body {
 .game-title-2 {
   position: absolute;
   font-family: 'Rye', serif;
-  font-size: clamp(5rem, 18vw, 13rem);
+  font-size: clamp(7rem, 24vw, 18rem);
   color: transparent;
   -webkit-text-stroke: 2px rgba(240,192,64,0.18);
   text-stroke: 2px rgba(240,192,64,0.18);
@@ -62,7 +62,7 @@ body {
   pointer-events: none;
   z-index: 0;
   left: 50%;
-  top: 50%;
+  top: 30%;
   transform: translate(-50%, -50%);
   line-height: 1;
   animation: titleFlicker 4s infinite;
