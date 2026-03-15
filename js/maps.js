@@ -63,43 +63,29 @@ const MAPS = {
     spawnX: 400, spawnY: 415,
     bgDecals: ['🌵','🪨','💀'],
     decals: [
-      // dirt patches
-      { type:'ellipse', x:300,  y:420, rx:60, ry:20, color:'rgba(0,0,0,0.08)' },
-      { type:'ellipse', x:900,  y:415, rx:80, ry:18, color:'rgba(0,0,0,0.08)' },
-      { type:'ellipse', x:1200, y:600, rx:50, ry:16, color:'rgba(0,0,0,0.07)' },
-      // saloon windows
-      { type:'rect', x:145,  y:100, w:40, h:30, color:'#a07840' },
-      { type:'rect', x:200,  y:100, w:40, h:30, color:'#a07840' },
-      { type:'rect', x:280,  y:100, w:40, h:30, color:'#a07840' },
-      { type:'rect', x:155,  y:105, w:20, h:20, color:'#c8a060' },
-      { type:'rect', x:210,  y:105, w:20, h:20, color:'#c8a060' },
-      { type:'rect', x:290,  y:105, w:20, h:20, color:'#c8a060' },
-      // saloon door
-      { type:'rect', x:215,  y:160, w:30, h:60, color:'#3d1a08' },
-      // sheriff star sign
-      { type:'rect', x:540,  y:110, w:60, h:20, color:'#8b6030' },
+      { type:'rect', x:145, y:100, w:40, h:30, color:'rgba(0,0,0,0.2)' },
+      { type:'rect', x:200, y:100, w:40, h:30, color:'rgba(0,0,0,0.2)' },
+      { type:'rect', x:155, y:105, w:20, h:20, color:'#c8a060' },
+      { type:'rect', x:210, y:105, w:20, h:20, color:'#8a6030' },
+      { type:'rect', x:215, y:160, w:30, h:60, color:'#3d1a08' },
+      { type:'rect', x:540, y:110, w:60, h:20, color:'#8b6030' },
       { type:'ellipse', x:570, y:120, rx:8, ry:8, color:'#f0c040' },
-      // bank windows
-      { type:'rect', x:970,  y:100, w:35, h:28, color:'#a07840' },
-      { type:'rect', x:1080, y:100, w:35, h:28, color:'#a07840' },
-      { type:'rect', x:980,  y:105, w:15, h:18, color:'#c8a060' },
+      { type:'rect', x:970, y:100, w:35, h:28, color:'rgba(0,0,0,0.2)' },
+      { type:'rect', x:1080, y:100, w:35, h:28, color:'rgba(0,0,0,0.2)' },
+      { type:'rect', x:980, y:105, w:15, h:18, color:'#c8a060' },
       { type:'rect', x:1090, y:105, w:15, h:18, color:'#c8a060' },
-      // wagon wheels
       { type:'ellipse', x:575, y:600, rx:14, ry:14, color:'#5c3010' },
       { type:'ellipse', x:625, y:600, rx:14, ry:14, color:'#5c3010' },
-      { type:'ellipse', x:1125,y:510, rx:14, ry:14, color:'#5c3010' },
-      { type:'ellipse', x:1175,y:510, rx:14, ry:14, color:'#5c3010' },
-      // road wear marks
-      { type:'rect', x:0,   y:388, w:1600, h:2, color:'rgba(0,0,0,0.1)' },
-      { type:'rect', x:0,   y:440, w:1600, h:2, color:'rgba(0,0,0,0.1)' },
-      // hitching posts
-      { type:'rect', x:112, y:360, w:8,  h:40, color:'#5c3010' },
-      { type:'rect', x:340, y:360, w:8,  h:40, color:'#5c3010' },
-      { type:'rect', x:510, y:360, w:8,  h:40, color:'#5c3010' },
-      // trough
+      { type:'ellipse', x:1125, y:510, rx:14, ry:14, color:'#5c3010' },
+      { type:'ellipse', x:1175, y:510, rx:14, ry:14, color:'#5c3010' },
+      { type:'rect', x:112, y:360, w:8, h:40, color:'#5c3010' },
+      { type:'rect', x:340, y:360, w:8, h:40, color:'#5c3010' },
       { type:'rect', x:350, y:370, w:80, h:16, color:'#7a4a18' },
       { type:'rect', x:353, y:373, w:74, h:10, color:'#1a3a5a' },
+      { type:'ellipse', x:300, y:420, rx:60, ry:20, color:'rgba(0,0,0,0.07)' },
+      { type:'ellipse', x:900, y:415, rx:80, ry:18, color:'rgba(0,0,0,0.07)' },
     ],
+  },
 
   city: {
     id: 'city',
@@ -162,37 +148,23 @@ const MAPS = {
     spawnX: 600, spawnY: 420,
     bgDecals: ['🚗','💡','🗑️'],
     decals: [
-      // road lane markings
-      { type:'rect', x:0,    y:417, w:1600, h:3,  color:'rgba(255,255,255,0.06)' },
-      { type:'rect', x:0,    y:825, w:1600, h:3,  color:'rgba(255,255,255,0.06)' },
-      // building windows — top row
-      { type:'rect', x:55,   y:55,  w:25, h:20, color:'#3a4a5a' },
-      { type:'rect', x:90,   y:55,  w:25, h:20, color:'#3a4a5a' },
-      { type:'rect', x:125,  y:55,  w:25, h:20, color:'#2a6a8a' }, // lit window
-      { type:'rect', x:55,   y:85,  w:25, h:20, color:'#3a4a5a' },
-      { type:'rect', x:90,   y:85,  w:25, h:20, color:'#2a6a8a' },
-      { type:'rect', x:315,  y:50,  w:25, h:20, color:'#3a4a5a' },
-      { type:'rect', x:355,  y:50,  w:25, h:20, color:'#2a6a8a' },
-      { type:'rect', x:395,  y:50,  w:25, h:20, color:'#3a4a5a' },
-      { type:'rect', x:575,  y:65,  w:25, h:20, color:'#2a6a8a' },
-      { type:'rect', x:615,  y:65,  w:25, h:20, color:'#3a4a5a' },
-      { type:'rect', x:655,  y:65,  w:25, h:20, color:'#2a6a8a' },
-      // car windows
-      { type:'rect', x:270,  y:420, w:35, h:15, color:'#1a2a3a' },
-      { type:'rect', x:550,  y:430, w:35, h:15, color:'#1a2a3a' },
-      { type:'rect', x:830,  y:415, w:35, h:15, color:'#1a2a3a' },
-      // road cracks
-      { type:'rect', x:400,  y:395, w:2,  h:40, color:'rgba(0,0,0,0.15)' },
-      { type:'rect', x:900,  y:800, w:2,  h:50, color:'rgba(0,0,0,0.15)' },
-      { type:'rect', x:700,  y:395, w:60, h:2,  color:'rgba(0,0,0,0.12)' },
-      // puddles
+      { type:'rect', x:55,  y:55,  w:25, h:20, color:'#2a3a4a' },
+      { type:'rect', x:90,  y:55,  w:25, h:20, color:'#2a6a8a' },
+      { type:'rect', x:125, y:55,  w:25, h:20, color:'#2a3a4a' },
+      { type:'rect', x:315, y:50,  w:25, h:20, color:'#2a6a8a' },
+      { type:'rect', x:355, y:50,  w:25, h:20, color:'#2a3a4a' },
+      { type:'rect', x:575, y:65,  w:25, h:20, color:'#2a6a8a' },
+      { type:'rect', x:270, y:420, w:35, h:15, color:'#1a2a3a' },
+      { type:'rect', x:550, y:430, w:35, h:15, color:'#1a2a3a' },
+      { type:'rect', x:830, y:415, w:35, h:15, color:'#1a2a3a' },
+      { type:'rect', x:400, y:395, w:2,  h:40, color:'rgba(0,0,0,0.15)' },
+      { type:'rect', x:700, y:395, w:60, h:2,  color:'rgba(0,0,0,0.12)' },
       { type:'ellipse', x:450,  y:410, rx:18, ry:8,  color:'rgba(40,60,80,0.4)' },
       { type:'ellipse', x:1100, y:820, rx:22, ry:9,  color:'rgba(40,60,80,0.4)' },
-      // manhole covers
-      { type:'ellipse', x:660,  y:418, rx:12, ry:12, color:'#1a1d22' },
-      { type:'ellipse', x:663,  y:421, rx:8,  ry:8,  color:'#222530' },
-      { type:'ellipse', x:940,  y:815, rx:12, ry:12, color:'#1a1d22' },
+      { type:'ellipse', x:660, y:418, rx:12, ry:12, color:'#1a1d22' },
+      { type:'ellipse', x:663, y:421, rx:8,  ry:8,  color:'#222530' },
     ],
+  },
 
   town: {
     id: 'town',
@@ -256,31 +228,21 @@ const MAPS = {
     spawnX: 400, spawnY: 318,
     bgDecals: ['🌿','🌻','🍂'],
     decals: [
-      // pond ripples
       { type:'ellipse', x:625,  y:430, rx:45, ry:35, color:'rgba(80,140,180,0.3)' },
       { type:'ellipse', x:1205, y:843, rx:38, ry:28, color:'rgba(80,140,180,0.3)' },
-      // house windows — top row houses
       { type:'rect', x:65,  y:95,  w:28, h:22, color:'#c8d8b0' },
       { type:'rect', x:105, y:95,  w:28, h:22, color:'#c8d8b0' },
       { type:'rect', x:330, y:90,  w:28, h:22, color:'#c8d8b0' },
-      { type:'rect', x:600, y:95,  w:28, h:22, color:'#c8d8b0' },
-      { type:'rect', x:870, y:90,  w:28, h:22, color:'#c8d8b0' },
-      // house doors
       { type:'rect', x:82,  y:140, w:18, h:30, color:'#5c3010' },
       { type:'rect', x:345, y:135, w:18, h:30, color:'#5c3010' },
-      // market stall stripes
       { type:'rect', x:525, y:490, w:10, h:60, color:'rgba(255,60,60,0.3)' },
       { type:'rect', x:545, y:490, w:10, h:60, color:'rgba(255,60,60,0.3)' },
-      { type:'rect', x:985, y:490, w:10, h:60, color:'rgba(255,60,60,0.3)' },
-      // road dirt patches
-      { type:'ellipse', x:400, y:318, rx:30, ry:12, color:'rgba(0,0,0,0.08)' },
-      { type:'ellipse', x:800, y:800, rx:25, ry:10, color:'rgba(0,0,0,0.08)' },
-      // fence posts
       { type:'rect', x:50,  y:278, w:8, h:20, color:'#8b6020' },
       { type:'rect', x:200, y:278, w:8, h:20, color:'#8b6020' },
       { type:'rect', x:350, y:278, w:8, h:20, color:'#8b6020' },
-      { type:'rect', x:500, y:278, w:8, h:20, color:'#8b6020' },
+      { type:'ellipse', x:400, y:318, rx:30, ry:12, color:'rgba(0,0,0,0.07)' },
     ],
+  },
 
   graveyard: {
     id: 'graveyard',
@@ -346,27 +308,18 @@ const MAPS = {
     spawnX: 400, spawnY: 605,
     bgDecals: ['💀','🦇','🌑'],
     decals: [
-      // grave cross details
       { type:'rect', x:75,  y:88,  w:20, h:4,  color:'rgba(255,255,255,0.08)' },
       { type:'rect', x:235, y:88,  w:20, h:4,  color:'rgba(255,255,255,0.08)' },
       { type:'rect', x:395, y:88,  w:20, h:4,  color:'rgba(255,255,255,0.08)' },
-      { type:'rect', x:75,  y:198, w:20, h:4,  color:'rgba(255,255,255,0.06)' },
-      { type:'rect', x:235, y:198, w:20, h:4,  color:'rgba(255,255,255,0.06)' },
-      // mausoleum columns
-      { type:'rect', x:890,  y:680, w:10, h:160, color:'rgba(255,255,255,0.06)' },
-      { type:'rect', x:920,  y:680, w:10, h:160, color:'rgba(255,255,255,0.04)' },
-      { type:'rect', x:1060, y:680, w:10, h:160, color:'rgba(255,255,255,0.06)' },
-      // eerie mist pools
-      { type:'ellipse', x:400,  y:600, rx:60, ry:20, color:'rgba(180,220,180,0.06)' },
-      { type:'ellipse', x:1100, y:600, rx:55, ry:18, color:'rgba(180,220,180,0.06)' },
-      { type:'ellipse', x:750,  y:400, rx:50, ry:16, color:'rgba(180,220,180,0.05)' },
-      // coffin lids
-      { type:'rect', x:428, y:562, w:58, h:8,  color:'rgba(255,255,255,0.06)' },
-      { type:'rect', x:788, y:752, w:58, h:8,  color:'rgba(255,255,255,0.06)' },
-      // path wear
-      { type:'rect', x:745, y:0,   w:10, h:1200, color:'rgba(0,0,0,0.1)' },
-      { type:'rect', x:0,   y:600, w:1600, h:6,  color:'rgba(0,0,0,0.1)' },
+      { type:'rect', x:890,  y:685, w:10, h:155, color:'rgba(255,255,255,0.05)' },
+      { type:'rect', x:1060, y:685, w:10, h:155, color:'rgba(255,255,255,0.05)' },
+      { type:'ellipse', x:400,  y:600, rx:60, ry:20, color:'rgba(180,220,180,0.05)' },
+      { type:'ellipse', x:1100, y:600, rx:55, ry:18, color:'rgba(180,220,180,0.05)' },
+      { type:'ellipse', x:750,  y:400, rx:50, ry:16, color:'rgba(180,220,180,0.04)' },
+      { type:'rect', x:428, y:562, w:58, h:8,  color:'rgba(255,255,255,0.05)' },
+      { type:'rect', x:788, y:752, w:58, h:8,  color:'rgba(255,255,255,0.05)' },
     ],
+  },
   // ── ABANDONED FARM ────────────────────────────────────────────────
   farm: {
     id: 'farm',
@@ -427,30 +380,19 @@ const MAPS = {
     spawnX: 780, spawnY: 450,
     bgDecals: ['🌾','🐄','🪵'],
     decals: [
-      // trough water
       { type:'rect', x:753, y:383, w:94, h:34, color:'rgba(60,120,160,0.4)' },
-      // well ring
       { type:'ellipse', x:527, y:707, rx:20, ry:20, color:'rgba(0,0,0,0.2)' },
-      // barn door
       { type:'rect', x:260, y:110, w:40, h:70, color:'#3d2008' },
       { type:'rect', x:280, y:110, w:4,  h:70, color:'rgba(0,0,0,0.3)' },
-      // farmhouse windows
       { type:'rect', x:90,  y:100, w:30, h:24, color:'#d4c890' },
       { type:'rect', x:140, y:100, w:30, h:24, color:'#d4c890' },
-      // field row shadows
-      { type:'rect', x:80,  y:848, w:600, h:4, color:'rgba(0,0,0,0.15)' },
-      { type:'rect', x:80,  y:898, w:600, h:4, color:'rgba(0,0,0,0.15)' },
-      { type:'rect', x:80,  y:948, w:600, h:4, color:'rgba(0,0,0,0.15)' },
-      // truck windows
       { type:'rect', x:260, y:508, w:40, h:22, color:'#1a2a1a' },
-      // mud patches on road
-      { type:'ellipse', x:350, y:450, rx:25, ry:10, color:'rgba(0,0,0,0.1)' },
-      { type:'ellipse', x:900, y:450, rx:20, ry:8,  color:'rgba(0,0,0,0.1)' },
-      // hay bales
       { type:'ellipse', x:900, y:500, rx:18, ry:14, color:'#c8a030' },
       { type:'ellipse', x:950, y:500, rx:18, ry:14, color:'#b89020' },
       { type:'ellipse', x:1050,y:900, rx:18, ry:14, color:'#c8a030' },
+      { type:'ellipse', x:350, y:450, rx:25, ry:10, color:'rgba(0,0,0,0.09)' },
     ],
+  },
 
   // ── DARK FOREST ───────────────────────────────────────────────────
   forest: {
@@ -499,23 +441,16 @@ const MAPS = {
     spawnX: 762, spawnY: 492,
     bgDecals: ['🌲','🍄','🦌'],
     decals: [
-      // pond ripple
       { type:'ellipse', x:640, y:745, rx:45, ry:32, color:'rgba(40,80,120,0.3)' },
-      // root patches under trees
       { type:'ellipse', x:90,  y:90,  rx:28, ry:12, color:'rgba(0,0,0,0.12)' },
       { type:'ellipse', x:310, y:80,  rx:25, ry:10, color:'rgba(0,0,0,0.12)' },
-      { type:'ellipse', x:610, y:85,  rx:28, ry:11, color:'rgba(0,0,0,0.12)' },
-      // moss patches on ground
       { type:'ellipse', x:200, y:500, rx:30, ry:14, color:'rgba(30,60,20,0.3)' },
       { type:'ellipse', x:500, y:480, rx:25, ry:10, color:'rgba(30,60,20,0.3)' },
       { type:'ellipse', x:1100,y:500, rx:28, ry:12, color:'rgba(30,60,20,0.3)' },
-      // fallen log details
-      { type:'rect', x:180, y:635, w:120, h:6, color:'rgba(0,0,0,0.15)' },
-      { type:'rect', x:980, y:630, w:100, h:6, color:'rgba(0,0,0,0.15)' },
-      // path ruts
-      { type:'rect', x:0,   y:478, w:1600, h:3, color:'rgba(0,0,0,0.1)' },
-      { type:'rect', x:0,   y:508, w:1600, h:3, color:'rgba(0,0,0,0.1)' },
+      { type:'rect', x:0,   y:478, w:1600, h:3, color:'rgba(0,0,0,0.08)' },
+      { type:'rect', x:0,   y:508, w:1600, h:3, color:'rgba(0,0,0,0.08)' },
     ],
+  },
 
   // ── OVERRUN SCHOOL ────────────────────────────────────────────────
   school: {
@@ -578,30 +513,21 @@ const MAPS = {
     spawnX: 680, spawnY: 420,
     bgDecals: ['📚','🖊️','🚌'],
     decals: [
-      // school windows
-      { type:'rect', x:55,  y:55,  w:30, h:22, color:'#4a5a6a' },
-      { type:'rect', x:100, y:55,  w:30, h:22, color:'#4a5a6a' },
-      { type:'rect', x:145, y:55,  w:30, h:22, color:'#6a8aaa' }, // lit
-      { type:'rect', x:300, y:50,  w:30, h:22, color:'#4a5a6a' },
-      { type:'rect', x:345, y:50,  w:30, h:22, color:'#6a8aaa' },
-      // bus windows
+      { type:'rect', x:55,  y:55,  w:30, h:22, color:'#3a4a5a' },
+      { type:'rect', x:100, y:55,  w:30, h:22, color:'#6a8aaa' },
+      { type:'rect', x:145, y:55,  w:30, h:22, color:'#3a4a5a' },
       { type:'rect', x:690, y:460, w:22, h:16, color:'#1a2a3a' },
       { type:'rect', x:720, y:460, w:22, h:16, color:'#1a2a3a' },
       { type:'rect', x:750, y:460, w:22, h:16, color:'#2a4a6a' },
-      // basketball court markings
-      { type:'rect', x:500, y:325, w:120, h:3,  color:'rgba(255,255,255,0.12)' },
-      { type:'ellipse', x:560, y:340, rx:20, ry:20, color:'rgba(255,255,255,0.0)' },
-      { type:'rect', x:558, y:322, w:3,  h:36, color:'rgba(255,255,255,0.1)' },
-      // hallway floor tiles
-      { type:'rect', x:0,   y:388, w:1600, h:3,  color:'rgba(255,255,255,0.05)' },
-      { type:'rect', x:0,   y:430, w:1600, h:3,  color:'rgba(255,255,255,0.05)' },
-      // locker doors
+      { type:'rect', x:500, y:325, w:120, h:3,  color:'rgba(255,255,255,0.1)' },
+      { type:'rect', x:558, y:322, w:3,  h:36, color:'rgba(255,255,255,0.08)' },
       { type:'rect', x:1105, y:310, w:2, h:80, color:'rgba(0,0,0,0.2)' },
       { type:'rect', x:1135, y:310, w:2, h:80, color:'rgba(0,0,0,0.2)' },
       { type:'rect', x:1165, y:310, w:2, h:80, color:'rgba(0,0,0,0.2)' },
-      // dumpster shadow
-      { type:'rect', x:224, y:428, w:55, h:4, color:'rgba(0,0,0,0.2)' },
+      { type:'rect', x:0,   y:388, w:1600, h:2, color:'rgba(255,255,255,0.04)' },
+      { type:'rect', x:0,   y:432, w:1600, h:2, color:'rgba(255,255,255,0.04)' },
     ],
+  },
 
   // ── CANYON PASS ───────────────────────────────────────────────────
   canyon: {
@@ -670,25 +596,16 @@ const MAPS = {
     ],
     bgDecals: ['🪨','💀','🦅'],
     decals: [
-      // canyon wall striations
       { type:'rect', x:0,    y:130, w:1600, h:4,  color:'rgba(0,0,0,0.12)' },
       { type:'rect', x:0,    y:160, w:1600, h:3,  color:'rgba(255,255,255,0.04)' },
       { type:'rect', x:0,    y:1060,w:1600, h:4,  color:'rgba(0,0,0,0.12)' },
-      // sandy ground streaks
-      { type:'rect', x:200,  y:500, w:300, h:3,  color:'rgba(255,255,255,0.06)' },
-      { type:'rect', x:700,  y:620, w:250, h:3,  color:'rgba(255,255,255,0.05)' },
-      { type:'rect', x:1100, y:550, w:200, h:3,  color:'rgba(255,255,255,0.06)' },
-      // dried riverbed cracks
+      { type:'rect', x:200,  y:500, w:300, h:3,  color:'rgba(255,255,255,0.05)' },
+      { type:'rect', x:700,  y:620, w:250, h:3,  color:'rgba(255,255,255,0.04)' },
       { type:'rect', x:400,  y:580, w:2,   h:80, color:'rgba(0,0,0,0.15)' },
       { type:'rect', x:900,  y:540, w:2,   h:60, color:'rgba(0,0,0,0.15)' },
-      { type:'rect', x:1200, y:600, w:2,   h:70, color:'rgba(0,0,0,0.15)' },
-      // wagon wheel ruts
-      { type:'ellipse', x:500, y:530, rx:14, ry:6,  color:'rgba(0,0,0,0.12)' },
-      { type:'ellipse', x:550, y:530, rx:14, ry:6,  color:'rgba(0,0,0,0.12)' },
-      // rock shadow detail
-      { type:'ellipse', x:410, y:348, rx:55, ry:12, color:'rgba(0,0,0,0.15)' },
-      { type:'ellipse', x:660, y:268, rx:45, ry:10, color:'rgba(0,0,0,0.15)' },
-      { type:'ellipse', x:865, y:358, rx:58, ry:12, color:'rgba(0,0,0,0.15)' },
+      { type:'ellipse', x:410, y:348, rx:55, ry:12, color:'rgba(0,0,0,0.13)' },
+      { type:'ellipse', x:660, y:268, rx:45, ry:10, color:'rgba(0,0,0,0.13)' },
+      { type:'ellipse', x:865, y:358, rx:58, ry:12, color:'rgba(0,0,0,0.13)' },
     ],
   },
 
@@ -751,27 +668,18 @@ const MAPS = {
     ],
     bgDecals: ['💀','🕯️','🦇'],
     decals: [
-      // stained glass window hints
-      { type:'rect', x:720, y:80,  w:20, h:30, color:'rgba(180,60,60,0.3)' },
-      { type:'rect', x:745, y:80,  w:20, h:30, color:'rgba(60,80,180,0.3)' },
-      // floor tiles in nave
-      { type:'rect', x:500, y:280, w:600, h:4,  color:'rgba(255,255,255,0.04)' },
-      { type:'rect', x:500, y:360, w:600, h:4,  color:'rgba(255,255,255,0.04)' },
-      { type:'rect', x:500, y:440, w:600, h:4,  color:'rgba(255,255,255,0.04)' },
-      { type:'rect', x:500, y:520, w:600, h:4,  color:'rgba(255,255,255,0.04)' },
-      // candle glow patches
-      { type:'ellipse', x:350,  y:500, rx:18, ry:10, color:'rgba(255,180,60,0.1)' },
-      { type:'ellipse', x:1250, y:480, rx:18, ry:10, color:'rgba(255,180,60,0.1)' },
-      { type:'ellipse', x:800,  y:650, rx:22, ry:12, color:'rgba(255,180,60,0.1)' },
-      // cracked floor lines
-      { type:'rect', x:600, y:400, w:2,  h:100, color:'rgba(0,0,0,0.2)' },
-      { type:'rect', x:900, y:350, w:80, h:2,   color:'rgba(0,0,0,0.2)' },
-      // pew rows
-      { type:'rect', x:520, y:460, w:80, h:10, color:'rgba(60,30,10,0.4)' },
-      { type:'rect', x:620, y:460, w:80, h:10, color:'rgba(60,30,10,0.4)' },
-      { type:'rect', x:920, y:460, w:80, h:10, color:'rgba(60,30,10,0.4)' },
-      { type:'rect', x:1020,y:460, w:80, h:10, color:'rgba(60,30,10,0.4)' },
+      { type:'rect', x:505, y:205, w:590, h:6, color:'rgba(0,0,0,0.2)' },
+      { type:'rect', x:505, y:205, w:6,   h:390, color:'rgba(0,0,0,0.2)' },
+      { type:'rect', x:1089,y:205, w:6,   h:390, color:'rgba(0,0,0,0.2)' },
+      { type:'rect', x:680, y:65,  w:100, h:6, color:'rgba(0,0,0,0.2)' },
+      { type:'rect', x:560, y:280, w:30,  h:20, color:'rgba(255,255,220,0.07)' },
+      { type:'rect', x:1010,y:280, w:30,  h:20, color:'rgba(255,255,220,0.07)' },
+      { type:'rect', x:560, y:380, w:30,  h:20, color:'rgba(255,255,220,0.07)' },
+      { type:'rect', x:1010,y:380, w:30,  h:20, color:'rgba(255,255,220,0.07)' },
+      { type:'ellipse', x:800, y:800, rx:50, ry:18, color:'rgba(180,220,180,0.05)' },
+      { type:'ellipse', x:400, y:700, rx:40, ry:14, color:'rgba(180,220,180,0.04)' },
     ],
+  },
 
   // ── OIL REFINERY ──────────────────────────────────────────────────
   refinery: {
@@ -843,27 +751,17 @@ const MAPS = {
     spawnX: 750, spawnY: 325,
     bgDecals: ['🛢️','⚠️','🔧'],
     decals: [
-      // tank highlights
-      { type:'ellipse', x:135,  y:100, rx:30, ry:10, color:'rgba(255,255,255,0.06)' },
-      { type:'ellipse', x:325,  y:95,  rx:30, ry:10, color:'rgba(255,255,255,0.06)' },
-      { type:'ellipse', x:1130, y:95,  rx:32, ry:10, color:'rgba(255,150,50,0.1)' },
-      { type:'ellipse', x:1330, y:100, rx:28, ry:10, color:'rgba(255,150,50,0.1)' },
-      // oil spill puddles
-      { type:'ellipse', x:400,  y:350, rx:30, ry:12, color:'rgba(0,0,0,0.35)' },
-      { type:'ellipse', x:950,  y:360, rx:25, ry:10, color:'rgba(0,0,0,0.35)' },
-      { type:'ellipse', x:1200, y:600, rx:28, ry:11, color:'rgba(0,0,0,0.35)' },
-      // caution stripes on buildings
-      { type:'rect', x:60,  y:450, w:30, h:8, color:'rgba(255,180,0,0.25)' },
-      { type:'rect', x:360, y:430, w:30, h:8, color:'rgba(255,180,0,0.25)' },
-      { type:'rect', x:780, y:440, w:30, h:8, color:'rgba(255,180,0,0.25)' },
-      // pipe shadows
-      { type:'rect', x:60,  y:322, w:280, h:4, color:'rgba(0,0,0,0.2)' },
-      { type:'rect', x:480, y:317, w:200, h:4, color:'rgba(0,0,0,0.2)' },
-      // ground grating marks
-      { type:'rect', x:540, y:500, w:80, h:3, color:'rgba(255,255,255,0.05)' },
-      { type:'rect', x:540, y:515, w:80, h:3, color:'rgba(255,255,255,0.05)' },
-      { type:'rect', x:540, y:530, w:80, h:3, color:'rgba(255,255,255,0.05)' },
+      { type:'ellipse', x:400,  y:330, rx:30, ry:12, color:'rgba(180,100,0,0.25)' },
+      { type:'ellipse', x:900,  y:330, rx:25, ry:10, color:'rgba(180,100,0,0.25)' },
+      { type:'ellipse', x:1300, y:500, rx:20, ry:8,  color:'rgba(180,100,0,0.2)' },
+      { type:'rect', x:0,   y:322, w:1600, h:3, color:'rgba(255,200,0,0.08)' },
+      { type:'rect', x:220, y:0,   w:3, h:1200, color:'rgba(255,200,0,0.06)' },
+      { type:'rect', x:530, y:0,   w:3, h:1200, color:'rgba(255,200,0,0.06)' },
+      { type:'rect', x:840, y:0,   w:3, h:1200, color:'rgba(255,200,0,0.06)' },
+      { type:'ellipse', x:700, y:325, rx:12, ry:12, color:'#1a1818' },
+      { type:'ellipse', x:703, y:328, rx:8,  ry:8,  color:'#222020' },
     ],
+  },
 
   // ── COASTAL DOCKS ─────────────────────────────────────────────────
   docks: {
@@ -936,32 +834,17 @@ const MAPS = {
     ],
     bgDecals: ['⚓','🚢','🐟'],
     decals: [
-      // water shimmer at top (sea)
-      { type:'rect', x:0,   y:20,  w:1600, h:4,  color:'rgba(80,140,200,0.15)' },
-      { type:'rect', x:0,   y:50,  w:1600, h:3,  color:'rgba(80,140,200,0.1)' },
-      { type:'rect', x:0,   y:80,  w:1600, h:3,  color:'rgba(80,140,200,0.1)' },
-      // dock plank lines
-      { type:'rect', x:0,   y:255, w:1600, h:2,  color:'rgba(0,0,0,0.1)' },
-      { type:'rect', x:0,   y:280, w:1600, h:2,  color:'rgba(0,0,0,0.1)' },
-      // boat details
-      { type:'rect', x:100, y:70,  w:80,  h:6,  color:'rgba(255,255,255,0.08)' },
-      { type:'rect', x:350, y:65,  w:70,  h:6,  color:'rgba(255,255,255,0.08)' },
-      // warehouse windows
-      { type:'rect', x:60,  y:368, w:30,  h:22, color:'#3a4a5a' },
-      { type:'rect', x:105, y:368, w:30,  h:22, color:'#5a7a9a' },
-      { type:'rect', x:340, y:375, w:30,  h:22, color:'#3a4a5a' },
-      // container highlights
-      { type:'rect', x:100, y:600, w:120, h:6,  color:'rgba(255,255,255,0.07)' },
-      { type:'rect', x:240, y:600, w:120, h:6,  color:'rgba(255,255,255,0.07)' },
-      { type:'rect', x:380, y:600, w:120, h:6,  color:'rgba(255,255,255,0.07)' },
-      // rope coils
-      { type:'ellipse', x:200,  y:268, rx:10, ry:10, color:'rgba(120,90,40,0.5)' },
-      { type:'ellipse', x:800,  y:265, rx:10, ry:10, color:'rgba(120,90,40,0.5)' },
-      { type:'ellipse', x:1300, y:268, rx:10, ry:10, color:'rgba(120,90,40,0.5)' },
-      // puddles
-      { type:'ellipse', x:500,  y:730, rx:22, ry:9,  color:'rgba(40,70,100,0.3)' },
-      { type:'ellipse', x:1100, y:725, rx:18, ry:8,  color:'rgba(40,70,100,0.3)' },
+      { type:'ellipse', x:800, y:180, rx:700, ry:120, color:'rgba(30,60,100,0.3)' },
+      { type:'rect', x:0,   y:700, w:1600, h:4, color:'rgba(30,60,100,0.2)' },
+      { type:'rect', x:0,   y:320, w:1600, h:3, color:'rgba(255,255,255,0.05)' },
+      { type:'rect', x:220, y:100, w:3, h:1100, color:'rgba(255,255,255,0.04)' },
+      { type:'rect', x:530, y:100, w:3, h:1100, color:'rgba(255,255,255,0.04)' },
+      { type:'rect', x:840, y:100, w:3, h:1100, color:'rgba(255,255,255,0.04)' },
+      { type:'rect', x:1150,y:100, w:3, h:1100, color:'rgba(255,255,255,0.04)' },
+      { type:'ellipse', x:400,  y:310, rx:20, ry:8,  color:'rgba(40,80,130,0.3)' },
+      { type:'ellipse', x:1100, y:310, rx:20, ry:8,  color:'rgba(40,80,130,0.3)' },
     ],
+  },
 
 };
 
