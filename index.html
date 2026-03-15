@@ -163,6 +163,9 @@
 <!-- ─────────────────────────────────────────
      HUD
 ──────────────────────────────────────────── -->
+<!-- Mobile pause button (touch only) -->
+<button id="mobile-pause-btn" aria-label="Pause">⏸</button>
+
 <!-- Top HUD: Score, Coins, Wave, Zombies, Map -->
 <div id="hud" style="display:none;">
   <div class="hud-block">
@@ -386,6 +389,7 @@
 <script src="js/entities.js"></script>
 <script src="js/game.js"></script>
 <script src="js/menu.js"></script>
+<script src="js/mobile.js"></script>
 <script>
   window.addEventListener('DOMContentLoaded', () => {
     init();
