@@ -1089,3 +1089,125 @@ body {
   from { transform: translateY(-40px) scale(0.85); opacity: 0; }
   to   { transform: translateY(0) scale(1);        opacity: 1; }
 }
+
+/* ── MOBILE ADDITIONS (appended — nothing above changed) ──────────────── */
+
+/* Always show mobile controls on touch devices (JS adds display:flex).
+   Override the media-query-only rule so it works on any screen size
+   when touch is detected. */
+#mobile-controls {
+  align-items: flex-end;
+}
+
+/* Make joystick areas larger and easier to hit on phone */
+.joystick-area {
+  width: 130px; height: 130px;
+  touch-action: none;
+}
+
+.aim-stick {
+  background: rgba(192,57,43,0.12);
+  border-color: rgba(192,57,43,0.3);
+}
+
+.joystick-dot {
+  width: 48px; height: 48px;
+}
+
+/* Center action buttons between the two sticks */
+.mobile-center-btns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: all;
+  padding-bottom: 8px;
+}
+
+.mobile-action-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 2px solid rgba(240,192,64,0.5);
+  background: rgba(10,8,4,0.8);
+  color: var(--gold);
+  pointer-events: all;
+  touch-action: manipulation;
+  min-width: 90px;
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mobile-action-btn:active {
+  background: rgba(240,192,64,0.2);
+  border-color: var(--gold);
+}
+
+.mobile-squeeze-btn {
+  border-color: rgba(46,204,113,0.5);
+  color: #2ecc71;
+}
+
+.mobile-squeeze-btn:active {
+  background: rgba(46,204,113,0.2);
+  border-color: #2ecc71;
+}
+
+/* Stick label */
+.stick-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--dim);
+  letter-spacing: 0.15em;
+  text-align: center;
+  margin-bottom: 6px;
+  pointer-events: none;
+}
+
+.mobile-stick-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Mobile pause button — top-right corner during gameplay */
+#mobile-pause-btn {
+  display: none;
+  position: fixed;
+  top: 10px; right: 10px;
+  z-index: 60;
+  width: 44px; height: 44px;
+  background: rgba(10,8,4,0.75);
+  border: 2px solid rgba(240,192,64,0.4);
+  border-radius: 8px;
+  color: var(--gold);
+  font-size: 1.2rem;
+  font-family: 'Share Tech Mono', monospace;
+  align-items: center; justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  pointer-events: all;
+}
+
+/* Show pause btn on touch devices when HUD is visible (JS sets display) */
+@media (max-width: 1024px) and (pointer: coarse) {
+  #mobile-pause-btn { display: flex; }
+  /* Shift killfeed left so it doesn't overlap pause btn */
+  #killfeed { right: 3.5rem; }
+  /* Make HUD text slightly smaller to fit narrow screens */
+  .hud-value { font-size: 0.9rem; }
+  .hud-label { font-size: 0.55rem; }
+  /* Nudge bottom HUD up so it clears joystick overlay */
+  #hud-bottom { bottom: 160px; }
+  /* Weapon slot touch targets — bigger */
+  .weapon-slot { width: 52px; height: 52px; }
+}
+
+/* Prevent any tap-highlight or scroll bounce while playing */
+#mobile-controls * {
+  -webkit-tap-highlight-color: transparent;
+}
