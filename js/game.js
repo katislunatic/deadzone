@@ -100,15 +100,13 @@ function init() {
   canvas.addEventListener('mousedown', e => {
     if (e.button === 0) {
       mouse.down = true;
+      // Re-request lock if not already locked (e.g. after tab switch)
       if (gameState === 'playing' && document.pointerLockElement !== canvas) {
         requestPointerLock();
       }
     }
   });
-  canvas.addEventListener('mouseup', e => { if (e.button===0) mouse.down=false; });
-  // Backup: catch mousedown/up on document too in case pointer lock swallows canvas events
-  document.addEventListener('mousedown', e => { if (e.button===0) mouse.down=true; });
-  document.addEventListener('mouseup',   e => { if (e.button===0) mouse.down=false; });
+  canvas.addEventListener('mouseup',   e => { if (e.button===0) mouse.down=false; });
 
   // Scroll wheel weapon switching
   window.addEventListener('wheel', e => {
@@ -363,12 +361,9 @@ function loop() {
   const worldMouseY = mouse.y / sc + _cy;
   player.facing = Math.atan2(worldMouseY - player.y, worldMouseX - player.x);
 
-  // Shoot — check mouse, Space fallback, and keybind
-  const shootKey = (keybinds && keybinds.shoot) ? keybinds.shoot : 'Space';
-  if (mouse.down || keys['Space'] || keys[shootKey]) tryShoot();
-  // Reload — R fallback and keybind
-  const reloadKey = (keybinds && keybinds.reload) ? keybinds.reload : 'KeyR';
-  if (keys['KeyR'] || keys[reloadKey]) startReload();
+  // Shoot
+  if (mouse.down || (keybinds && keys[keybinds.shoot])) tryShoot();
+  if (keybinds && keys[keybinds.reload]) startReload();
   if (player.invincible > 0) player.invincible--;
 
   // Horse stomp — damages zombies player runs over
