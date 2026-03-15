@@ -61,8 +61,9 @@ body {
   letter-spacing: 0;
   pointer-events: none;
   z-index: 0;
-  right: -0.15em;
-  bottom: -0.1em;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   line-height: 1;
   animation: titleFlicker 4s infinite;
 }
