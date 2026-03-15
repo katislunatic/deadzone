@@ -80,57 +80,67 @@ class Player extends Entity {
         ctx.fillStyle = c;
         ctx.fillRect(px * P, Math.round((py + bobY) * P), P, P);
       };
-      // Horse gallop: 4-frame cycle
-      const gf = moving ? Math.floor(this.age / 4) % 4 : 0;
-      const legO = [[0,2],[1,0],[-1,2],[0,-1]]; // front/back leg offsets per frame
-      const [fLeg, bLeg] = [legO[gf], legO[(gf+2)%4]];
 
-      const hc  = '#8B5E3C'; // main coat
-      const hcd = '#6B3E1C'; // dark
-      const hcl = '#A87040'; // light
-      const hmane = '#3d2008'; // mane/tail dark brown
+      const hc   = '#8B5E3C'; // coat
+      const hcd  = '#5a3518'; // dark shading
+      const hcl  = '#b07848'; // highlight
+      const hmane= '#2a1408'; // mane/tail
+      const hoof = '#1a1008'; // hooves
+
+      // Gallop cycle — 4 frames, legs alternate
+      const gf = moving ? Math.floor(this.age / 5) % 4 : 0;
+      const frontY = [0, -1, -2, -1][gf];
+      const backY  = [-2, -1, 0, -1][gf];
 
       // shadow
       ctx.fillStyle = 'rgba(0,0,0,0.3)';
-      ctx.beginPath(); ctx.ellipse(0, 28, 22, 7, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(1, 30, 24, 6, 0, 0, Math.PI*2); ctx.fill();
 
-      // tail
-      hf(5,10,hmane); hf(5,11,hmane); hf(6,12,hmane); hf(6,13,'#5a3010');
+      // tail (on left/back end, negative x)
+      hf(-6, 8, hmane); hf(-7, 9, hmane); hf(-7,10, hmane);
+      hf(-6,11,'#4a2810'); hf(-7,11,hmane);
 
-      // body
-      hf(-4,6,hcd);  hf(-3,6,hc);   hf(-2,6,hc);   hf(-1,6,hc);
-      hf(0,6,hc);    hf(1,6,hc);    hf(2,6,hc);    hf(3,6,hcd);
-      hf(-4,7,hcd);  hf(-3,7,hcl);  hf(-2,7,hcl);  hf(-1,7,hcl);
-      hf(0,7,hcl);   hf(1,7,hcl);   hf(2,7,hc);    hf(3,7,hcd);
-      hf(-4,8,hcd);  hf(-3,8,hc);   hf(-2,8,hc);   hf(-1,8,hc);
-      hf(0,8,hc);    hf(1,8,hc);    hf(2,8,hc);    hf(3,8,hcd);
+      // body — centered, horse wider than player
+      for (let px = -5; px <= 5; px++) {
+        hf(px, 7,  px===- 5||px===5 ? hcd : px%3===0 ? hcl : hc);
+        hf(px, 8,  px===-5||px===5 ? hcd : hc);
+        hf(px, 9,  px===-5||px===5 ? hcd : hcd);
+      }
 
-      // neck
-      hf(-4,5,hcd); hf(-3,5,hc); hf(-2,5,hc); hf(-1,5,hcd);
-      hf(-4,4,hcd); hf(-3,4,hc); hf(-2,4,hcd);
+      // neck (right/front side, positive x)
+      hf(4, 6, hcd); hf(5, 6, hc);  hf(6, 6, hcd);
+      hf(4, 5, hcd); hf(5, 5, hc);  hf(6, 5, hcd);
+      hf(5, 4, hc);  hf(6, 4, hcd);
 
-      // head
-      hf(-5,3,hcd); hf(-4,3,hc); hf(-3,3,hc); hf(-2,3,hcd);
-      hf(-5,2,hcd); hf(-4,2,hc); hf(-3,2,hcd);
-      hf(-5,1,hmane); // ear
-      hf(-4,1,hc); hf(-3,1,hcd);
-      // nostril
-      hf(-5,3,'#3d1808');
+      // head (faces right — positive x)
+      hf(5, 3, hc);  hf(6, 3, hc);  hf(7, 3, hcd);
+      hf(5, 2, hcl); hf(6, 2, hc);  hf(7, 2, hcd);
+      hf(6, 1, hc);  hf(7, 1, hcd); // snout
+      hf(7, 1, hcd); hf(8, 1, hcd); // nose tip
+      hf(8, 2, hcd);                 // nostril area
+      // ear
+      hf(5, 1, hmane); hf(6, 0, hmane);
       // eye
-      hf(-3,2,'#1a0a00');
+      hf(6, 2, '#1a0800');
       // mane
-      hf(-2,3,hmane); hf(-2,4,hmane); hf(-1,4,hmane);
+      hf(4, 4, hmane); hf(5, 5, hmane); hf(4, 7, hmane);
 
-      // front legs (animated)
-      hf(-3, 9+fLeg[0], hc);   hf(-2, 9+fLeg[0], hcd);
-      hf(-3,10+fLeg[0], hcd);  hf(-2,10+fLeg[0],'#2a1800'); // hoof
-      // back legs (animated)
-      hf(2,  9+bLeg[0], hc);   hf(3,  9+bLeg[0], hcd);
-      hf(2, 10+bLeg[0], hcd);  hf(3, 10+bLeg[0],'#2a1800'); // hoof
+      // front legs (right side, animated)
+      hf(3, 10+frontY, hc);   hf(4, 10+frontY, hcd);
+      hf(3, 11+frontY, hcd);  hf(4, 11+frontY, hcd);
+      hf(3, 12+frontY, hoof); hf(4, 12+frontY, hoof);
 
-      // saddle
-      hf(-2,5,'#5c3010'); hf(-1,5,'#7a4018'); hf(0,5,'#7a4018'); hf(1,5,'#5c3010');
-      hf(-1,6,'#8b5020'); hf(0,6,'#8b5020');
+      // back legs (left side, animated)
+      hf(-3, 10+backY, hc);   hf(-2, 10+backY, hcd);
+      hf(-3, 11+backY, hcd);  hf(-2, 11+backY, hcd);
+      hf(-3, 12+backY, hoof); hf(-2, 12+backY, hoof);
+
+      // saddle — sits right where player body meets horse
+      hf(-1, 6, '#6b3810'); hf(0, 6, '#8b4820');
+      hf(1,  6, '#8b4820'); hf(2, 6, '#6b3810');
+      hf(0,  7, '#7a4018'); hf(1, 7, '#7a4018');
+      // stirrups
+      hf(-2, 8, '#5a3010'); hf(3, 8, '#5a3010');
     }
 
     // shadow (player, only if not on horse)
@@ -143,6 +153,8 @@ class Player extends Entity {
       ctx.fillStyle = flash ? '#ff9977' : c;
       ctx.fillRect(px*P, Math.round((py+bobY)*P), P, P);
     };
+
+    const riderOffset = this.onHorse ? -4 : 0; // shift rider up to sit on saddle
 
     // ── BOOTS & LEGS (hidden when on horse) ──
     if (!this.onHorse) {
@@ -159,28 +171,29 @@ class Player extends Entity {
     }
 
     // ── STATIC UPPER BODY ──
+    const ro = riderOffset;
     // belt
-    f(-3,1,'#3d2010'); f(-2,1,'#5c3018'); f(-1,1,'#6b3a20');
-    f(0,1,'#f0c040');  f(1,1,'#5c3018');  f(2,1,'#3d2010');
+    f(-3,1+ro,'#3d2010'); f(-2,1+ro,'#5c3018'); f(-1,1+ro,'#6b3a20');
+    f(0,1+ro,'#f0c040');  f(1,1+ro,'#5c3018');  f(2,1+ro,'#3d2010');
     // shirt
-    f(-3,-1,'#8b6030'); f(-2,-1,'#c87830'); f(-1,-1,'#d88840');
-    f(0,-1,'#d88840');  f(1,-1,'#c87830');  f(2,-1,'#8b6030');
-    f(-3,0,'#8b6030');  f(-2,0,'#c87830');  f(-1,0,'#d88840');
-    f(0,0,'#d88840');   f(1,0,'#c87830');   f(2,0,'#8b6030');
+    f(-3,-1+ro,'#8b6030'); f(-2,-1+ro,'#c87830'); f(-1,-1+ro,'#d88840');
+    f(0,-1+ro,'#d88840');  f(1,-1+ro,'#c87830');  f(2,-1+ro,'#8b6030');
+    f(-3,0+ro,'#8b6030');  f(-2,0+ro,'#c87830');  f(-1,0+ro,'#d88840');
+    f(0,0+ro,'#d88840');   f(1,0+ro,'#c87830');   f(2,0+ro,'#8b6030');
     // face
-    f(-2,-3,'#e8c888'); f(-1,-3,'#e8c888'); f(0,-3,'#e8c888'); f(1,-3,'#e8c888');
-    f(-2,-2,'#e8c888'); f(-1,-2,'#d4a060'); f(0,-2,'#d4a060'); f(1,-2,'#e8c888');
-    f(-1,-2,'#2a1800'); f(1,-2,'#2a1800'); // eyes
+    f(-2,-3+ro,'#e8c888'); f(-1,-3+ro,'#e8c888'); f(0,-3+ro,'#e8c888'); f(1,-3+ro,'#e8c888');
+    f(-2,-2+ro,'#e8c888'); f(-1,-2+ro,'#d4a060'); f(0,-2+ro,'#d4a060'); f(1,-2+ro,'#e8c888');
+    f(-1,-2+ro,'#2a1800'); f(1,-2+ro,'#2a1800'); // eyes
     // hat brim
-    f(-5,-4,'#5c3018'); f(-4,-4,'#5c3018'); f(-3,-4,'#6b3a20');
-    f(-2,-4,'#6b3a20'); f(-1,-4,'#6b3a20'); f(0,-4,'#6b3a20');
-    f(1,-4,'#6b3a20');  f(2,-4,'#6b3a20');  f(3,-4,'#5c3018'); f(4,-4,'#5c3018');
+    f(-5,-4+ro,'#5c3018'); f(-4,-4+ro,'#5c3018'); f(-3,-4+ro,'#6b3a20');
+    f(-2,-4+ro,'#6b3a20'); f(-1,-4+ro,'#6b3a20'); f(0,-4+ro,'#6b3a20');
+    f(1,-4+ro,'#6b3a20');  f(2,-4+ro,'#6b3a20');  f(3,-4+ro,'#5c3018'); f(4,-4+ro,'#5c3018');
     // hat top
-    f(-3,-6,'#3d2010'); f(-2,-6,'#3d2010'); f(-1,-6,'#4a2818');
-    f(0,-6,'#4a2818');  f(1,-6,'#3d2010');  f(2,-6,'#3d2010');
-    f(-3,-5,'#3d2010'); f(-2,-5,'#3d2010'); f(-1,-5,'#3d2010');
-    f(0,-5,'#3d2010');  f(1,-5,'#3d2010');  f(2,-5,'#3d2010');
-    f(-2,-7,'#2a1208'); f(-1,-7,'#2a1208'); f(0,-7,'#2a1208'); f(1,-7,'#2a1208');
+    f(-3,-6+ro,'#3d2010'); f(-2,-6+ro,'#3d2010'); f(-1,-6+ro,'#4a2818');
+    f(0,-6+ro,'#4a2818');  f(1,-6+ro,'#3d2010');  f(2,-6+ro,'#3d2010');
+    f(-3,-5+ro,'#3d2010'); f(-2,-5+ro,'#3d2010'); f(-1,-5+ro,'#3d2010');
+    f(0,-5+ro,'#3d2010');  f(1,-5+ro,'#3d2010');  f(2,-5+ro,'#3d2010');
+    f(-2,-7+ro,'#2a1208'); f(-1,-7+ro,'#2a1208'); f(0,-7+ro,'#2a1208'); f(1,-7+ro,'#2a1208');
 
     ctx.restore();
 
