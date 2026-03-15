@@ -55,6 +55,7 @@ function init() {
   });
 
   // Input
+  let _cheatBuffer = '';
   window.addEventListener('keydown', e => {
     keys[e.code] = true;
     // Only handle ESC when already paused (to resume) — pausing is handled by pointerlockchange
@@ -70,6 +71,18 @@ function init() {
         };
         if (wepMap[e.code]) selectWeapon(wepMap[e.code]);
       }
+      // Cheat code: type 'testing' during gameplay
+      if (e.key.length === 1) {
+        _cheatBuffer = (_cheatBuffer + e.key).slice(-7);
+        if (_cheatBuffer === 'testing') {
+          player.coins += 1000;
+          _cheatBuffer = '';
+          addKillFeed('🤑 +1000 coins [CHEAT]', 'kill');
+          updateHUD();
+        }
+      }
+    } else {
+      _cheatBuffer = '';
     }
   });
   window.addEventListener('keyup',  e => keys[e.code] = false);
