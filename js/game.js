@@ -496,8 +496,11 @@ function loop() {
     const z = zombies[i];
     const touching = z.update(player.x, player.y, obstacles);
     if (touching && z.attackCooldown<=0) {
+      const wasAlive = player.alive;
       player.takeDamage(z.damage);
       z.attackCooldown = 40;
+      // Track the zombie that lands the killing blow
+      if (wasAlive && !player.alive) deathAnimZombie = z;
       playSound('player_hurt');
       flashDamage();
     }
@@ -605,7 +608,12 @@ function loop() {
   if (!player.alive && gameState === 'playing') {
     gameState = 'dying';
     deathAnimFrame = 0;
-    deathAnimZombie = zombies.length > 0 ? zombies.reduce((a,b) => dist(a.x,a.y,player.x,player.y) < dist(b.x,b.y,player.x,player.y) ? a : b) : null;
+    // Fall back to nearest zombie if killer wasn't tracked
+    if (!deathAnimZombie) {
+      deathAnimZombie = zombies.length > 0 ? zombies.reduce((a,b) => dist(a.x,a.y,player.x,player.y) < dist(b.x,b.y,player.x,player.y) ? a : b) : null;
+    }
+    // Freeze the killer in place for the animation
+    if (deathAnimZombie) { deathAnimZombie.vx = 0; deathAnimZombie.vy = 0; }
   }
 
   // Dust particles
@@ -727,7 +735,12 @@ function render() {
 
   // Entities
   for (const c of civilians) c.draw(ctx);
-  for (const z of zombies)   z.draw(ctx);
+  // During dying animation, only draw the killer zombie (others freeze/hide)
+  if (gameState === 'dying') {
+    if (deathAnimZombie) deathAnimZombie.draw(ctx);
+  } else {
+    for (const z of zombies) z.draw(ctx);
+  }
   for (const b of bullets)   b.draw(ctx);
   player.draw(ctx);
   for (let i=particles.length-1; i>=0; i--) {
@@ -943,108 +956,115 @@ function closeShop() {
 function drawDeathAnimation(frame) {
   const cw = canvas.width, ch = canvas.height;
   const cx = window._camX || 0, cy = window._camY || 0;
-
-  // Screen-space player position
   const px = player.x - cx;
   const py = player.y - cy;
-
-  // Phase 1 (0-40): zombie lunges in from side
-  // Phase 2 (40-90): zombie biting, player flashing red
-  // Phase 3 (90-130): screen fades to black
-
   const P = 3;
-  ctx.save();
 
-  // Phase 3 — fade to black
-  if (frame > 90) {
-    const fade = Math.min(1, (frame - 90) / 40);
-    ctx.fillStyle = `rgba(0,0,0,${fade * 0.92})`;
+  const z = deathAnimZombie;
+  const isBig = z && z.type === 'big';
+  const ZP = isBig ? 4 : 3;
+  const skin = z && z.customSkin  ? z.customSkin  : (isBig ? '#2a7a1a' : '#3a9a2a');
+  const skinD= z && z.customSkin  ? z.customSkin  : (isBig ? '#1a5a10' : '#2a7a1a');
+  const shirt= z && z.customShirt ? z.customShirt : (isBig ? '#8a2020' : '#3a5a8a');
+  const shirtD = isBig ? '#6a1010' : '#2a4a6a';
+
+  // Phase 1 (0–35):  zombie lunges in, player falls
+  // Phase 2 (35–95): zombie bites, blood, screen darkens slightly
+  // Phase 3 (95–130): full fade to black
+  const t1 = Math.min(1, frame / 35);
+  const t3 = frame > 95 ? Math.min(1, (frame - 95) / 35) : 0;
+
+  // Darken screen gradually from phase 2 onward
+  if (frame > 35) {
+    const dim = Math.min(0.75, ((frame - 35) / 95) * 0.75);
+    ctx.fillStyle = `rgba(0,0,0,${dim})`;
     ctx.fillRect(0, 0, cw, ch);
   }
 
-  // Draw zombie biting from the right side of player
-  const biteZombie = deathAnimZombie;
-  const skin = '#3a9a2a';
-  const skinD = '#2a7a1a';
-  const shirtCol = '#3a5a8a';
-  const shirtD = '#2a4a6a';
+  // Player — crumple to the ground
+  const playerTilt = t1 * 1.4; // radians — tips over
+  const playerDrop = t1 * 10;  // pixels down
+  ctx.save();
+  ctx.translate(px, py + playerDrop);
+  ctx.rotate(playerTilt);
+  ctx.globalAlpha = Math.max(0, 1 - t3 * 2);
+  // Draw fallen player (simplified — just body + hat)
+  const fp = (fx, fy, c) => { ctx.fillStyle = c; ctx.fillRect(fx*P, fy*P, P, P); };
+  fp(-3,0,'#3d2010'); fp(-2,0,'#5c3018'); fp(-1,0,'#6b3a20'); fp(0,0,'#f0c040'); fp(1,0,'#5c3018'); fp(2,0,'#3d2010');
+  fp(-3,-1,'#8b6030'); fp(-2,-1,'#c87830'); fp(-1,-1,'#d88840'); fp(0,-1,'#d88840'); fp(1,-1,'#c87830'); fp(2,-1,'#8b6030');
+  fp(-2,-3,'#e8c888'); fp(-1,-3,'#e8c888'); fp(0,-3,'#e8c888'); fp(1,-3,'#e8c888');
+  fp(-5,-4,'#5c3018'); fp(-4,-4,'#5c3018'); fp(-3,-4,'#6b3a20'); fp(-2,-4,'#6b3a20'); fp(-1,-4,'#6b3a20');
+  fp(0,-4,'#6b3a20'); fp(1,-4,'#6b3a20'); fp(2,-4,'#6b3a20'); fp(3,-4,'#5c3018'); fp(4,-4,'#5c3018');
+  ctx.globalAlpha = 1;
+  ctx.restore();
 
-  // Lunge offset — zombie slides in from right
-  let lungeX = 0;
-  if (frame < 40) {
-    lungeX = (1 - frame / 40) * 60; // slides in from right
-  }
+  // Killer zombie — position relative to player, leans over them
+  const zOffX = 22 * (1 - t1); // slides in from right
+  const zx = px + 14 + zOffX;
+  const zy = py + playerDrop - 4;
+  const zTilt = -0.35 + t1 * -0.5; // leans forward over player
 
-  const zx = px + 18 + lungeX;
-  const zy = py;
-
+  ctx.save();
   ctx.translate(zx, zy);
+  ctx.rotate(zTilt);
 
-  // Bite chomp: jaw opens and closes
-  const bitePhase = frame < 40 ? 0 : Math.sin((frame - 40) * 0.4) * 0.5 + 0.5;
-  const jawOpen = frame >= 40 ? Math.round(bitePhase * 4) : 0;
+  const zf = (fx, fy, c) => { ctx.fillStyle = c; ctx.fillRect(fx*ZP, fy*ZP, ZP, ZP); };
 
-  const f = (fx, fy, c) => {
-    ctx.fillStyle = c;
-    ctx.fillRect(fx * P, fy * P, P, P);
-  };
+  // Feet
+  zf(-2,3,'#1a1008'); zf(-1,3,'#2a1a0a'); zf(0,3,'#2a1a0a'); zf(1,3,'#1a1008');
+  // Legs
+  zf(-2,1,skinD); zf(-1,1,'#4a3828'); zf(0,1,'#4a3828'); zf(1,1,skinD);
+  zf(-2,2,skinD); zf(-1,2,'#3a2818'); zf(0,2,'#3a2818'); zf(1,2,skinD);
+  // Torso
+  zf(-3,-1,shirtD); zf(-2,-1,shirt); zf(-1,-1,shirt); zf(0,-1,shirt); zf(1,-1,shirt); zf(2,-1,shirtD);
+  zf(-3,-2,shirtD); zf(-2,-2,shirt); zf(-1,-2,skinD);  zf(0,-2,skinD);  zf(1,-2,shirt); zf(2,-2,shirtD);
+  zf(-3,-3,shirtD); zf(-2,-3,shirt); zf(-1,-3,shirt);  zf(0,-3,shirt);  zf(1,-3,shirt); zf(2,-3,shirtD);
+  // Arms reaching down toward player
+  zf(-4,-2,skin); zf(-5,-3,skin); // left arm reaches down
+  zf(3,-2,skin);  zf(4,-3,skin);  // right arm
+  // Neck
+  zf(-1,-4,skin); zf(0,-4,skin);
+  // Head — facing left (down toward player)
+  zf(-3,-6,skin); zf(-2,-6,skin); zf(-1,-6,skin); zf(0,-6,skin);
+  zf(-3,-5,skin); zf(-2,-5,skinD); zf(-1,-5,skinD); zf(0,-5,skin);
+  zf(-2,-5,'#ff2222'); zf(0,-5,'#ff2222'); // eyes
 
-  // Zombie body
-  f(-2, 1, skinD); f(-1, 1, '#4a3828'); f(0, 1, '#4a3828'); f(1, 1, skinD);
-  f(-2, 2, skinD); f(-1, 2, '#3a2818'); f(0, 2, '#3a2818'); f(1, 2, skinD);
-  f(-3,-1,shirtD); f(-2,-1,shirtCol); f(-1,-1,shirtCol); f(0,-1,shirtCol); f(1,-1,shirtCol); f(2,-1,shirtD);
-  f(-3,-2,shirtD); f(-2,-2,shirtCol); f(-1,-2,skinD);    f(0,-2,skinD);    f(1,-2,shirtCol); f(2,-2,shirtD);
-  f(-3,-3,shirtD); f(-2,-3,shirtCol); f(-1,-3,shirtCol); f(0,-3,shirtCol); f(1,-3,shirtCol); f(2,-3,shirtD);
-  // arms outstretched toward player (left)
-  f(-4,-2, skin); f(-5,-2, skin); f(-4,-1, skin); f(-5,-1, skin);
-
-  // Head — facing left (toward player)
-  f(-3,-5,skin); f(-2,-5,skin); f(-1,-5,skin); f(0,-5,skin);
-  f(-3,-4,skin); f(-2,-4,skinD); f(-1,-4,skinD); f(0,-4,skin);
-  f(-2,-4,'#ff2222'); f(0,-4,'#ff2222'); // eyes
-
-  // Jaw/mouth — opens and closes
-  f(-2,-3,'#ddddcc'); f(-1,-3,'#ddddcc'); // teeth top
-  if (jawOpen > 0) {
-    // open jaw — gap
-    f(-2,-3+jawOpen,'#1a0808'); f(-1,-3+jawOpen,'#1a0808'); // dark mouth gap
-    f(-2,-2+jawOpen,'#ddddcc'); f(-1,-2+jawOpen,'#ddddcc'); // bottom teeth
+  // Chomping jaw — opens/closes during bite phase
+  const chomping = frame >= 35 && frame < 95;
+  const jawGap = chomping ? Math.max(0, Math.round(Math.sin((frame - 35) * 0.45) * 3)) : 0;
+  zf(-2,-3,'#ddddcc'); zf(-1,-3,'#ddddcc'); // upper teeth
+  if (jawGap > 0) {
+    zf(-2,-3+jawGap,'#330000'); zf(-1,-3+jawGap,'#330000'); // open mouth
+    zf(-2,-2+jawGap,'#ddddcc'); zf(-1,-2+jawGap,'#ddddcc'); // lower teeth
   }
 
   ctx.restore();
 
-  // Blood splat particles during bite phase
-  if (frame >= 40 && frame < 90 && frame % 6 === 0) {
-    for (let i = 0; i < 4; i++) {
+  // Blood splatter during bite
+  if (chomping && jawGap === 0 && frame % 8 === 0) {
+    for (let i = 0; i < 6; i++) {
       particles.push(new Particle(
-        player.x + (Math.random()-0.5)*10,
-        player.y + (Math.random()-0.5)*10,
-        '#c0392b', { spread: 5, life: 25, size: 3 }
+        player.x + (Math.random()-0.5)*16,
+        player.y + (Math.random()-0.5)*16,
+        '#c0392b', { spread:6, life:30, size:3+Math.random()*2 }
       ));
     }
   }
 
-  // Red flash on player during bite
-  if (frame >= 40 && frame < 90) {
-    const alpha = Math.sin((frame - 40) * 0.4) * 0.4;
-    ctx.save();
-    ctx.fillStyle = `rgba(192,57,43,${alpha})`;
-    ctx.beginPath();
-    ctx.arc(px, py, 20, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+  // Vignette — darkens edges during bite
+  if (chomping) {
+    const vigAlpha = 0.3 + Math.sin((frame-35)*0.15)*0.15;
+    const grad = ctx.createRadialGradient(px, py, 60, px, py, 280);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, `rgba(0,0,0,${vigAlpha})`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, cw, ch);
   }
 
-  // "CHOMP" text pop
-  if (frame === 45 || frame === 65 || frame === 82) {
-    ctx.save();
-    ctx.font = 'bold 18px monospace';
-    ctx.fillStyle = '#ff4444';
-    ctx.textAlign = 'center';
-    ctx.globalAlpha = 0.9;
-    ctx.fillText('CHOMP!', px + 30, py - 40);
-    ctx.textAlign = 'left';
-    ctx.restore();
+  // Final fade to black
+  if (t3 > 0) {
+    ctx.fillStyle = `rgba(0,0,0,${t3})`;
+    ctx.fillRect(0, 0, cw, ch);
   }
 }
 
