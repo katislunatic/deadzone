@@ -11,7 +11,13 @@
 
     // Show mobile controls panel
     const panel = document.getElementById('mobile-controls');
-    if (panel) panel.style.display = 'flex';
+    if (panel) {
+      panel.style.display = 'flex';
+      // Re-run canvas sizing now the controls bar has a real height
+      requestAnimationFrame(() => {
+        if (typeof resizeCanvas === 'function') resizeCanvas();
+      });
+    }
 
     // Hide the keyboard hint text in menu (not relevant on mobile)
     const menuHint = document.querySelector('#menu-screen > div[style*="monospace"]');
