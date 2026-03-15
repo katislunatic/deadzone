@@ -146,10 +146,19 @@ function init() {
 const VIEWPORT_W = 800;
 const VIEWPORT_H = 600;
 
+function getMobileControlsHeight() {
+  const panel = document.getElementById('mobile-controls');
+  if (!panel || panel.style.display === 'none' || panel.offsetHeight === 0) return 0;
+  return panel.offsetHeight;
+}
+
 function resizeCanvas() {
-  // Scale up the 800x600 viewport to fill the screen
-  const scaleX = window.innerWidth  / VIEWPORT_W;
-  const scaleY = window.innerHeight / VIEWPORT_H;
+  // On mobile, reserve space at the bottom for the joystick controls bar
+  const mobileH = getMobileControlsHeight();
+  const availH  = window.innerHeight - mobileH;
+
+  const scaleX = window.innerWidth / VIEWPORT_W;
+  const scaleY = availH            / VIEWPORT_H;
   const displayScale = Math.min(scaleX, scaleY);
 
   canvas.width  = VIEWPORT_W;
@@ -157,9 +166,16 @@ function resizeCanvas() {
   canvas.style.width  = Math.round(VIEWPORT_W * displayScale) + 'px';
   canvas.style.height = Math.round(VIEWPORT_H * displayScale) + 'px';
   canvas.style.position = 'fixed';
-  canvas.style.left = Math.round((window.innerWidth  - VIEWPORT_W * displayScale) / 2) + 'px';
-  canvas.style.top  = Math.round((window.innerHeight - VIEWPORT_H * displayScale) / 2) + 'px';
+  canvas.style.left = Math.round((window.innerWidth - VIEWPORT_W * displayScale) / 2) + 'px';
+  // Pin to top so canvas never slides under the controls bar
+  canvas.style.top = '0px';
   canvas.style.imageRendering = 'crisp-edges';
+
+  // Move bottom HUD to sit just above the controls bar
+  const hudBottom = document.getElementById('hud-bottom');
+  if (hudBottom) {
+    hudBottom.style.bottom = (mobileH > 0 ? mobileH + 4 : 0) + 'px';
+  }
 }
 
 // ── START GAME ────────────────────────────────────────────────────────
