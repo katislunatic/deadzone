@@ -9,6 +9,7 @@ const DEFAULT_KEYBINDS = {
   moveRight: 'KeyD',
   shoot:     'Space',
   reload:    'KeyR',
+  squeeze:   'ShiftLeft',
   weapon1:   'Digit1',
   weapon2:   'Digit2',
   weapon3:   'Digit3',
@@ -22,6 +23,7 @@ const KEYBIND_LABELS = {
   moveRight: 'Move Right',
   shoot:     'Shoot',
   reload:    'Reload',
+  squeeze:   'Squeeze',
   weapon1:   'Weapon 1',
   weapon2:   'Weapon 2',
   weapon3:   'Weapon 3',
@@ -141,22 +143,12 @@ function startListening(action) {
   };
 
   window.addEventListener('keydown', window._keybindListener, { once: true, capture: true });
-
-  // Also cancel if user clicks away instead of pressing a key
-  window._keybindMouseCancel = function() { cancelListening(); };
-  window.addEventListener('mousedown', window._keybindMouseCancel, { once: true, capture: true });
-  window.addEventListener('touchstart', window._keybindMouseCancel, { once: true, capture: true });
 }
 
 function cancelListening() {
   if (window._keybindListener) {
     window.removeEventListener('keydown', window._keybindListener, { capture: true });
     window._keybindListener = null;
-  }
-  if (window._keybindMouseCancel) {
-    window.removeEventListener('mousedown', window._keybindMouseCancel, { capture: true });
-    window.removeEventListener('touchstart', window._keybindMouseCancel, { capture: true });
-    window._keybindMouseCancel = null;
   }
   listeningFor = null;
   // Re-render to clear listening state

@@ -83,8 +83,6 @@ function openSettings() {
 function closeSettings() {
   saveSettings();
   document.getElementById('settings-overlay').style.display = 'none';
-  // Cancel any pending keybind listening so it doesn't eat game inputs
-  if (typeof cancelListening === 'function') cancelListening();
 }
 
 function toggleSetting(key) {
