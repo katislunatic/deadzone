@@ -360,6 +360,16 @@ function loop() {
   try {
   if (gameState === 'paused') { render(); return; }
   if (gameState === 'shop')   { render(); return; }
+  if (gameState === 'dying')  {
+    deathAnimFrame++;
+    render();
+    drawDeathAnimation(deathAnimFrame);
+    if (deathAnimFrame >= 130) {
+      gameState = 'gameover';
+      showGameOver();
+    }
+    return;
+  }
   if (gameState !== 'playing') { drawBackground(); return; }
 
   frameCount++;
@@ -596,17 +606,6 @@ function loop() {
     gameState = 'dying';
     deathAnimFrame = 0;
     deathAnimZombie = zombies.length > 0 ? zombies.reduce((a,b) => dist(a.x,a.y,player.x,player.y) < dist(b.x,b.y,player.x,player.y) ? a : b) : null;
-  }
-  if (gameState === 'dying') {
-    deathAnimFrame++;
-    render();
-    // Draw death bite animation on top
-    drawDeathAnimation(deathAnimFrame);
-    if (deathAnimFrame >= 130) {
-      gameState = 'gameover';
-      showGameOver();
-    }
-    return;
   }
 
   // Dust particles
