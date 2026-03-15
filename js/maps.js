@@ -1,5 +1,8 @@
 // ── MAPS ─────────────────────────────────────────────────────────────
 
+const WORLD_W = 1600;
+const WORLD_H = 1200;
+
 const MAPS = {
   western: {
     id: 'western',
