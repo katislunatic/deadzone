@@ -154,7 +154,7 @@ class Player extends Entity {
       ctx.fillRect(px*P, Math.round((py+bobY)*P), P, P);
     };
 
-    const riderOffset = this.onHorse ? -4 : 0; // shift rider up to sit on saddle
+    const riderOffset = this.onHorse ? 3 : 0; // sit on saddle (saddle is at row 6, body rows 0-1 = belt/shirt)
 
     // ── BOOTS & LEGS (hidden when on horse) ──
     if (!this.onHorse) {
