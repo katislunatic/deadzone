@@ -499,7 +499,6 @@ function loop() {
       // Spawn zombie with the civilian's original clothes
       const newZ = new Zombie(c.x, c.y, wave, {
         shirtColor: c.shirtColor,
-        skinColor:  c.color,
         type: 'normal'
       });
       newZ.speed *= 0.85; // freshly turned — a bit slower
