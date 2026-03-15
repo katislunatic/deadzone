@@ -3,7 +3,7 @@
 const SETTINGS_KEY = 'deadzone_settings';
 
 const DEFAULT_SETTINGS = {
-  volMaster: 80,
+  volMaster: 100,
   volGuns:   100,
   volDeath:  100,
   volReload: 100,
