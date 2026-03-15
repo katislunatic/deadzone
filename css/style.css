@@ -62,7 +62,7 @@ body {
   pointer-events: none;
   z-index: 0;
   left: 50%;
-  top: 12%;
+  top: 17%;
   transform: translate(-50%, -50%);
   line-height: 1;
   animation: titleFlicker 4s infinite;
