@@ -47,6 +47,7 @@ class Player extends Entity {
     // Squeeze mechanic
     this.squeezing = false;
     this.squeezeStamina = 100;   // 0-100, drains while squeezing
+    this.squeezeCooldown = 0;    // frames before squeeze can reactivate after exhaustion
     this.baseRadius = 14;
   }
   draw(ctx) {
