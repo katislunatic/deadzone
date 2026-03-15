@@ -354,18 +354,22 @@ function loop() {
   } else {
     // When releasing squeeze, push player out of any obstacle they're inside
     if (player.squeezing) {
-      let pushed = false;
-      for (const obs of obstacles) {
-        if (circleRect(player.x, player.y, player.baseRadius, obs)) {
-          // Find nearest edge and push out
-          const cx = obs.x + obs.w / 2, cy = obs.y + obs.h / 2;
-          const dx = player.x - cx, dy = player.y - cy;
-          const len = Math.sqrt(dx*dx + dy*dy) || 1;
-          const pushDist = player.baseRadius + Math.max(obs.w, obs.h) / 2 + 2;
-          player.x = cx + (dx/len) * pushDist * 0.5;
-          player.y = cy + (dy/len) * pushDist * 0.5;
-          pushed = true;
-          break;
+      const r = player.baseRadius;
+      if (obstacles.some(o => circleRect(player.x, player.y, r, o))) {
+        // Spiral outward to find nearest clear spot
+        let found = false;
+        for (let dist = 4; dist <= 120 && !found; dist += 4) {
+          const steps = Math.ceil(2 * Math.PI * dist / 4);
+          for (let s = 0; s < steps && !found; s++) {
+            const angle = (s / steps) * Math.PI * 2;
+            const tx = player.x + Math.cos(angle) * dist;
+            const ty = player.y + Math.sin(angle) * dist;
+            if (!obstacles.some(o => circleRect(tx, ty, r, o))) {
+              player.x = tx;
+              player.y = ty;
+              found = true;
+            }
+          }
         }
       }
     }
