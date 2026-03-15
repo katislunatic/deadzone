@@ -32,7 +32,7 @@ function getWorldScale() {
 }
 
 function requestPointerLock() {
-  if (canvas.requestPointerLock) canvas.requestPointerLock();
+  if (!isMobile() && canvas.requestPointerLock) canvas.requestPointerLock();
 }
 
 function exitPointerLock() {
@@ -43,13 +43,14 @@ function init() {
   canvas = document.getElementById('game-canvas');
   ctx = canvas.getContext('2d');
   crosshairEl = document.getElementById('crosshair');
+  if (isMobile() && crosshairEl) crosshairEl.style.display = 'none';
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
   // Pointer Lock change handler
   document.addEventListener('pointerlockchange', () => {
     // When lock is released while playing, ESC was pressed — auto pause
-    if (gameState === 'playing' && document.pointerLockElement !== canvas) {
+    if (gameState === 'playing' && document.pointerLockElement !== canvas && !isMobile()) {
       gameState = 'paused';
       document.getElementById('pause-overlay').style.display = 'flex';
       if (typeof syncPauseSettings === 'function') syncPauseSettings();
@@ -110,6 +111,9 @@ function init() {
   });
   canvas.addEventListener('mouseup',   e => { if (e.button===0) mouse.down=false; });
 
+  // Hide crosshair on touch devices
+  if (isMobile()) crosshairEl.style.display = 'none';
+
   // Scroll wheel weapon switching
   window.addEventListener('wheel', e => {
     if (gameState !== 'playing') return;
@@ -133,20 +137,40 @@ function init() {
 const VIEWPORT_W = 800;
 const VIEWPORT_H = 600;
 
-function resizeCanvas() {
-  // Scale up the 800x600 viewport to fill the screen
-  const scaleX = window.innerWidth  / VIEWPORT_W;
-  const scaleY = window.innerHeight / VIEWPORT_H;
-  const displayScale = Math.min(scaleX, scaleY);
+function isMobile() {
+  return window.matchMedia('(pointer: coarse)').matches;
+}
 
-  canvas.width  = VIEWPORT_W;
-  canvas.height = VIEWPORT_H;
-  canvas.style.width  = Math.round(VIEWPORT_W * displayScale) + 'px';
-  canvas.style.height = Math.round(VIEWPORT_H * displayScale) + 'px';
-  canvas.style.position = 'fixed';
-  canvas.style.left = Math.round((window.innerWidth  - VIEWPORT_W * displayScale) / 2) + 'px';
-  canvas.style.top  = Math.round((window.innerHeight - VIEWPORT_H * displayScale) / 2) + 'px';
-  canvas.style.imageRendering = 'crisp-edges';
+function resizeCanvas() {
+  if (isMobile()) {
+    // Mobile: use actual device pixels so nothing is stretched/distorted
+    // Reserve space at bottom for controls (portrait) or side (landscape)
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    const isPortrait = H > W;
+    // Controls take up bottom ~220px portrait, bottom ~160px landscape
+    const ctrlH = isPortrait ? 220 : 160;
+    const gameH = H - ctrlH;
+
+    canvas.width  = W;
+    canvas.height = gameH;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = gameH + 'px';
+    canvas.style.position = 'fixed';
+    canvas.style.left = '0';
+    canvas.style.top  = '0';
+    canvas.style.imageRendering = 'auto';
+  } else {
+    // Desktop: fixed 800x600 logical viewport scaled to fill screen
+    canvas.width  = VIEWPORT_W;
+    canvas.height = VIEWPORT_H;
+    canvas.style.width  = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    canvas.style.position = 'fixed';
+    canvas.style.left = '0';
+    canvas.style.top  = '0';
+    canvas.style.imageRendering = 'crisp-edges';
+  }
 }
 
 // ── START GAME ────────────────────────────────────────────────────────
@@ -198,7 +222,7 @@ function startGame(mapIdArg) {
   mouse.y = virtualMouseY;
 
   gameState = 'playing';
-  requestPointerLock();
+  if (!isMobile()) requestPointerLock();
   nextWave();
 }
 
@@ -810,6 +834,8 @@ function updateHUD() {
   document.getElementById('hud-zombies').textContent = remaining + ' left';
   const clipTxt = reloading ? 'RELOAD' : `${currentClip}/${maxClip}`;
   document.getElementById('hud-ammo').textContent = clipTxt;
+  const ammoTop = document.getElementById('hud-ammo-top');
+  if (ammoTop) ammoTop.textContent = clipTxt;
 
   // Squeeze stamina bar
   const sqFill = document.getElementById('squeeze-fill');
@@ -968,7 +994,7 @@ function closeShop() {
   el.classList.remove('shop-open');
   el.style.display = 'none';
   gameState = 'playing';
-  requestPointerLock();
+  if (!isMobile()) requestPointerLock();
   nextWave();
 }
 
