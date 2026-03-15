@@ -496,8 +496,12 @@ function loop() {
   for (const c of civilians) {
     const result = c.update(player.x, player.y, zombies, obstacles);
     if (result === 'turned') {
-      // Spawn a fresh zombie in their place
-      const newZ = new Zombie(c.x, c.y, wave);
+      // Spawn zombie with the civilian's original clothes
+      const newZ = new Zombie(c.x, c.y, wave, {
+        shirtColor: c.shirtColor,
+        skinColor:  c.color,
+        type: 'normal'
+      });
       newZ.speed *= 0.85; // freshly turned — a bit slower
       zombies.push(newZ);
       zombiesLeftThisWave++; // counts as an extra zombie
