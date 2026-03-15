@@ -17,6 +17,8 @@ let selectedWeaponId = 'revolver';
 let currentClip, maxClip, reloading, reloadProgress;
 let crosshairEl;
 let dustParticles = [];
+let deathAnimFrame = 0;
+let deathAnimZombie = null;
 
 // ── INIT ──────────────────────────────────────────────────────────────
 // Virtual mouse position in canvas/world space (used when pointer is locked)
@@ -590,9 +592,21 @@ function loop() {
   }
 
   // Game over
-  if (!player.alive) {
-    gameState = 'gameover';
-    showGameOver();
+  if (!player.alive && gameState === 'playing') {
+    gameState = 'dying';
+    deathAnimFrame = 0;
+    deathAnimZombie = zombies.length > 0 ? zombies.reduce((a,b) => dist(a.x,a.y,player.x,player.y) < dist(b.x,b.y,player.x,player.y) ? a : b) : null;
+  }
+  if (gameState === 'dying') {
+    deathAnimFrame++;
+    render();
+    // Draw death bite animation on top
+    drawDeathAnimation(deathAnimFrame);
+    if (deathAnimFrame >= 130) {
+      gameState = 'gameover';
+      showGameOver();
+    }
+    return;
   }
 
   // Dust particles
@@ -924,6 +938,115 @@ function closeShop() {
   nextWave();
   // Delay pointer lock so browser doesn't black-screen during wave announce
   setTimeout(() => { if (gameState === 'playing') requestPointerLock(); }, 2500);
+}
+
+// ── DEATH ANIMATION ──────────────────────────────────────────────────
+function drawDeathAnimation(frame) {
+  const cw = canvas.width, ch = canvas.height;
+  const cx = window._camX || 0, cy = window._camY || 0;
+
+  // Screen-space player position
+  const px = player.x - cx;
+  const py = player.y - cy;
+
+  // Phase 1 (0-40): zombie lunges in from side
+  // Phase 2 (40-90): zombie biting, player flashing red
+  // Phase 3 (90-130): screen fades to black
+
+  const P = 3;
+  ctx.save();
+
+  // Phase 3 — fade to black
+  if (frame > 90) {
+    const fade = Math.min(1, (frame - 90) / 40);
+    ctx.fillStyle = `rgba(0,0,0,${fade * 0.92})`;
+    ctx.fillRect(0, 0, cw, ch);
+  }
+
+  // Draw zombie biting from the right side of player
+  const biteZombie = deathAnimZombie;
+  const skin = '#3a9a2a';
+  const skinD = '#2a7a1a';
+  const shirtCol = '#3a5a8a';
+  const shirtD = '#2a4a6a';
+
+  // Lunge offset — zombie slides in from right
+  let lungeX = 0;
+  if (frame < 40) {
+    lungeX = (1 - frame / 40) * 60; // slides in from right
+  }
+
+  const zx = px + 18 + lungeX;
+  const zy = py;
+
+  ctx.translate(zx, zy);
+
+  // Bite chomp: jaw opens and closes
+  const bitePhase = frame < 40 ? 0 : Math.sin((frame - 40) * 0.4) * 0.5 + 0.5;
+  const jawOpen = frame >= 40 ? Math.round(bitePhase * 4) : 0;
+
+  const f = (fx, fy, c) => {
+    ctx.fillStyle = c;
+    ctx.fillRect(fx * P, fy * P, P, P);
+  };
+
+  // Zombie body
+  f(-2, 1, skinD); f(-1, 1, '#4a3828'); f(0, 1, '#4a3828'); f(1, 1, skinD);
+  f(-2, 2, skinD); f(-1, 2, '#3a2818'); f(0, 2, '#3a2818'); f(1, 2, skinD);
+  f(-3,-1,shirtD); f(-2,-1,shirtCol); f(-1,-1,shirtCol); f(0,-1,shirtCol); f(1,-1,shirtCol); f(2,-1,shirtD);
+  f(-3,-2,shirtD); f(-2,-2,shirtCol); f(-1,-2,skinD);    f(0,-2,skinD);    f(1,-2,shirtCol); f(2,-2,shirtD);
+  f(-3,-3,shirtD); f(-2,-3,shirtCol); f(-1,-3,shirtCol); f(0,-3,shirtCol); f(1,-3,shirtCol); f(2,-3,shirtD);
+  // arms outstretched toward player (left)
+  f(-4,-2, skin); f(-5,-2, skin); f(-4,-1, skin); f(-5,-1, skin);
+
+  // Head — facing left (toward player)
+  f(-3,-5,skin); f(-2,-5,skin); f(-1,-5,skin); f(0,-5,skin);
+  f(-3,-4,skin); f(-2,-4,skinD); f(-1,-4,skinD); f(0,-4,skin);
+  f(-2,-4,'#ff2222'); f(0,-4,'#ff2222'); // eyes
+
+  // Jaw/mouth — opens and closes
+  f(-2,-3,'#ddddcc'); f(-1,-3,'#ddddcc'); // teeth top
+  if (jawOpen > 0) {
+    // open jaw — gap
+    f(-2,-3+jawOpen,'#1a0808'); f(-1,-3+jawOpen,'#1a0808'); // dark mouth gap
+    f(-2,-2+jawOpen,'#ddddcc'); f(-1,-2+jawOpen,'#ddddcc'); // bottom teeth
+  }
+
+  ctx.restore();
+
+  // Blood splat particles during bite phase
+  if (frame >= 40 && frame < 90 && frame % 6 === 0) {
+    for (let i = 0; i < 4; i++) {
+      particles.push(new Particle(
+        player.x + (Math.random()-0.5)*10,
+        player.y + (Math.random()-0.5)*10,
+        '#c0392b', { spread: 5, life: 25, size: 3 }
+      ));
+    }
+  }
+
+  // Red flash on player during bite
+  if (frame >= 40 && frame < 90) {
+    const alpha = Math.sin((frame - 40) * 0.4) * 0.4;
+    ctx.save();
+    ctx.fillStyle = `rgba(192,57,43,${alpha})`;
+    ctx.beginPath();
+    ctx.arc(px, py, 20, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // "CHOMP" text pop
+  if (frame === 45 || frame === 65 || frame === 82) {
+    ctx.save();
+    ctx.font = 'bold 18px monospace';
+    ctx.fillStyle = '#ff4444';
+    ctx.textAlign = 'center';
+    ctx.globalAlpha = 0.9;
+    ctx.fillText('CHOMP!', px + 30, py - 40);
+    ctx.textAlign = 'left';
+    ctx.restore();
+  }
 }
 
 // ── GAME OVER ─────────────────────────────────────────────────────────
