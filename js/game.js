@@ -195,8 +195,9 @@ function startGame(mapIdArg) {
   mouse.y = virtualMouseY;
 
   gameState = 'playing';
-  requestPointerLock();
   nextWave();
+  // Delay pointer lock so browser doesn't black-screen during wave announce
+  setTimeout(() => { if (gameState === 'playing') requestPointerLock(); }, 2500);
 }
 
 // ── WAVE ──────────────────────────────────────────────────────────────
@@ -554,6 +555,10 @@ function render() {
   ctx.fillStyle = (mapData && mapData.bg) ? mapData.bg : '#0a0804';
   ctx.fillRect(0, 0, cw, ch);
 
+  // Fill entire canvas with map bg — no black letterbox edges
+  ctx.fillStyle = (mapData && mapData.bg) ? mapData.bg : '#0a0804';
+  ctx.fillRect(0, 0, cw, ch);
+
   ctx.save();
   ctx.translate(-camX, -camY);
 
@@ -811,8 +816,9 @@ function closeShop() {
   el.classList.remove('shop-open');
   el.style.display = 'none';
   gameState = 'playing';
-  requestPointerLock();
   nextWave();
+  // Delay pointer lock so browser doesn't black-screen during wave announce
+  setTimeout(() => { if (gameState === 'playing') requestPointerLock(); }, 2500);
 }
 
 // ── GAME OVER ─────────────────────────────────────────────────────────
