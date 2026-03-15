@@ -154,20 +154,28 @@ class Player extends Entity {
       ctx.fillRect(px*P, Math.round((py+bobY)*P), P, P);
     };
 
-    const riderOffset = this.onHorse ? 6 : 0; // sit on saddle
+    const riderOffset = this.onHorse ? 5 : 0; // sit on saddle
 
-    // ── BOOTS & LEGS (hidden when on horse) ──
+    // ── BOOTS & LEGS ──
     if (!this.onHorse) {
-      // Left boot
+      // Normal walking legs
       f(-2, 4+lOff[0], '#2a1808'); f(-1, 4+lOff[0], '#3a2010');
-      // Right boot
       f(0,  4+rOff[0], '#2a1808'); f(1,  4+rOff[0], '#3a2010');
-      // Left leg
       f(-2, 2+lOff[1], '#4a3020'); f(-1, 2+lOff[1], '#6b4830');
       f(-2, 3+lOff[1], '#3a2518'); f(-1, 3+lOff[1], '#5a3820');
-      // Right leg
       f(0,  2+rOff[1], '#6b4830'); f(1,  2+rOff[1], '#4a3020');
       f(0,  3+rOff[1], '#5a3820'); f(1,  3+rOff[1], '#3a2518');
+    } else {
+      // Riding legs — hang down on sides of horse, slight sway with bob
+      const ro = riderOffset;
+      // Left leg (hangs left)
+      f(-3, 2+ro, '#4a3020'); f(-3, 3+ro, '#3a2518');
+      f(-3, 4+ro, '#4a3020'); // knee
+      f(-3, 5+ro, '#2a1808'); // boot
+      // Right leg (hangs right)
+      f(2,  2+ro, '#4a3020'); f(2,  3+ro, '#3a2518');
+      f(2,  4+ro, '#4a3020'); // knee
+      f(2,  5+ro, '#2a1808'); // boot
     }
 
     // ── STATIC UPPER BODY ──
