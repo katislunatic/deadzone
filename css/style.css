@@ -576,21 +576,60 @@ body {
 #mobile-controls {
   display: none;
   position: fixed; bottom: 0; left: 0; right: 0;
-  padding: 0.75rem 1rem 1.25rem;
+  padding: 0.5rem 0.75rem 1rem;
   z-index: 55;
   pointer-events: none;
   align-items: flex-end;
   justify-content: space-between;
   gap: 0.5rem;
+  height: 200px;
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
 }
 
 @media (max-width: 900px), (pointer: coarse) {
   #mobile-controls { display: flex; }
-  /* Make HUD bigger on mobile */
-  .hud-label { font-size: 0.6rem; }
-  .hud-value { font-size: 0.85rem; }
-  #hud-bottom { padding: 0.5rem 0.75rem 7rem; }
+
+  /* Hide PC crosshair on touch devices */
+  #crosshair { display: none !important; }
+  * { cursor: auto !important; }
+
+  /* Top HUD: smaller, wrap on narrow screens */
+  #hud {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+    padding: 0.3rem 0.4rem;
+    background: rgba(0,0,0,0.88);
+  }
+  .hud-block { padding: 0.2rem 0.5rem; }
+  .hud-label { font-size: 0.55rem; }
+  .hud-value { font-size: 0.8rem; }
+  .wave-badge { font-size: 0.75rem; }
+
+  /* Bottom HUD: hidden on mobile — too crowded, key info in top HUD */
+  #hud-bottom { display: none !important; }
+
+  /* Weapon slots smaller */
+  .weapon-slot { width: 38px; height: 38px; }
+  .weapon-slot-icon { font-size: 0.9rem; }
+  .weapon-slot-name { display: none; }
+
+  /* Wave announce */
   #wave-announce { font-size: clamp(1.5rem, 6vw, 3rem); }
+
+  /* Kill feed smaller */
+  #killfeed { right: 0.5rem; top: 3.5rem; }
+  .kf-entry { font-size: 0.65rem; }
+
+  /* Shop usable on mobile */
+  #shop-screen { padding: 1rem 0.5rem 5rem; }
+  .shop-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem; }
+  .shop-title { font-size: 1.6rem; }
+  .shop-close-btn { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 95; }
+
+  /* Settings overlay scrollable */
+  #settings-overlay { align-items: flex-start; overflow-y: auto; padding: 1rem; }
+  .settings-panel { max-height: none; }
 }
 
 .mobile-stick-wrap {
@@ -610,9 +649,9 @@ body {
 }
 
 .joystick-area {
-  width: 130px; height: 130px;
-  background: rgba(255,255,255,0.06);
-  border: 2px solid rgba(255,255,255,0.15);
+  width: 140px; height: 140px;
+  background: rgba(255,255,255,0.07);
+  border: 2px solid rgba(255,255,255,0.18);
   border-radius: 50%;
   position: relative;
   pointer-events: all;
@@ -1130,4 +1169,20 @@ body {
 @keyframes wcSlam {
   from { transform: translateY(-40px) scale(0.85); opacity: 0; }
   to   { transform: translateY(0) scale(1);        opacity: 1; }
+}
+
+/* Ammo top — hidden on desktop, shown on mobile */
+#hud-ammo-top-wrap { display: none; }
+@media (pointer: coarse) {
+  #hud-ammo-top-wrap { display: flex; }
+}
+
+/* Landscape mobile: shrink controls */
+@media (pointer: coarse) and (orientation: landscape) {
+  #mobile-controls { height: 160px; padding: 0.3rem 0.75rem 0.4rem; }
+  .joystick-area   { width: 100px; height: 100px; }
+  .joystick-dot    { width: 36px; height: 36px; }
+  .stick-label     { font-size: 0.5rem; }
+  .mobile-center-btns { gap: 0.3rem; }
+  .mobile-action-btn  { padding: 0.3rem 0.5rem; font-size: 0.58rem; min-width: 64px; }
 }
