@@ -16,7 +16,7 @@ const SOUND_CATEGORIES = {
   guns:   ['shoot_revolver','shoot_shotgun','shoot_rifle','shoot_smg','empty_click'],
   death:  ['zombie_die','zombie_hit','player_hurt','player_die','civilian_hit','civilian_turned'],
   reload: ['reload_start','reload_done'],
-  ui:     ['coin_pickup','wave_start','weapon_switch','shop_buy','slot_spin_tick','slot_spin_land'],
+  ui:     ['coin_pickup','wave_start','wave_complete','weapon_switch','shop_buy','slot_spin_tick','slot_spin_land'],
 };
 
 let gameSettings = { ...DEFAULT_SETTINGS };
