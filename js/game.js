@@ -32,7 +32,7 @@ function getWorldScale() {
 }
 
 function requestPointerLock() {
-  if (!isMobile() && canvas.requestPointerLock) canvas.requestPointerLock();
+  if (canvas.requestPointerLock) canvas.requestPointerLock();
 }
 
 function exitPointerLock() {
@@ -111,9 +111,6 @@ function init() {
   });
   canvas.addEventListener('mouseup',   e => { if (e.button===0) mouse.down=false; });
 
-  // Hide crosshair on touch devices
-  if (isMobile()) crosshairEl.style.display = 'none';
-
   // Scroll wheel weapon switching
   window.addEventListener('wheel', e => {
     if (gameState !== 'playing') return;
@@ -138,38 +135,26 @@ const VIEWPORT_W = 800;
 const VIEWPORT_H = 600;
 
 function isMobile() {
-  return window.matchMedia('(pointer: coarse)').matches;
+  return window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 900;
 }
 
 function resizeCanvas() {
-  if (isMobile()) {
-    // Mobile: use actual device pixels so nothing is stretched/distorted
-    // Reserve space at bottom for controls (portrait) or side (landscape)
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-    const isPortrait = H > W;
-    // Controls take up bottom ~220px portrait, bottom ~160px landscape
-    const ctrlH = isPortrait ? 220 : 160;
-    const gameH = H - ctrlH;
+  canvas.width  = VIEWPORT_W;
+  canvas.height = VIEWPORT_H;
+  canvas.style.position = 'fixed';
+  canvas.style.imageRendering = 'crisp-edges';
 
-    canvas.width  = W;
-    canvas.height = gameH;
-    canvas.style.width  = W + 'px';
-    canvas.style.height = gameH + 'px';
-    canvas.style.position = 'fixed';
-    canvas.style.left = '0';
-    canvas.style.top  = '0';
-    canvas.style.imageRendering = 'auto';
-  } else {
-    // Desktop: fixed 800x600 logical viewport scaled to fill screen
-    canvas.width  = VIEWPORT_W;
-    canvas.height = VIEWPORT_H;
+  if (isMobile()) {
     canvas.style.width  = window.innerWidth + 'px';
     canvas.style.height = window.innerHeight + 'px';
-    canvas.style.position = 'fixed';
     canvas.style.left = '0';
     canvas.style.top  = '0';
-    canvas.style.imageRendering = 'crisp-edges';
+  } else {
+    const displayScale = Math.min(window.innerWidth / VIEWPORT_W, window.innerHeight / VIEWPORT_H);
+    canvas.style.width  = Math.round(VIEWPORT_W * displayScale) + 'px';
+    canvas.style.height = Math.round(VIEWPORT_H * displayScale) + 'px';
+    canvas.style.left = Math.round((window.innerWidth  - VIEWPORT_W * displayScale) / 2) + 'px';
+    canvas.style.top  = Math.round((window.innerHeight - VIEWPORT_H * displayScale) / 2) + 'px';
   }
 }
 
@@ -834,8 +819,7 @@ function updateHUD() {
   document.getElementById('hud-zombies').textContent = remaining + ' left';
   const clipTxt = reloading ? 'RELOAD' : `${currentClip}/${maxClip}`;
   document.getElementById('hud-ammo').textContent = clipTxt;
-  const ammoTop = document.getElementById('hud-ammo-top');
-  if (ammoTop) ammoTop.textContent = clipTxt;
+
 
   // Squeeze stamina bar
   const sqFill = document.getElementById('squeeze-fill');
