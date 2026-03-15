@@ -26,16 +26,19 @@
     const aimDot  = document.getElementById('aim-stick-dot');
 
     if (aimArea) {
+      let aimTouchId = null;
       let aimOrigin = null;
       let aimActive = false;
       let aimAngle  = 0;
       let aimDist   = 0;
-      const AIM_DEAD_ZONE = 8;  // px — must move this far before aiming / firing
-      const AIM_RADIUS    = 40; // px — max stick deflection
+      const AIM_DEAD_ZONE = 8;
+      const AIM_RADIUS    = 40;
 
       aimArea.addEventListener('touchstart', e => {
         e.preventDefault();
-        const t = e.touches[0];
+        if (aimTouchId !== null) return; // already tracking a finger
+        const t = e.changedTouches[0];
+        aimTouchId = t.identifier;
         const r = aimArea.getBoundingClientRect();
         aimOrigin = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
         aimActive = true;
@@ -43,8 +46,10 @@
 
       aimArea.addEventListener('touchmove', e => {
         e.preventDefault();
-        if (!aimOrigin) return;
-        const t = e.touches[0];
+        if (!aimOrigin || aimTouchId === null) return;
+        // Only respond to the finger we claimed
+        const t = Array.from(e.changedTouches).find(t => t.identifier === aimTouchId);
+        if (!t) return;
         const dx = t.clientX - aimOrigin.x;
         const dy = t.clientY - aimOrigin.y;
         aimDist  = Math.sqrt(dx * dx + dy * dy);
@@ -55,9 +60,7 @@
           `translate(calc(-50% + ${Math.cos(aimAngle) * clamped}px), ` +
           `calc(-50% + ${Math.sin(aimAngle) * clamped}px))`;
 
-        // Update mouse aim position in canvas space
         if (typeof mouse !== 'undefined' && typeof canvas !== 'undefined' && canvas) {
-          // Convert aim angle to a point far from player so facing is correct
           const FAR = 1000;
           const playerScreenX = canvas.width  / 2;
           const playerScreenY = canvas.height / 2;
@@ -65,13 +68,15 @@
           mouse.y = playerScreenY + Math.sin(aimAngle) * FAR;
         }
 
-        // Auto-fire when pushed past dead-zone
         if (typeof mouse !== 'undefined') {
           mouse.down = aimDist > AIM_DEAD_ZONE;
         }
       }, { passive: false });
 
-      function aimEnd() {
+      function aimEnd(e) {
+        const released = Array.from(e.changedTouches).find(t => t.identifier === aimTouchId);
+        if (!released) return;
+        aimTouchId = null;
         aimActive = false;
         aimOrigin = null;
         aimDot.style.transform = 'translate(-50%,-50%)';
