@@ -341,9 +341,23 @@ function loop() {
     }
   }
 
+  // Squeeze — check first so speed is correct this frame
+  const squeezeHeld = keybinds && keys[keybinds.squeeze];
+  if (squeezeHeld && player.squeezeStamina > 0) {
+    player.squeezing = true;
+    player.squeezeStamina = Math.max(0, player.squeezeStamina - 0.8);
+    player.radius = 7; // smaller hitbox
+  } else {
+    player.squeezing = false;
+    player.radius = player.baseRadius;
+    if (!squeezeHeld) player.squeezeStamina = Math.min(100, player.squeezeStamina + 0.4);
+  }
+  const squeezeFill = document.getElementById('squeeze-fill');
+  if (squeezeFill) squeezeFill.style.width = player.squeezeStamina + '%';
+
   // Player movement
   const wep = getActiveWeapon();
-  let spd = player.speed;
+  let spd = player.squeezing ? player.speed * 0.5 : player.speed;
   let dx=0, dy=0;
   if (keys['ArrowUp']    || (keybinds && keys[keybinds.moveUp]))    dy -= 1;
   if (keys['ArrowDown']  || (keybinds && keys[keybinds.moveDown]))  dy += 1;
@@ -357,7 +371,6 @@ function loop() {
   player.move(obstacles);
 
   // Player facing
-  // Convert screen-space mouse to world-space, then aim from player
   const sc = window._scale || 1;
   const _cx = window._camX || 0, _cy = window._camY || 0;
   const worldMouseX = mouse.x / sc + _cx;
