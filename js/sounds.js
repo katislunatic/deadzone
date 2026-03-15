@@ -330,6 +330,34 @@ function playSound(type) {
         osc.start(t); osc.stop(t + 1.0);
         break;
       }
+
+      case 'wave_complete': {
+        // Triumphant western fanfare — rising notes then a big finish
+        const notes = [330, 392, 494, 392, 523, 659, 784];
+        const times = [0, 0.10, 0.20, 0.32, 0.44, 0.56, 0.70];
+        notes.forEach((f, i) => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = i === notes.length-1 ? 'sawtooth' : 'square';
+          o.frequency.setValueAtTime(f, t + times[i]);
+          const dur = i === notes.length-1 ? 0.5 : 0.12;
+          g.gain.setValueAtTime(i === notes.length-1 ? 0.28 : 0.18, t + times[i]);
+          g.gain.exponentialRampToValueAtTime(0.001, t + times[i] + dur);
+          o.connect(g); g.connect(dest);
+          o.start(t + times[i]); o.stop(t + times[i] + dur + 0.05);
+        });
+        // Low drum hit on the final note
+        const drum = ctx.createOscillator();
+        const dg = ctx.createGain();
+        drum.type = 'sine';
+        drum.frequency.setValueAtTime(120, t + 0.70);
+        drum.frequency.exponentialRampToValueAtTime(40, t + 0.95);
+        dg.gain.setValueAtTime(0.4, t + 0.70);
+        dg.gain.exponentialRampToValueAtTime(0.001, t + 1.0);
+        drum.connect(dg); dg.connect(dest);
+        drum.start(t + 0.70); drum.stop(t + 1.05);
+        break;
+      }
     }
   } catch(e) { /* AudioContext blocked — ignore */ }
 }
