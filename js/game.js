@@ -800,6 +800,7 @@ function updateHUD() {
 // ── SHOP ─────────────────────────────────────────────────────────────
 function showWaveComplete(waveNum) {
   exitPointerLock();
+  playSound('wave_complete');
 
   const overlay = document.getElementById('wave-complete-overlay');
   if (!overlay) { showShop(); return; }
